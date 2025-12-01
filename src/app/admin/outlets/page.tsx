@@ -80,8 +80,8 @@ export default async function OutletsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl p-5 border border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Building2 className="w-5 h-5 text-blue-600" />
+            <div className="p-2 bg-orange-100 rounded-lg">
+              <Building2 className="w-5 h-5 text-orange-600" />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{outlets.length}</p>
@@ -125,7 +125,7 @@ export default async function OutletsPage() {
           <p className="text-gray-500 mb-4">Mulai dengan menambahkan outlet pertama Anda</p>
           <Link
             href="/admin/outlets/create"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" />
             Tambah Outlet
@@ -195,7 +195,7 @@ export default async function OutletsPage() {
               <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
                 <Link
                   href={`/admin/outlets/${outlet.id}/menu`}
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                  className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
                 >
                   <UtensilsCrossed className="w-4 h-4" />
                   Kelola Menu

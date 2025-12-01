@@ -210,7 +210,7 @@ export function PricingRecommendationPanel({ outletId }: PricingRecommendationPa
                   className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4 text-blue-500" />
+                    <Target className="w-4 h-4 text-orange-500" />
                     <span className="font-medium text-gray-900">Analisis Portfolio Harga</span>
                   </div>
                   {expandedSection === 'portfolio' ? (
@@ -425,7 +425,7 @@ export function PricingRecommendationPanel({ outletId }: PricingRecommendationPa
                   className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-center gap-2">
-                    <Info className="w-4 h-4 text-blue-500" />
+                    <Info className="w-4 h-4 text-orange-500" />
                     <span className="font-medium text-gray-900">
                       Rekomendasi Musiman ({analysis.seasonalRecommendations.length})
                     </span>
@@ -444,8 +444,8 @@ export function PricingRecommendationPanel({ outletId }: PricingRecommendationPa
                         className="p-4 border border-gray-200 rounded-lg"
                       >
                         <div className="flex items-start gap-3">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <Info className="w-4 h-4 text-blue-600" />
+                          <div className="p-2 bg-orange-100 rounded-lg">
+                            <Info className="w-4 h-4 text-orange-600" />
                           </div>
                           <div>
                             <h5 className="font-medium text-gray-900 mb-1">{rec.timing}</h5>
@@ -454,7 +454,7 @@ export function PricingRecommendationPanel({ outletId }: PricingRecommendationPa
                               {rec.affectedItems.map((item, i) => (
                                 <span
                                   key={i}
-                                  className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded"
+                                  className="px-2 py-0.5 text-xs bg-orange-100 text-orange-700 rounded"
                                 >
                                   {item}
                                 </span>

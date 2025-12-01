@@ -44,8 +44,8 @@ const statusConfig: Record<TableStatus, {
   },
   reserved: {
     label: 'Reserved',
-    color: 'text-blue-500',
-    dotColor: 'bg-blue-500'
+    color: 'text-orange-500',
+    dotColor: 'bg-orange-500'
   },
   needs_cleaning: {
     label: 'Needs Cleaning',
@@ -124,7 +124,7 @@ export default function TablesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -165,7 +165,7 @@ export default function TablesPage() {
             placeholder="Search by table name or number..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 pl-10 pr-4 bg-white rounded-lg border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+            className="w-full h-10 pl-10 pr-4 bg-white rounded-lg border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
           />
         </div>
 
@@ -177,7 +177,7 @@ export default function TablesPage() {
               onClick={() => setActiveFilter(tab.value)}
               className={`h-9 px-4 rounded-lg text-sm font-medium transition-all ${
                 activeFilter === tab.value
-                  ? 'bg-blue-500 text-white shadow-sm'
+                  ? 'bg-orange-500 text-white shadow-sm'
                   : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300'
               }`}
             >
@@ -200,13 +200,13 @@ export default function TablesPage() {
                 onClick={() => setSelectedTable(isSelected ? null : table.id)}
                 className={`relative bg-white rounded-xl p-5 cursor-pointer transition-all hover:shadow-lg ${
                   isSelected
-                    ? 'border-2 border-blue-500 shadow-lg ring-4 ring-blue-50'
+                    ? 'border-2 border-orange-500 shadow-lg ring-4 ring-orange-50'
                     : 'border border-gray-100 shadow-sm hover:border-gray-200'
                 }`}
               >
                 {/* Selected Badge */}
                 {isSelected && (
-                  <div className="absolute -top-2.5 right-4 bg-blue-500 text-white text-xs font-medium px-2.5 py-1 rounded-md shadow-sm">
+                  <div className="absolute -top-2.5 right-4 bg-orange-500 text-white text-xs font-medium px-2.5 py-1 rounded-md shadow-sm">
                     Selected
                   </div>
                 )}
@@ -237,7 +237,7 @@ export default function TablesPage() {
                   data-tour="tables-qr-download"
                   className={`flex items-center justify-center gap-2 w-full h-10 rounded-lg text-sm font-medium transition-all ${
                     isSelected
-                      ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-sm'
+                      ? 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm'
                       : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
                   }`}
                 >

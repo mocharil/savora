@@ -40,7 +40,7 @@ const quickActions = [
     icon: FileText,
     label: 'Buat Deskripsi Menu',
     prompt: 'Buatkan deskripsi menarik untuk menu',
-    color: 'from-blue-500 to-cyan-500',
+    color: 'from-orange-500 to-cyan-500',
   },
   {
     id: 'suggest',
@@ -591,12 +591,12 @@ export function AIAssistant() {
                     <div className="bg-white rounded-lg p-4 border border-gray-200">
                       <div className="flex items-center justify-between mb-2">
                         <h5 className="font-medium text-gray-900 flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-blue-500" />
+                          <FileText className="w-4 h-4 text-orange-500" />
                           Deskripsi Menu
                         </h5>
                         <button
                           onClick={() => handleCopy(menu.description, `desc-${index}`)}
-                          className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                          className="text-xs text-orange-600 hover:text-orange-800 flex items-center gap-1"
                         >
                           {copied === `desc-${index}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                           {copied === `desc-${index}` ? 'Copied!' : 'Copy'}

@@ -205,8 +205,8 @@ export default async function AnalyticsPage({
         {/* Orders */}
         <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center">
-              <ShoppingBag className="w-5 h-5 text-[#3B82F6]" />
+            <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+              <ShoppingBag className="w-5 h-5 text-orange-500" />
             </div>
             <div className={`flex items-center gap-1 text-sm font-medium ${
               ordersChange >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'
@@ -263,7 +263,7 @@ export default async function AnalyticsPage({
         <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
           <div className="px-6 py-4 border-b border-[#E5E7EB]">
             <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-              <PieChart className="w-4 h-4 text-[#3B82F6]" />
+              <PieChart className="w-4 h-4 text-orange-500" />
               Status Pesanan
             </h2>
           </div>
@@ -272,7 +272,7 @@ export default async function AnalyticsPage({
               {[
                 { status: 'completed', label: 'Selesai', color: '#10B981', count: ordersByStatus.completed },
                 { status: 'preparing', label: 'Diproses', color: '#8B5CF6', count: ordersByStatus.preparing },
-                { status: 'ready', label: 'Siap', color: '#3B82F6', count: ordersByStatus.ready },
+                { status: 'ready', label: 'Siap', color: 'orange-500', count: ordersByStatus.ready },
                 { status: 'pending', label: 'Menunggu', color: '#F59E0B', count: ordersByStatus.pending },
                 { status: 'cancelled', label: 'Dibatalkan', color: '#EF4444', count: ordersByStatus.cancelled },
               ].map((item) => {
@@ -303,7 +303,7 @@ export default async function AnalyticsPage({
         <div data-tour="analytics-top-items" className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
           <div className="px-6 py-4 border-b border-[#E5E7EB]">
             <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-              <Star className="w-4 h-4 text-[#3B82F6]" />
+              <Star className="w-4 h-4 text-orange-500" />
               Menu Terlaris
             </h2>
           </div>
@@ -345,7 +345,7 @@ export default async function AnalyticsPage({
       <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
         <div className="px-6 py-4 border-b border-[#E5E7EB]">
           <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-[#3B82F6]" />
+            <BarChart3 className="w-4 h-4 text-orange-500" />
             Distribusi Pesanan per Jam
           </h2>
         </div>
@@ -360,7 +360,7 @@ export default async function AnalyticsPage({
                 <div key={hour} className="flex-1 flex flex-col items-center gap-1">
                   <div
                     className={`w-full rounded-t transition-all ${
-                      isActive ? 'bg-[#3B82F6]' : 'bg-[#E5E7EB]'
+                      isActive ? 'bg-orange-500' : 'bg-[#E5E7EB]'
                     }`}
                     style={{ height: `${Math.max(height, 4)}%` }}
                     title={`${hour}:00 - ${count} pesanan`}
@@ -374,7 +374,7 @@ export default async function AnalyticsPage({
           </div>
           <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-[#E5E7EB]">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-[#3B82F6]" />
+              <div className="w-3 h-3 rounded bg-orange-500" />
               <span className="text-sm text-[#6B7280]">Jam Operasional</span>
             </div>
             <div className="flex items-center gap-2">

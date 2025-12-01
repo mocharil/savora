@@ -205,7 +205,7 @@ export function TableForm({ storeId, outlets, initialData }: TableFormProps) {
           <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
             <div className="px-6 py-4 border-b border-[#E5E7EB]">
               <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-                <Hash className="w-4 h-4 text-[#3B82F6]" />
+                <Hash className="w-4 h-4 text-orange-500" />
                 Informasi Meja
               </h2>
             </div>
@@ -219,7 +219,7 @@ export function TableForm({ storeId, outlets, initialData }: TableFormProps) {
                   id="outlet_id"
                   value={formData.outlet_id}
                   onChange={(e) => setFormData({ ...formData, outlet_id: e.target.value })}
-                  className="w-full h-11 px-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all cursor-pointer"
+                  className="w-full h-11 px-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all cursor-pointer"
                 >
                   <option value="">Pilih Outlet</option>
                   {outlets.map((outlet) => (
@@ -242,7 +242,7 @@ export function TableForm({ storeId, outlets, initialData }: TableFormProps) {
                   value={formData.table_number}
                   onChange={(e) => setFormData({ ...formData, table_number: e.target.value })}
                   placeholder="Contoh: 1, A1, VIP-1"
-                  className="w-full h-11 px-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all"
+                  className="w-full h-11 px-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
                 />
               </div>
 
@@ -259,7 +259,7 @@ export function TableForm({ storeId, outlets, initialData }: TableFormProps) {
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     placeholder="Contoh: Lantai 1, Area Smoking, Teras"
-                    className="w-full h-11 pl-11 pr-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all"
+                    className="w-full h-11 pl-11 pr-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
                   />
                 </div>
                 <p className="text-xs text-[#6B7280]">
@@ -287,7 +287,7 @@ export function TableForm({ storeId, outlets, initialData }: TableFormProps) {
                     max="50"
                     value={formData.capacity}
                     onChange={(e) => setFormData({ ...formData, capacity: Math.max(1, Math.min(50, Number(e.target.value) || 1)) })}
-                    className="w-20 h-10 px-3 text-center bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all"
+                    className="w-20 h-10 px-3 text-center bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
                   />
                   <button
                     type="button"
@@ -381,7 +381,7 @@ export function TableForm({ storeId, outlets, initialData }: TableFormProps) {
             <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
               <div className="px-6 py-4 border-b border-[#E5E7EB]">
                 <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-                  <QrCode className="w-4 h-4 text-[#3B82F6]" />
+                  <QrCode className="w-4 h-4 text-orange-500" />
                   QR Code
                 </h2>
               </div>
@@ -391,7 +391,7 @@ export function TableForm({ storeId, outlets, initialData }: TableFormProps) {
                 </p>
                 <Link
                   href={`/admin/tables/${initialData.id}/qr`}
-                  className="inline-flex items-center gap-2 h-10 px-4 bg-[#3B82F6] text-white rounded-lg text-sm font-medium hover:bg-[#2563EB] transition-colors"
+                  className="inline-flex items-center gap-2 h-10 px-4 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors"
                 >
                   <QrCode className="w-4 h-4" />
                   Lihat QR Code
@@ -413,7 +413,7 @@ export function TableForm({ storeId, outlets, initialData }: TableFormProps) {
         <button
           type="submit"
           disabled={loading || success}
-          className="h-11 px-6 inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="h-11 px-6 inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <>

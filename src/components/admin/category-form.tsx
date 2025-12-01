@@ -169,7 +169,7 @@ export function CategoryForm({ storeId, initialData }: CategoryFormProps) {
           <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
             <div className="px-6 py-4 border-b border-[#E5E7EB]">
               <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-                <FileText className="w-4 h-4 text-[#3B82F6]" />
+                <FileText className="w-4 h-4 text-orange-500" />
                 Informasi Kategori
               </h2>
             </div>
@@ -185,7 +185,7 @@ export function CategoryForm({ storeId, initialData }: CategoryFormProps) {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Contoh: Makanan Utama"
-                  className="w-full h-11 px-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all"
+                  className="w-full h-11 px-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
                 />
               </div>
 
@@ -200,7 +200,7 @@ export function CategoryForm({ storeId, initialData }: CategoryFormProps) {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Deskripsi singkat tentang kategori ini..."
                   rows={3}
-                  className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all resize-none"
+                  className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all resize-none"
                 />
               </div>
 
@@ -218,7 +218,7 @@ export function CategoryForm({ storeId, initialData }: CategoryFormProps) {
                     onChange={(e) => setFormData({ ...formData, sort_order: Number(e.target.value) })}
                     placeholder="0"
                     min="0"
-                    className="w-full h-11 pl-11 pr-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all"
+                    className="w-full h-11 pl-11 pr-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
                   />
                 </div>
                 <p className="text-xs text-[#6B7280]">
@@ -283,7 +283,7 @@ export function CategoryForm({ storeId, initialData }: CategoryFormProps) {
         <button
           type="submit"
           disabled={loading || success}
-          className="h-11 px-6 inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="h-11 px-6 inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <>

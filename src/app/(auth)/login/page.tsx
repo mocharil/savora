@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 
 function LoginForm() {
@@ -46,16 +47,24 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-red-50 to-orange-100 px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">Savora</h1>
-          <p className="text-gray-600 mt-2">Dashboard Manajemen Restoran</p>
+          <Link href="/" className="inline-block">
+            <Image
+              src="/savora_logo.png"
+              alt="Savora"
+              width={180}
+              height={50}
+              className="h-12 w-auto mx-auto"
+            />
+          </Link>
+          <p className="text-gray-600 mt-3">Dashboard Manajemen Restoran</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-900">Masuk</h2>
             <p className="text-gray-500 mt-1">Masuk ke dashboard Anda</p>
@@ -82,7 +91,7 @@ function LoginForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                 />
               </div>
             </div>
@@ -101,7 +110,7 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                 />
                 <button
                   type="button"
@@ -117,7 +126,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg shadow-orange-500/25"
             >
               {loading ? (
                 <>
@@ -134,16 +143,23 @@ function LoginForm() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Belum punya akun?{' '}
-              <Link href="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+              <Link href="/register" className="text-orange-600 hover:text-orange-700 font-medium">
                 Daftar sekarang
               </Link>
             </p>
           </div>
         </div>
 
+        {/* Back to Home */}
+        <div className="text-center mt-6">
+          <Link href="/" className="text-sm text-gray-500 hover:text-gray-700">
+            ← Kembali ke Beranda
+          </Link>
+        </div>
+
         {/* Footer */}
-        <p className="text-center text-gray-500 text-sm mt-6">
-          &copy; 2024 Savora. All rights reserved.
+        <p className="text-center text-gray-500 text-sm mt-4">
+          &copy; {new Date().getFullYear()} Savora. All rights reserved.
         </p>
       </div>
     </div>
@@ -153,8 +169,8 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-red-50 to-orange-100">
+        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
       </div>
     }>
       <LoginForm />

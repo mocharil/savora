@@ -36,8 +36,8 @@ const statusConfig: Record<OrderStatus, {
   },
   confirmed: {
     label: 'Dikonfirmasi',
-    bgColor: 'bg-[#3B82F6]/10',
-    textColor: 'text-[#3B82F6]',
+    bgColor: 'bg-orange-500/10',
+    textColor: 'text-orange-500',
     icon: <CheckCircle className="w-3.5 h-3.5" />
   },
   preparing: {
@@ -143,7 +143,7 @@ export default async function OrdersPage({
                 href={tab.value === 'all' ? '/admin/orders' : `/admin/orders?status=${tab.value}`}
                 className={`relative flex items-center gap-2 px-5 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
                   isActive
-                    ? 'text-[#3B82F6]'
+                    ? 'text-orange-500'
                     : 'text-[#6B7280] hover:text-[#111827]'
                 }`}
               >
@@ -153,14 +153,14 @@ export default async function OrdersPage({
                     tab.highlight && !isActive && count > 0
                       ? 'bg-[#EF4444] text-white'
                       : isActive
-                      ? 'bg-[#3B82F6]/10 text-[#3B82F6]'
+                      ? 'bg-orange-500/10 text-orange-500'
                       : 'bg-[#F3F4F6] text-[#6B7280]'
                   }`}>
                     {count}
                   </span>
                 )}
                 {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#3B82F6]" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500" />
                 )}
               </Link>
             )
@@ -242,7 +242,7 @@ export default async function OrdersPage({
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-[#3B82F6]">
+                      <p className="text-lg font-bold text-orange-500">
                         {formatCurrency(order.total_amount)}
                       </p>
                       <p className="text-xs text-[#9CA3AF]">
@@ -272,7 +272,7 @@ export default async function OrdersPage({
                         {order.payment_status === 'paid' ? 'Lunas' : 'Belum Bayar'}
                       </span>
                     </div>
-                    <span className="flex items-center gap-1 text-sm font-medium text-[#3B82F6]">
+                    <span className="flex items-center gap-1 text-sm font-medium text-orange-500">
                       <Eye className="w-4 h-4" />
                       Lihat Detail
                     </span>

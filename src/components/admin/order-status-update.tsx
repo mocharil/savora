@@ -27,9 +27,9 @@ const statusButtons: {
     status: 'confirmed',
     label: 'Konfirmasi',
     icon: <CheckCircle className="w-4 h-4" />,
-    color: 'text-[#3B82F6]',
-    bgColor: 'bg-[#3B82F6]/10',
-    hoverBgColor: 'hover:bg-[#3B82F6]/20'
+    color: 'text-orange-500',
+    bgColor: 'bg-orange-500/10',
+    hoverBgColor: 'hover:bg-orange-500/20'
   },
   {
     status: 'preparing',

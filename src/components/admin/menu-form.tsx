@@ -314,7 +314,7 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
           <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
             <div className="px-6 py-4 border-b border-[#E5E7EB]">
               <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-                <FileText className="w-4 h-4 text-[#3B82F6]" />
+                <FileText className="w-4 h-4 text-orange-500" />
                 Informasi Dasar
               </h2>
             </div>
@@ -330,7 +330,7 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Contoh: Nasi Goreng Spesial"
-                  className="w-full h-11 px-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all"
+                  className="w-full h-11 px-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
                 />
               </div>
 
@@ -346,7 +346,7 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
                       id="category"
                       value={formData.category_id}
                       onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                      className="w-full h-11 pl-11 pr-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all appearance-none cursor-pointer"
+                      className="w-full h-11 pl-11 pr-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all appearance-none cursor-pointer"
                     >
                       <option value="">Pilih kategori</option>
                       {categories.map((cat) => (
@@ -382,7 +382,7 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Deskripsi singkat tentang menu ini..."
                   rows={3}
-                  className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all resize-none"
+                  className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all resize-none"
                 />
               </div>
             </div>
@@ -392,7 +392,7 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
           <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
             <div className="px-6 py-4 border-b border-[#E5E7EB]">
               <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-                <Tag className="w-4 h-4 text-[#3B82F6]" />
+                <Tag className="w-4 h-4 text-orange-500" />
                 Harga
               </h2>
             </div>
@@ -412,7 +412,7 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
                       onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
                       placeholder="0"
                       min="0"
-                      className="w-full h-11 pl-12 pr-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all"
+                      className="w-full h-11 pl-12 pr-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
                     />
                   </div>
                 </div>
@@ -436,7 +436,7 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
                       onChange={(e) => setFormData({ ...formData, discount_price: Number(e.target.value) })}
                       placeholder="0"
                       min="0"
-                      className="w-full h-11 pl-12 pr-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all"
+                      className="w-full h-11 pl-12 pr-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
                     />
                   </div>
                 </div>
@@ -447,7 +447,7 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
                 <div className="p-4 bg-[#F9FAFB] rounded-lg">
                   <p className="text-xs text-[#6B7280] mb-1">Preview Harga</p>
                   <div className="flex items-end gap-2">
-                    <span className="text-xl font-bold text-[#3B82F6]">
+                    <span className="text-xl font-bold text-orange-500">
                       {formatCurrency(formData.discount_price || formData.price)}
                     </span>
                     {formData.discount_price > 0 && formData.discount_price < formData.price && (
@@ -468,7 +468,7 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
           <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
             <div className="px-6 py-4 border-b border-[#E5E7EB]">
               <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-[#3B82F6]" />
+                <ImageIcon className="w-4 h-4 text-orange-500" />
                 Foto Menu
               </h2>
             </div>
@@ -502,17 +502,17 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  className="w-full aspect-square rounded-lg border-2 border-dashed border-[#E5E7EB] hover:border-[#3B82F6] bg-[#F9FAFB] hover:bg-[#3B82F6]/5 transition-all flex flex-col items-center justify-center gap-3"
+                  className="w-full aspect-square rounded-lg border-2 border-dashed border-[#E5E7EB] hover:border-orange-500 bg-[#F9FAFB] hover:bg-orange-500/5 transition-all flex flex-col items-center justify-center gap-3"
                 >
                   {uploading ? (
                     <>
-                      <Loader2 className="w-8 h-8 text-[#3B82F6] animate-spin" />
+                      <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
                       <span className="text-sm text-[#6B7280]">Mengupload...</span>
                     </>
                   ) : (
                     <>
-                      <div className="w-12 h-12 rounded-full bg-[#3B82F6]/10 flex items-center justify-center">
-                        <Upload className="w-6 h-6 text-[#3B82F6]" />
+                      <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
+                        <Upload className="w-6 h-6 text-orange-500" />
                       </div>
                       <div className="text-center">
                         <p className="text-sm font-medium text-[#374151]">Upload Gambar</p>
@@ -608,7 +608,7 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
         <button
           type="submit"
           disabled={loading || success}
-          className="h-11 px-6 inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="h-11 px-6 inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <>
@@ -672,8 +672,8 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-[#3B82F6]/10 flex items-center justify-center">
-                <Layers className="w-6 h-6 text-[#3B82F6]" />
+              <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
+                <Layers className="w-6 h-6 text-orange-500" />
               </div>
               <div>
                 <h3 className="font-semibold text-[#111827]">Tambah Kategori Baru</h3>
@@ -698,7 +698,7 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 placeholder="Contoh: Makanan Utama, Minuman, Snack"
-                className="w-full h-11 px-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all"
+                className="w-full h-11 px-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -725,7 +725,7 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
                 type="button"
                 onClick={handleCreateCategory}
                 disabled={creatingCategory}
-                className="flex-1 h-10 px-4 rounded-lg text-sm font-medium text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 h-10 px-4 rounded-lg text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {creatingCategory ? (
                   <>

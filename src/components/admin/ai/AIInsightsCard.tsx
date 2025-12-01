@@ -156,7 +156,7 @@ export function AIInsightsCard({
         )
       case 'medium':
         return (
-          <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">
+          <span className="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">
             Medium Impact
           </span>
         )
@@ -319,16 +319,16 @@ export function AIInsightsCard({
             {insights.strategicRecommendations && insights.strategicRecommendations.length > 0 && (
               <div>
                 <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <Lightbulb className="w-4 h-4 text-blue-500" />
+                  <Lightbulb className="w-4 h-4 text-orange-500" />
                   Rekomendasi Strategis
                 </h4>
                 <div className="space-y-2">
                   {insights.strategicRecommendations.map((rec, index) => (
                     <div
                       key={index}
-                      className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100"
+                      className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100"
                     >
-                      <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <CheckCircle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
                       <p className="text-sm text-gray-700">{rec}</p>
                     </div>
                   ))}

@@ -112,16 +112,16 @@ export function FTUEBanner({ stepId, emptyState = false, ctaLabel, ctaHref }: FT
   return (
     <div className="bg-gradient-to-r from-[#EFF6FF] to-[#DBEAFE] border border-[#93C5FD] rounded-xl p-4 mb-6">
       <div className="flex items-center gap-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#3B82F6]/10 flex-shrink-0">
-          <Lightbulb className="h-5 w-5 text-[#3B82F6]" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10 flex-shrink-0">
+          <Lightbulb className="h-5 w-5 text-orange-500" />
         </div>
         <div className="flex-1">
           <h4 className="font-medium text-[#1E40AF]">{config.title}</h4>
-          <p className="text-sm text-[#3B82F6] mt-0.5">{config.description}</p>
+          <p className="text-sm text-orange-500 mt-0.5">{config.description}</p>
         </div>
         <Link
           href={ctaHref || config.ctaHref}
-          className="flex items-center gap-1 px-4 py-2 bg-[#3B82F6] text-white rounded-lg font-medium text-sm hover:bg-[#2563EB] transition-colors whitespace-nowrap"
+          className="flex items-center gap-1 px-4 py-2 bg-orange-500 text-white rounded-lg font-medium text-sm hover:bg-orange-600 transition-colors whitespace-nowrap"
         >
           {ctaLabel || config.ctaLabel}
           <ChevronRight className="h-4 w-4" />

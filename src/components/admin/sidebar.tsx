@@ -251,7 +251,7 @@ export function AdminSidebar({
                         className={cn(
                           "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                           isActive
-                            ? "bg-[#3B82F6] text-white"
+                            ? "bg-gradient-to-r from-orange-500 to-red-500 text-white"
                             : "text-white/70 hover:bg-white/10 hover:text-white",
                           isCollapsed && "justify-center px-2"
                         )}
@@ -305,7 +305,7 @@ export function AdminSidebar({
               "flex items-center gap-3 rounded-lg p-2",
               isCollapsed && "justify-center"
             )}>
-              <div className="h-9 w-9 rounded-full bg-[#3B82F6] flex items-center justify-center text-white text-sm font-medium">
+              <div className="h-9 w-9 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center text-white text-sm font-medium">
                 {getInitials(userName)}
               </div>
               {!isCollapsed && (
@@ -324,7 +324,7 @@ export function AdminSidebar({
                     <button className="flex w-full items-center justify-center rounded-lg p-2 hover:bg-white/10 transition-colors">
                       <Avatar className="h-9 w-9">
                         <AvatarImage src={userAvatar || undefined} alt={userName} />
-                        <AvatarFallback className="bg-[#3B82F6] text-white text-sm font-medium">
+                        <AvatarFallback className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-medium">
                           {getInitials(userName)}
                         </AvatarFallback>
                       </Avatar>
@@ -373,7 +373,7 @@ export function AdminSidebar({
                 <button className="flex w-full items-center gap-3 rounded-lg p-2 hover:bg-white/10 transition-colors">
                   <Avatar className="h-9 w-9">
                     <AvatarImage src={userAvatar || undefined} alt={userName} />
-                    <AvatarFallback className="bg-[#3B82F6] text-white text-sm font-medium">
+                    <AvatarFallback className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-medium">
                       {getInitials(userName)}
                     </AvatarFallback>
                   </Avatar>

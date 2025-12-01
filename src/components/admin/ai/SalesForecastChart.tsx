@@ -190,7 +190,7 @@ export function SalesForecastChart({ outletId }: SalesForecastChartProps) {
             <div className="grid grid-cols-3 gap-4">
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
                 <div className="flex items-center gap-2 mb-1">
-                  <ShoppingBag className="w-4 h-4 text-blue-500" />
+                  <ShoppingBag className="w-4 h-4 text-orange-500" />
                   <span className="text-xs text-gray-500">Total Prediksi Pesanan</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-900">
@@ -251,7 +251,7 @@ export function SalesForecastChart({ outletId }: SalesForecastChartProps) {
                       <div className="flex items-center gap-4 text-right">
                         <div>
                           <p className="text-xs text-gray-500">Pesanan</p>
-                          <p className="font-bold text-blue-600">{day.predictedOrders}</p>
+                          <p className="font-bold text-orange-600">{day.predictedOrders}</p>
                         </div>
                         <div>
                           <p className="text-xs text-gray-500">Revenue</p>
@@ -273,7 +273,7 @@ export function SalesForecastChart({ outletId }: SalesForecastChartProps) {
                         <span className="text-xs text-gray-500 w-16">Pesanan</span>
                         <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-blue-500 rounded-full transition-all"
+                            className="h-full bg-orange-500 rounded-full transition-all"
                             style={{
                               width: `${(day.predictedOrders / maxOrders) * 100}%`,
                             }}

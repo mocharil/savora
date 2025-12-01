@@ -85,7 +85,7 @@ export function HelpCenter({ triggerVariant = 'both', className }: HelpCenterPro
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <BookOpen className="w-5 h-5 text-[#3B82F6]" />
+            <BookOpen className="w-5 h-5 text-orange-500" />
             Bantuan & Tutorial
           </DialogTitle>
         </DialogHeader>
@@ -103,7 +103,7 @@ export function HelpCenter({ triggerVariant = 'both', className }: HelpCenterPro
                   variant="ghost"
                   size="sm"
                   onClick={handleResetFTUE}
-                  className="text-xs text-gray-500 hover:text-[#3B82F6] h-7 px-2"
+                  className="text-xs text-gray-500 hover:text-orange-500 h-7 px-2"
                 >
                   <RotateCcw className="w-3 h-3 mr-1" />
                   Ulangi dari awal

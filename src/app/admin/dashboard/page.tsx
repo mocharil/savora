@@ -26,7 +26,7 @@ type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed'
 
 const statusConfig: Record<OrderStatus, { label: string; bgColor: string; textColor: string }> = {
   pending: { label: 'Baru', bgColor: 'bg-[#F59E0B]/10', textColor: 'text-[#F59E0B]' },
-  confirmed: { label: 'Dikonfirmasi', bgColor: 'bg-[#3B82F6]/10', textColor: 'text-[#3B82F6]' },
+  confirmed: { label: 'Dikonfirmasi', bgColor: 'bg-orange-500/10', textColor: 'text-orange-500' },
   preparing: { label: 'Diproses', bgColor: 'bg-[#8B5CF6]/10', textColor: 'text-[#8B5CF6]' },
   ready: { label: 'Siap', bgColor: 'bg-[#10B981]/10', textColor: 'text-[#10B981]' },
   completed: { label: 'Selesai', bgColor: 'bg-[#6B7280]/10', textColor: 'text-[#6B7280]' },
@@ -183,8 +183,8 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-admin-xs">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-[#6B7280]">Pesanan Hari Ini</span>
-            <div className="w-10 h-10 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center">
-              <ShoppingBag className="w-5 h-5 text-[#3B82F6]" />
+            <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+              <ShoppingBag className="w-5 h-5 text-orange-500" />
             </div>
           </div>
           <div className="text-3xl font-bold text-[#111827] mb-2">
@@ -255,7 +255,7 @@ export default async function DashboardPage() {
             <h3 className="text-lg font-semibold text-[#111827]">Pesanan Terbaru</h3>
             <Link
               href="/admin/orders"
-              className="flex items-center gap-1 text-sm font-medium text-[#3B82F6] hover:text-[#2563EB] transition-colors"
+              className="flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors"
             >
               Lihat Semua
               <ChevronRight className="w-4 h-4" />
@@ -330,7 +330,7 @@ export default async function DashboardPage() {
             <h3 className="text-lg font-semibold text-[#111827]">Menu Populer</h3>
             <Link
               href="/admin/menu"
-              className="flex items-center gap-1 text-sm font-medium text-[#3B82F6] hover:text-[#2563EB] transition-colors"
+              className="flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors"
             >
               Kelola Menu
               <ChevronRight className="w-4 h-4" />

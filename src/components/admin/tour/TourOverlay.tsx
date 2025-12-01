@@ -258,7 +258,7 @@ export function TourOverlay() {
       {/* Spotlight border glow */}
       {targetRect && (
         <div
-          className="absolute rounded-lg ring-2 ring-[#3B82F6] ring-offset-2 ring-offset-transparent pointer-events-none"
+          className="absolute rounded-lg ring-2 ring-orange-500 ring-offset-2 ring-offset-transparent pointer-events-none"
           style={{
             top: targetRect.top,
             left: targetRect.left,
@@ -305,9 +305,9 @@ export function TourOverlay() {
                   className={cn(
                     'h-1.5 rounded-full transition-all duration-300',
                     i === currentStepIndex
-                      ? 'w-6 bg-[#3B82F6]'
+                      ? 'w-6 bg-orange-500'
                       : i < currentStepIndex
-                      ? 'w-1.5 bg-[#3B82F6]/50'
+                      ? 'w-1.5 bg-orange-500/50'
                       : 'w-1.5 bg-gray-200'
                   )}
                 />
@@ -364,7 +364,7 @@ export function TourOverlay() {
               <Button
                 size="sm"
                 onClick={nextStep}
-                className="gap-1 bg-[#3B82F6] hover:bg-[#2563EB]"
+                className="gap-1 bg-orange-500 hover:bg-orange-600"
               >
                 {currentStepIndex === totalSteps - 1 ? (
                   'Selesai'

@@ -224,7 +224,7 @@ export function OutletForm({ storeId, initialData }: OutletFormProps) {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Outlet Bandung"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 required
               />
             </div>
@@ -241,7 +241,7 @@ export function OutletForm({ storeId, initialData }: OutletFormProps) {
                   onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                   placeholder="BDG01"
                   maxLength={10}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
             </div>
@@ -258,7 +258,7 @@ export function OutletForm({ storeId, initialData }: OutletFormProps) {
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 placeholder="Jl. Sudirman No. 123, Bandung"
                 rows={2}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
           </div>
@@ -275,7 +275,7 @@ export function OutletForm({ storeId, initialData }: OutletFormProps) {
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="081234567890"
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
             </div>
@@ -291,7 +291,7 @@ export function OutletForm({ storeId, initialData }: OutletFormProps) {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="outlet@email.com"
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
             </div>
@@ -304,7 +304,7 @@ export function OutletForm({ storeId, initialData }: OutletFormProps) {
                 type="checkbox"
                 checked={formData.is_main}
                 onChange={(e) => setFormData({ ...formData, is_main: e.target.checked })}
-                className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="w-5 h-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
               />
               <span className="flex items-center gap-2 text-sm text-gray-700">
                 <Star className="w-4 h-4 text-yellow-500" />
@@ -317,7 +317,7 @@ export function OutletForm({ storeId, initialData }: OutletFormProps) {
                 type="checkbox"
                 checked={formData.is_active}
                 onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="w-5 h-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
               />
               <span className="text-sm text-gray-700">Aktif</span>
             </label>
@@ -343,7 +343,7 @@ export function OutletForm({ storeId, initialData }: OutletFormProps) {
                 min={0}
                 max={100}
                 step={0.5}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -358,7 +358,7 @@ export function OutletForm({ storeId, initialData }: OutletFormProps) {
                 min={0}
                 max={100}
                 step={0.5}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
           </div>
@@ -379,7 +379,7 @@ export function OutletForm({ storeId, initialData }: OutletFormProps) {
                     type="checkbox"
                     checked={formData.operational_hours[key]?.isOpen ?? true}
                     onChange={(e) => handleHoursChange(key, 'isOpen', e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="w-4 h-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
                   />
                   <span className="text-sm text-gray-700">{label}</span>
                 </label>
@@ -390,14 +390,14 @@ export function OutletForm({ storeId, initialData }: OutletFormProps) {
                       type="time"
                       value={formData.operational_hours[key]?.open || '09:00'}
                       onChange={(e) => handleHoursChange(key, 'open', e.target.value)}
-                      className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     />
                     <span className="text-gray-400">-</span>
                     <input
                       type="time"
                       value={formData.operational_hours[key]?.close || '21:00'}
                       onChange={(e) => handleHoursChange(key, 'close', e.target.value)}
-                      className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     />
                   </div>
                 )}
@@ -433,7 +433,7 @@ export function OutletForm({ storeId, initialData }: OutletFormProps) {
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {isEditing ? 'Update Outlet' : 'Tambah Outlet'}

@@ -87,8 +87,8 @@ export function OnboardingStep5Complete({ data, onComplete, onBack }: Props) {
         <h4 className="font-semibold text-gray-700 mb-3">What's Next?</h4>
         <ul className="space-y-3">
           <li className="flex items-start gap-3">
-            <div className="p-1.5 bg-blue-100 rounded mt-0.5">
-              <Menu className="w-4 h-4 text-blue-600" />
+            <div className="p-1.5 bg-orange-100 rounded mt-0.5">
+              <Menu className="w-4 h-4 text-orange-600" />
             </div>
             <div>
               <p className="font-medium text-sm">Add Menu Items</p>

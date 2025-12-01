@@ -98,8 +98,8 @@ export function OnboardingStep2Outlet({ data, onComplete, onBack }: Props) {
   return (
     <div className="bg-white rounded-xl shadow-sm border p-6 sm:p-8">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-blue-100 rounded-lg">
-          <MapPin className="w-6 h-6 text-blue-600" />
+        <div className="p-2 bg-orange-100 rounded-lg">
+          <MapPin className="w-6 h-6 text-orange-600" />
         </div>
         <div>
           <h3 className="font-semibold text-lg">Outlet Pertama</h3>
@@ -107,8 +107,8 @@ export function OnboardingStep2Outlet({ data, onComplete, onBack }: Props) {
         </div>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <p className="text-blue-800 text-sm">
+      <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+        <p className="text-orange-800 text-sm">
           Outlet adalah lokasi fisik bisnis Anda. Anda dapat menambahkan outlet lainnya nanti melalui dashboard admin.
         </p>
       </div>

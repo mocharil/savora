@@ -80,7 +80,7 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-700'
-      case 'confirmed': return 'bg-blue-100 text-blue-700'
+      case 'confirmed': return 'bg-orange-100 text-orange-700'
       case 'preparing': return 'bg-purple-100 text-purple-700'
       case 'ready': return 'bg-green-100 text-green-700'
       default: return 'bg-gray-100 text-gray-700'
@@ -110,11 +110,11 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
         <div
           className={`hidden md:flex items-center gap-2 h-10 px-4 rounded-lg transition-all duration-200 ${
             isSearchFocused
-              ? 'bg-white border-2 border-[#3B82F6] shadow-sm w-80'
+              ? 'bg-white border-2 border-orange-500 shadow-sm w-80'
               : 'bg-[#F3F4F6] border-2 border-transparent w-64'
           }`}
         >
-          <Search className={`w-4 h-4 ${isSearchFocused ? 'text-[#3B82F6]' : 'text-[#9CA3AF]'}`} />
+          <Search className={`w-4 h-4 ${isSearchFocused ? 'text-orange-500' : 'text-[#9CA3AF]'}`} />
           <input
             type="text"
             placeholder="Cari..."
@@ -159,7 +159,7 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
                 <div className="flex items-center justify-between px-4 py-3 border-b border-[#E5E7EB]">
                   <h3 className="font-semibold text-[#111827]">Notifikasi</h3>
                   {notifications.length > 0 && (
-                    <button className="text-xs text-[#3B82F6] hover:underline">
+                    <button className="text-xs text-orange-500 hover:underline">
                       Tandai semua dibaca
                     </button>
                   )}
@@ -169,7 +169,7 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
                 <div className="max-h-[400px] overflow-y-auto">
                   {loading ? (
                     <div className="flex items-center justify-center py-8">
-                      <div className="w-6 h-6 border-2 border-[#3B82F6] border-t-transparent rounded-full animate-spin" />
+                      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
                     </div>
                   ) : notifications.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 px-4">
@@ -192,8 +192,8 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
                             !order.is_read ? 'bg-[#EFF6FF]' : ''
                           }`}
                         >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3B82F6]/10 flex-shrink-0">
-                            <ShoppingBag className="w-5 h-5 text-[#3B82F6]" />
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500/10 flex-shrink-0">
+                            <ShoppingBag className="w-5 h-5 text-orange-500" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
@@ -201,7 +201,7 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
                                 {order.customer_name || `Meja ${order.table_number}` || order.order_number}
                               </p>
                               {!order.is_read && (
-                                <span className="w-2 h-2 rounded-full bg-[#3B82F6]" />
+                                <span className="w-2 h-2 rounded-full bg-orange-500" />
                               )}
                             </div>
                             <p className="text-xs text-[#6B7280] mt-0.5">
@@ -233,7 +233,7 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
                     <Link
                       href="/admin/orders"
                       onClick={() => setShowNotifications(false)}
-                      className="flex items-center justify-center gap-2 text-sm font-medium text-[#3B82F6] hover:underline"
+                      className="flex items-center justify-center gap-2 text-sm font-medium text-orange-500 hover:underline"
                     >
                       Lihat semua pesanan
                       <ChevronRight className="w-4 h-4" />

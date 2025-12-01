@@ -52,9 +52,9 @@
   --color-savora-error: #E74C3C;
   --color-savora-info: #0984E3;
   /* Admin Side Colors */
-  --color-admin-primary: #3B82F6;
-  --color-admin-primary-light: #60A5FA;
-  --color-admin-primary-dark: #2563EB;
+  --color-admin-primary: #FF6B35;
+  --color-admin-primary-light: #FF8F66;
+  --color-admin-primary-dark: #E55A2B;
   --color-admin-sidebar: #1E293B;
   --color-admin-sidebar-light: #334155;
   --color-admin-sidebar-dark: #0F172A;
@@ -222,7 +222,7 @@
   }
   /* Admin Side Gradients */
   .gradient-admin-primary {
-    background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8F66 100%);
   }
   .gradient-admin-success {
     background: linear-gradient(135deg, #10B981 0%, #34D399 100%);

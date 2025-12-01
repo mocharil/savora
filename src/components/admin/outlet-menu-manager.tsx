@@ -258,8 +258,8 @@ export function OutletMenuManager({ outlet, categories }: OutletMenuManagerProps
       </div>
 
       {/* Info Banner */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <p className="text-sm text-blue-800">
+      <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+        <p className="text-sm text-orange-800">
           <strong>Catatan:</strong> Di halaman ini Anda dapat mengatur ketersediaan dan harga menu khusus untuk outlet <strong>{outlet.name}</strong>.
           Menu yang tidak diubah akan menggunakan harga dan status default dari Store.
         </p>

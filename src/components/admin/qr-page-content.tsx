@@ -80,7 +80,7 @@ export function QRPageContent({ table, store, orderUrl }: QRPageContentProps) {
             </button>
             <button
               onClick={handleDownload}
-              className="flex items-center gap-2 h-10 px-4 bg-[#3B82F6] text-white rounded-lg text-sm font-medium hover:bg-[#2563EB] transition-colors"
+              className="flex items-center gap-2 h-10 px-4 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors"
             >
               <Download className="w-4 h-4" />
               Download
@@ -93,7 +93,7 @@ export function QRPageContent({ table, store, orderUrl }: QRPageContentProps) {
           <div className="lg:col-span-2 bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
             <div className="px-6 py-4 border-b border-[#E5E7EB]">
               <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-                <QrCode className="w-4 h-4 text-[#3B82F6]" />
+                <QrCode className="w-4 h-4 text-orange-500" />
                 QR Code untuk Pemesanan
               </h2>
             </div>
@@ -106,7 +106,7 @@ export function QRPageContent({ table, store, orderUrl }: QRPageContentProps) {
                 <div className="text-center">
                   <h3 className="text-xl font-bold text-[#111827]">{store.name}</h3>
                   <div className="flex items-center justify-center gap-2 mt-2">
-                    <span className="px-3 py-1 bg-[#3B82F6]/10 text-[#3B82F6] font-semibold rounded-full">
+                    <span className="px-3 py-1 bg-orange-500/10 text-orange-500 font-semibold rounded-full">
                       Meja {table.table_number}
                     </span>
                     {table.location && (
@@ -130,7 +130,7 @@ export function QRPageContent({ table, store, orderUrl }: QRPageContentProps) {
             <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
               <div className="px-6 py-4 border-b border-[#E5E7EB]">
                 <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-                  <LinkIcon className="w-4 h-4 text-[#3B82F6]" />
+                  <LinkIcon className="w-4 h-4 text-orange-500" />
                   Link Pemesanan
                 </h2>
               </div>
@@ -158,23 +158,23 @@ export function QRPageContent({ table, store, orderUrl }: QRPageContentProps) {
             </div>
 
             {/* Tips Card */}
-            <div className="bg-[#3B82F6]/5 rounded-xl border border-[#3B82F6]/20 p-6">
+            <div className="bg-orange-500/5 rounded-xl border border-orange-500/20 p-6">
               <h3 className="font-semibold text-[#111827] mb-3">Tips</h3>
               <ul className="space-y-2 text-sm text-[#6B7280]">
                 <li className="flex gap-2">
-                  <span className="text-[#3B82F6]">•</span>
+                  <span className="text-orange-500">•</span>
                   Cetak QR code dan letakkan di meja pelanggan
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-[#3B82F6]">•</span>
+                  <span className="text-orange-500">•</span>
                   Gunakan kertas stiker untuk hasil terbaik
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-[#3B82F6]">•</span>
+                  <span className="text-orange-500">•</span>
                   Laminasi untuk menjaga keawetan
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-[#3B82F6]">•</span>
+                  <span className="text-orange-500">•</span>
                   Pastikan QR code mudah terlihat
                 </li>
               </ul>

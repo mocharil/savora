@@ -40,8 +40,8 @@ const statusConfig: Record<OrderStatus, {
   },
   confirmed: {
     label: 'Dikonfirmasi',
-    bgColor: 'bg-[#3B82F6]/10',
-    textColor: 'text-[#3B82F6]',
+    bgColor: 'bg-orange-500/10',
+    textColor: 'text-orange-500',
     icon: <CheckCircle className="w-4 h-4" />
   },
   preparing: {
@@ -184,7 +184,7 @@ export default async function OrderDetailPage({
                         isCompleted
                           ? 'bg-[#10B981] text-white'
                           : isCurrent
-                          ? 'bg-[#3B82F6] text-white'
+                          ? 'bg-orange-500 text-white'
                           : 'bg-[#F3F4F6] text-[#9CA3AF]'
                       }`}
                     >
@@ -213,7 +213,7 @@ export default async function OrderDetailPage({
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
             <div className="flex items-center gap-2 px-6 py-4 border-b border-[#E5E7EB]">
-              <Receipt className="w-5 h-5 text-[#3B82F6]" />
+              <Receipt className="w-5 h-5 text-orange-500" />
               <h3 className="font-semibold text-[#111827]">Item Pesanan</h3>
             </div>
 
@@ -265,7 +265,7 @@ export default async function OrderDetailPage({
                 </div>
                 <div className="flex justify-between text-lg font-bold pt-2 border-t border-[#E5E7EB]">
                   <span className="text-[#111827]">Total</span>
-                  <span className="text-[#3B82F6]">{formatCurrency(order.total_amount)}</span>
+                  <span className="text-orange-500">{formatCurrency(order.total_amount)}</span>
                 </div>
               </div>
             </div>
@@ -275,7 +275,7 @@ export default async function OrderDetailPage({
           {order.customer_notes && (
             <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
               <div className="flex items-center gap-2 px-6 py-4 border-b border-[#E5E7EB]">
-                <MessageSquare className="w-5 h-5 text-[#3B82F6]" />
+                <MessageSquare className="w-5 h-5 text-orange-500" />
                 <h3 className="font-semibold text-[#111827]">Catatan Pelanggan</h3>
               </div>
               <div className="p-6">
@@ -304,8 +304,8 @@ export default async function OrderDetailPage({
             </div>
             <div className="p-6 space-y-4">
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-4 h-4 text-[#3B82F6]" />
+                <div className="w-9 h-9 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-4 h-4 text-orange-500" />
                 </div>
                 <div>
                   <p className="text-xs text-[#6B7280]">Lokasi Meja</p>
@@ -399,7 +399,7 @@ export default async function OrderDetailPage({
               <div className="pt-4 border-t border-[#E5E7EB]">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-[#111827]">Total</span>
-                  <span className="text-lg font-bold text-[#3B82F6]">
+                  <span className="text-lg font-bold text-orange-500">
                     {formatCurrency(order.total_amount)}
                   </span>
                 </div>

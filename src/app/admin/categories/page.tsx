@@ -46,8 +46,8 @@ export default async function CategoriesPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center">
-              <Layers className="w-5 h-5 text-[#3B82F6]" />
+            <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+              <Layers className="w-5 h-5 text-orange-500" />
             </div>
             <div>
               <p className="text-2xl font-bold text-[#111827]">{totalCategories}</p>
@@ -168,7 +168,7 @@ export default async function CategoriesPage() {
           </p>
           <Link
             href="/admin/categories/create"
-            className="inline-flex items-center gap-2 h-10 px-4 bg-[#3B82F6] text-white rounded-lg text-sm font-medium hover:bg-[#2563EB] transition-colors"
+            className="inline-flex items-center gap-2 h-10 px-4 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Tambah Kategori

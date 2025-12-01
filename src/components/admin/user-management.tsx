@@ -73,7 +73,7 @@ const ROLE_ICONS = {
 
 const ROLE_COLORS = {
   tenant_admin: 'bg-purple-100 text-purple-700',
-  outlet_admin: 'bg-blue-100 text-blue-700',
+  outlet_admin: 'bg-orange-100 text-orange-700',
   staff: 'bg-gray-100 text-gray-700',
 }
 
@@ -315,7 +315,7 @@ export function UserManagement({ outlets, currentUserId }: Props) {
           <span className="text-gray-600">Tenant Admin - Akses semua</span>
         </div>
         <div className="flex items-center gap-2">
-          <Shield className="w-4 h-4 text-blue-600" />
+          <Shield className="w-4 h-4 text-orange-600" />
           <span className="text-gray-600">Outlet Admin - Kelola outlet tertentu</span>
         </div>
         <div className="flex items-center gap-2">
@@ -411,7 +411,7 @@ export function UserManagement({ outlets, currentUserId }: Props) {
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => openEditModal(user)}
-                          className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                           title="Edit"
                         >
                           <Edit className="w-4 h-4" />
@@ -529,12 +529,12 @@ export function UserManagement({ outlets, currentUserId }: Props) {
                         }}
                         className={`flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-all ${
                           isSelected
-                            ? 'border-blue-500 bg-blue-50'
+                            ? 'border-orange-500 bg-orange-50'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
                       >
-                        <Icon className={`w-5 h-5 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`} />
-                        <span className={`text-xs font-medium ${isSelected ? 'text-blue-700' : 'text-gray-600'}`}>
+                        <Icon className={`w-5 h-5 ${isSelected ? 'text-orange-600' : 'text-gray-500'}`} />
+                        <span className={`text-xs font-medium ${isSelected ? 'text-orange-700' : 'text-gray-600'}`}>
                           {ROLE_LABELS[role]}
                         </span>
                       </button>
@@ -562,14 +562,14 @@ export function UserManagement({ outlets, currentUserId }: Props) {
                           <label
                             key={outlet.id}
                             className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
-                              isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'
+                              isSelected ? 'bg-orange-50' : 'hover:bg-gray-50'
                             }`}
                           >
                             <input
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => toggleOutlet(outlet.id)}
-                              className="w-4 h-4 rounded text-blue-600"
+                              className="w-4 h-4 rounded text-orange-600"
                             />
                             <Building2 className="w-4 h-4 text-gray-400" />
                             <span className="text-sm">{outlet.name}</span>
@@ -593,7 +593,7 @@ export function UserManagement({ outlets, currentUserId }: Props) {
                     type="checkbox"
                     checked={formData.is_active}
                     onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
-                    className="w-4 h-4 rounded text-blue-600"
+                    className="w-4 h-4 rounded text-orange-600"
                   />
                   <div>
                     <span className="font-medium">User Aktif</span>

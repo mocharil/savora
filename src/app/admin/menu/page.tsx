@@ -150,7 +150,7 @@ export default async function MenuPage() {
                 {/* Price Row */}
                 <div className="flex items-end justify-between mt-4">
                   <div>
-                    <p className="text-lg font-bold text-[#3B82F6]">
+                    <p className="text-lg font-bold text-orange-500">
                       {formatCurrency(item.discount_price || item.price)}
                     </p>
                     {item.discount_price && (
@@ -186,7 +186,7 @@ export default async function MenuPage() {
           </p>
           <Link
             href="/admin/menu/create"
-            className="inline-flex items-center gap-2 h-10 px-4 bg-[#3B82F6] text-white rounded-lg text-sm font-medium hover:bg-[#2563EB] transition-colors"
+            className="inline-flex items-center gap-2 h-10 px-4 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Tambah Menu
