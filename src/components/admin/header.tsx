@@ -12,7 +12,6 @@ import {
   ShoppingBag,
   Inbox,
 } from 'lucide-react'
-import { OutletSelector } from './OutletSelector'
 import { HelpCenter } from './tour'
 import { formatDistanceToNow } from 'date-fns'
 import { id } from 'date-fns/locale'
@@ -101,11 +100,8 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
         )}
       </div>
 
-      {/* Right Section - Outlet Selector, Search, Notifications */}
+      {/* Right Section - Search, Notifications */}
       <div className="flex items-center gap-3">
-        {/* Outlet Selector */}
-        <OutletSelector />
-
         {/* Search Bar */}
         <div
           className={`hidden md:flex items-center gap-2 h-10 px-4 rounded-lg transition-all duration-200 ${

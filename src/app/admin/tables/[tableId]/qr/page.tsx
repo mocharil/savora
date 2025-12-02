@@ -23,10 +23,7 @@ export default async function TableQRPage({
   const [tableResult, storeResult] = await Promise.all([
     supabase
       .from('tables')
-      .select(`
-        *,
-        outlet:outlets(id, name, slug)
-      `)
+      .select('*')
       .eq('id', tableId)
       .eq('store_id', storeId)
       .single(),
@@ -43,13 +40,10 @@ export default async function TableQRPage({
 
   const table = tableResult.data
   const store = storeResult.data
-  const outlet = table.outlet
 
-  // Build order URL with outlet slug if available
+  // Build order URL (store-only, no outlet)
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  const orderUrl = outlet
-    ? `${baseUrl}/${store.slug}/${outlet.slug}/order?table=${table.qr_code}`
-    : `${baseUrl}/${store.slug}/order?table=${table.qr_code}`
+  const orderUrl = `${baseUrl}/${store.slug}/order?table=${table.qr_code}`
 
-  return <QRPageContent table={table} store={store} outlet={outlet} orderUrl={orderUrl} />
+  return <QRPageContent table={table} store={store} orderUrl={orderUrl} />
 }

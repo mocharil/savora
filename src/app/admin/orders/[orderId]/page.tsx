@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -22,6 +22,7 @@ import {
 import { formatCurrency } from '@/lib/utils'
 import { getUserFromToken } from '@/lib/tenant-context'
 import { OrderStatusUpdate } from '@/components/admin/order-status-update'
+import { PaymentStatusUpdate } from '@/components/admin/payment-status-update'
 
 type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled'
 type PaymentStatus = 'pending' | 'paid' | 'failed'
@@ -83,7 +84,7 @@ export default async function OrderDetailPage({
 }: {
   params: Promise<{ orderId: string }>
 }) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { orderId } = await params
 
   // Get user from token
@@ -102,13 +103,13 @@ export default async function OrderDetailPage({
       order_items(
         id,
         quantity,
-        price,
+        unit_price,
         notes,
         menu_item:menu_items(name, description, image_url)
       ),
       payment:payments(
         payment_method,
-        payment_status,
+        status,
         amount,
         paid_at
       )
@@ -123,7 +124,7 @@ export default async function OrderDetailPage({
 
   const status = order.status as OrderStatus
   const statusInfo = statusConfig[status]
-  const paymentStatus = (order.payment?.payment_status || order.payment_status || 'pending') as PaymentStatus
+  const paymentStatus = (order.payment?.status || order.payment_status || 'pending') as PaymentStatus
   const currentStepIndex = timelineSteps.findIndex(s => s.status === status)
 
   return (
@@ -244,12 +245,12 @@ export default async function OrderDetailPage({
                       </p>
                     )}
                     <p className="text-sm text-[#6B7280] mt-1">
-                      {formatCurrency(item.price)} x {item.quantity}
+                      {formatCurrency(item.unit_price)} x {item.quantity}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-[#111827]">
-                      {formatCurrency(item.price * item.quantity)}
+                      {formatCurrency(item.unit_price * item.quantity)}
                     </p>
                   </div>
                 </div>
@@ -261,11 +262,11 @@ export default async function OrderDetailPage({
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-[#6B7280]">Subtotal</span>
-                  <span className="text-[#111827]">{formatCurrency(order.total_amount)}</span>
+                  <span className="text-[#111827]">{formatCurrency(order.subtotal || order.total)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold pt-2 border-t border-[#E5E7EB]">
                   <span className="text-[#111827]">Total</span>
-                  <span className="text-orange-500">{formatCurrency(order.total_amount)}</span>
+                  <span className="text-orange-500">{formatCurrency(order.total)}</span>
                 </div>
               </div>
             </div>
@@ -366,43 +367,39 @@ export default async function OrderDetailPage({
                 </span>
               </div>
 
-              {order.payment && (
-                <>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#6B7280]">Metode</span>
-                    <span className="text-sm font-medium text-[#111827] capitalize">
-                      {order.payment.payment_method || 'Cash'}
-                    </span>
-                  </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[#6B7280]">Metode</span>
+                <span className="text-sm font-medium text-[#111827] capitalize">
+                  {order.payment?.payment_method || order.payment_method || 'Cash'}
+                </span>
+              </div>
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#6B7280]">Jumlah</span>
-                    <span className="text-sm font-medium text-[#111827]">
-                      {formatCurrency(order.payment.amount || order.total_amount)}
-                    </span>
-                  </div>
-
-                  {order.payment.paid_at && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#6B7280]">Dibayar</span>
-                      <span className="text-sm font-medium text-[#111827]">
-                        {new Date(order.payment.paid_at).toLocaleString('id-ID', {
-                          dateStyle: 'short',
-                          timeStyle: 'short',
-                        })}
-                      </span>
-                    </div>
-                  )}
-                </>
+              {order.payment?.paid_at && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[#6B7280]">Dibayar</span>
+                  <span className="text-sm font-medium text-[#111827]">
+                    {new Date(order.payment.paid_at).toLocaleString('id-ID', {
+                      dateStyle: 'short',
+                      timeStyle: 'short',
+                    })}
+                  </span>
+                </div>
               )}
 
               <div className="pt-4 border-t border-[#E5E7EB]">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-4">
                   <span className="font-semibold text-[#111827]">Total</span>
                   <span className="text-lg font-bold text-orange-500">
-                    {formatCurrency(order.total_amount)}
+                    {formatCurrency(order.total)}
                   </span>
                 </div>
+
+                {/* Payment Action Button */}
+                <PaymentStatusUpdate
+                  orderId={order.id}
+                  currentStatus={paymentStatus}
+                  total={order.total}
+                />
               </div>
             </div>
           </div>

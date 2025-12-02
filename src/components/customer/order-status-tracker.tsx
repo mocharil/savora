@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useEffect, useState, useCallback } from 'react'
 import { Check, Circle, Loader2, XCircle, Clock, ChefHat, Bell, PartyPopper } from 'lucide-react'
 
 type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled'
@@ -53,30 +52,37 @@ interface OrderStatusTrackerProps {
 
 export function OrderStatusTracker({ orderId, initialStatus }: OrderStatusTrackerProps) {
   const [currentStatus, setCurrentStatus] = useState<OrderStatus>(initialStatus)
-  const supabase = createClient()
 
-  useEffect(() => {
-    const channel = supabase
-      .channel(`order-${orderId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'orders',
-          filter: `id=eq.${orderId}`,
-        },
-        (payload) => {
-          const newStatus = payload.new.status as OrderStatus
-          setCurrentStatus(newStatus)
+  // Fetch status from API
+  const fetchStatus = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/orders/${orderId}/status`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.status !== currentStatus) {
+          setCurrentStatus(data.status)
         }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
+      }
+    } catch (error) {
+      console.error('Failed to fetch order status:', error)
     }
-  }, [orderId, supabase])
+  }, [orderId, currentStatus])
+
+  // Poll for status updates every 5 seconds
+  useEffect(() => {
+    // Don't poll if order is completed or cancelled
+    if (currentStatus === 'completed' || currentStatus === 'cancelled') {
+      return
+    }
+
+    // Initial fetch
+    fetchStatus()
+
+    // Set up polling interval
+    const interval = setInterval(fetchStatus, 5000)
+
+    return () => clearInterval(interval)
+  }, [currentStatus, fetchStatus])
 
   if (currentStatus === 'cancelled') {
     return (
@@ -116,11 +122,11 @@ export function OrderStatusTracker({ orderId, initialStatus }: OrderStatusTracke
                     isCompleted
                       ? 'bg-[#00B894] text-white'
                       : isCurrent
-                      ? 'bg-primary text-white'
+                      ? currentStatus === 'completed' ? 'bg-[#00B894] text-white' : 'bg-primary text-white'
                       : 'bg-[#E8EAED] text-[#9AA0A6]'
                   }`}
                 >
-                  {isCompleted ? (
+                  {isCompleted || (isCurrent && currentStatus === 'completed') ? (
                     <Check className="w-4 h-4" />
                   ) : isCurrent ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -156,11 +162,19 @@ export function OrderStatusTracker({ orderId, initialStatus }: OrderStatusTracke
                   {step.description}
                 </p>
 
-                {/* Current Status Indicator */}
-                {isCurrent && (
+                {/* Current Status Indicator - Only show for non-completed status */}
+                {isCurrent && currentStatus !== 'completed' && (
                   <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full">
                     <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                     <span className="text-xs font-medium text-primary">Sedang berlangsung</span>
+                  </div>
+                )}
+
+                {/* Completed Status Indicator */}
+                {isCurrent && currentStatus === 'completed' && (
+                  <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-[#00B894]/10 rounded-full">
+                    <Check className="w-3 h-3 text-[#00B894]" />
+                    <span className="text-xs font-medium text-[#00B894]">Pesanan selesai</span>
                   </div>
                 )}
               </div>

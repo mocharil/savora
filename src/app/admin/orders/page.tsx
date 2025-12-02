@@ -1,6 +1,6 @@
 // @ts-nocheck
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { formatCurrency } from '@/lib/utils'
 import { getUserFromToken } from '@/lib/tenant-context'
 import { redirect } from 'next/navigation'
@@ -80,7 +80,7 @@ export default async function OrdersPage({
 }: {
   searchParams: Promise<{ status?: string }>
 }) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { status: statusFilter } = await searchParams
 
   // Get user from token
@@ -112,7 +112,7 @@ export default async function OrdersPage({
       order_items(
         id,
         quantity,
-        price,
+        unit_price,
         menu_item:menu_items(name)
       )
     `)
@@ -206,7 +206,7 @@ export default async function OrdersPage({
               <div
                 key={order.id}
                 className={`bg-white rounded-xl border ${
-                  isPending ? 'border-[#10B981] border-2 animate-pulse-ring' : 'border-[#E5E7EB]'
+                  isPending ? 'border-[#10B981] border-2' : 'border-[#E5E7EB]'
                 } overflow-hidden hover:shadow-admin-md transition-all cursor-pointer`}
               >
                 <Link href={`/admin/orders/${order.id}`} className="block p-5">
@@ -221,7 +221,7 @@ export default async function OrdersPage({
                           {statusInfo.label}
                         </span>
                         {isPending && (
-                          <span className="px-2 py-1 rounded bg-[#10B981]/10 text-[#10B981] text-xs font-bold animate-pulse">
+                          <span className="px-2 py-1 rounded bg-[#10B981]/10 text-[#10B981] text-xs font-bold">
                             BARU!
                           </span>
                         )}
@@ -243,7 +243,7 @@ export default async function OrdersPage({
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-bold text-orange-500">
-                        {formatCurrency(order.total_amount)}
+                        {formatCurrency(order.total)}
                       </p>
                       <p className="text-xs text-[#9CA3AF]">
                         {order.order_items?.length || 0} item

@@ -49,14 +49,14 @@ export function CartFloatingButton({ storeSlug, outletSlug }: CartFloatingButton
     <div className="fixed bottom-6 left-4 right-4 z-50 max-w-lg mx-auto">
       <Link
         href={cartUrl}
-        className={`flex items-center justify-between w-full h-[60px] px-5 rounded-xl bg-primary shadow-savora-xl transition-all duration-300 ${
+        className={`flex items-center justify-between w-full h-[60px] px-5 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 shadow-xl shadow-orange-300/50 transition-all duration-300 ${
           isAnimating ? 'scale-105' : 'scale-100'
         }`}
       >
         {/* Left - Icon with Badge */}
         <div className="relative">
           <ShoppingBag className="w-6 h-6 text-white" />
-          <span className="absolute -top-2 -right-2 w-5 h-5 bg-white text-primary text-xs font-bold rounded-full flex items-center justify-center">
+          <span className="absolute -top-2 -right-2 w-5 h-5 bg-white text-orange-600 text-xs font-bold rounded-full flex items-center justify-center shadow-sm">
             {totalItems}
           </span>
         </div>

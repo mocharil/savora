@@ -105,14 +105,14 @@ export function SettingsForm({ store }: SettingsFormProps) {
     type: 'logo' | 'banner'
   ) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file || !store) return
 
     if (!file.type.startsWith('image/')) {
       setError('File harus berupa gambar')
       return
     }
 
-    const maxSize = type === 'logo' ? 1 : 5
+    const maxSize = type === 'logo' ? 2 : 5 // Increased logo max size to 2MB
     if (file.size > maxSize * 1024 * 1024) {
       setError(`Ukuran file maksimal ${maxSize}MB`)
       return
@@ -123,12 +123,14 @@ export function SettingsForm({ store }: SettingsFormProps) {
 
     try {
       const fileExt = file.name.split('.').pop()
-      const fileName = `${store?.id}/${type}-${Date.now()}.${fileExt}`
+      const fileName = `${store.id}/${type}-${Date.now()}.${fileExt}`
 
       const uploadFormData = new FormData()
       uploadFormData.append('file', file)
       uploadFormData.append('bucket', 'store-assets')
       uploadFormData.append('path', fileName)
+
+      console.log('Uploading file:', { type, fileName, fileSize: file.size })
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -136,16 +138,40 @@ export function SettingsForm({ store }: SettingsFormProps) {
       })
 
       const result = await response.json()
+      console.log('Upload response:', result)
 
       if (!response.ok) {
         throw new Error(result.error || 'Upload gagal')
       }
 
-      setFormData({
+      const fieldName = type === 'logo' ? 'logo_url' : 'banner_url'
+      const newFormData = {
         ...formData,
-        [type === 'logo' ? 'logo_url' : 'banner_url']: result.publicUrl
+        [fieldName]: result.publicUrl
+      }
+
+      setFormData(newFormData)
+
+      // Auto-save to database after successful upload using API
+      const updateResponse = await fetch('/api/store/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ field: fieldName, value: result.publicUrl })
       })
+
+      const updateResult = await updateResponse.json()
+
+      if (!updateResponse.ok) {
+        console.error('Auto-save error:', updateResult.error)
+        setError('Gambar terupload tapi gagal menyimpan. Silakan klik Simpan Perubahan.')
+      } else {
+        console.log('Auto-saved', fieldName, 'to database')
+        setSuccess(true)
+        router.refresh()
+        setTimeout(() => setSuccess(false), 3000)
+      }
     } catch (err: any) {
+      console.error('Upload error:', err)
       setError('Gagal upload gambar: ' + err.message)
     } finally {
       setUploading(null)
@@ -161,23 +187,30 @@ export function SettingsForm({ store }: SettingsFormProps) {
     setSuccess(false)
 
     try {
-      const { error } = await supabase
-        .from('stores')
-        .update({
-          name: formData.name,
-          description: formData.description,
-          address: formData.address,
-          phone: formData.phone,
-          logo_url: formData.logo_url,
-          banner_url: formData.banner_url,
-          tax_percentage: Number(formData.tax_percentage),
-          service_charge_percentage: Number(formData.service_charge_percentage),
-          operational_hours: formData.operational_hours,
-          is_active: formData.is_active,
+      // Batch update all fields via API
+      const response = await fetch('/api/store/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: {
+            name: formData.name,
+            description: formData.description,
+            address: formData.address,
+            phone: formData.phone,
+            logo_url: formData.logo_url,
+            banner_url: formData.banner_url,
+            tax_percentage: Number(formData.tax_percentage),
+            service_charge_percentage: Number(formData.service_charge_percentage),
+            operational_hours: formData.operational_hours,
+            is_active: formData.is_active,
+          }
         })
-        .eq('id', store.id)
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        const result = await response.json()
+        throw new Error(result.error || 'Gagal menyimpan pengaturan')
+      }
 
       setSuccess(true)
       router.refresh()

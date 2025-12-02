@@ -37,8 +37,8 @@ export function MenuDetailModal({ item, isOpen, onClose }: MenuDetailModalProps)
   const [notes, setNotes] = useState('')
   const [isClosing, setIsClosing] = useState(false)
 
-  // Get current quantity in cart
-  const cartItem = item ? cartItems.find(i => i.id === item.id) : null
+  // Get current quantity in cart - find by menuItemId
+  const cartItem = item ? cartItems.find(i => i.menuItemId === item.id) : null
   const currentCartQty = cartItem?.quantity || 0
 
   // Reset state when modal opens with new item
@@ -75,25 +75,19 @@ export function MenuDetailModal({ item, isOpen, onClose }: MenuDetailModalProps)
 
     const displayPrice = item.discount_price || item.price
 
-    if (currentCartQty > 0) {
+    if (currentCartQty > 0 && cartItem) {
       // Update existing item
-      updateQuantity(item.id, currentCartQty + quantity)
+      updateQuantity(cartItem.id, currentCartQty + quantity)
     } else {
-      // Add new item
-      for (let i = 0; i < quantity; i++) {
-        addItem({
-          id: item.id,
-          name: item.name,
-          price: displayPrice,
-          image_url: item.image_url || undefined,
-          notes: i === 0 ? notes : undefined,
-        })
-      }
-      // If notes and quantity > 1, update notes for all
-      if (notes && quantity > 1) {
-        // The first add already has notes, need to update with correct quantity
-        updateQuantity(item.id, quantity)
-      }
+      // Add new item with correct menuItemId
+      addItem({
+        menuItemId: item.id,
+        name: item.name,
+        price: displayPrice,
+        image_url: item.image_url || undefined,
+        notes: notes || undefined,
+        quantity: quantity,
+      })
     }
 
     handleClose()

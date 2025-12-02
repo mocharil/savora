@@ -23,8 +23,8 @@ interface CartStore {
   setContext: (context: {
     storeId: string
     storeSlug: string
-    outletId: string
-    outletSlug: string
+    outletId?: string | null
+    outletSlug?: string | null
     tableId?: string | null
   }) => void
   addItem: (item: Omit<CartItem, 'id' | 'quantity'> & { quantity?: number }) => void
@@ -51,24 +51,28 @@ export const useCartStore = create<CartStore>()(
       tableId: null,
 
       setContext: (context) => {
+        const currentStoreId = get().storeId
         const currentOutletId = get().outletId
 
-        // Clear cart if switching to different outlet
-        if (currentOutletId && currentOutletId !== context.outletId) {
+        // Clear cart if switching to different store or outlet
+        const isNewStore = currentStoreId && currentStoreId !== context.storeId
+        const isNewOutlet = context.outletId && currentOutletId && currentOutletId !== context.outletId
+
+        if (isNewStore || isNewOutlet) {
           set({
             items: [],
             storeId: context.storeId,
             storeSlug: context.storeSlug,
-            outletId: context.outletId,
-            outletSlug: context.outletSlug,
+            outletId: context.outletId || null,
+            outletSlug: context.outletSlug || null,
             tableId: context.tableId || null,
           })
         } else {
           set({
             storeId: context.storeId,
             storeSlug: context.storeSlug,
-            outletId: context.outletId,
-            outletSlug: context.outletSlug,
+            outletId: context.outletId || get().outletId,
+            outletSlug: context.outletSlug || get().outletSlug,
             tableId: context.tableId || get().tableId,
           })
         }

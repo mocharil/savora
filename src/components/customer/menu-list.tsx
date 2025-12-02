@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { formatCurrency } from '@/lib/utils'
-import { Plus, Minus, Search, Star, UtensilsCrossed, Sparkles, TrendingUp, Mic } from 'lucide-react'
+import { Plus, Minus, Search, Star, UtensilsCrossed, Sparkles, TrendingUp, Mic, Flame } from 'lucide-react'
 import { useCartStore } from '@/stores/cart-store'
 import { MenuDetailModal } from './menu-detail-modal'
 import { VoiceOrderButton } from './VoiceOrderButton'
@@ -50,12 +50,13 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
 
   useEffect(() => {
     setMounted(true)
-    if (storeId && storeSlug && outletId && outletSlug) {
+    // Set context if we have at least storeId and storeSlug
+    if (storeId && storeSlug) {
       setContext({
         storeId,
         storeSlug,
-        outletId,
-        outletSlug,
+        outletId: outletId || null,
+        outletSlug: outletSlug || null,
         tableId: tableId ?? null,
       })
     }
@@ -156,21 +157,21 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
     return (
       <div className="p-4 space-y-4">
         {/* Search skeleton */}
-        <div className="h-12 bg-gray-100 rounded-xl animate-pulse" />
+        <div className="h-12 bg-gradient-to-r from-orange-100 to-orange-50 rounded-2xl animate-pulse" />
         {/* Category tabs skeleton */}
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar">
+        <div className="flex gap-2 overflow-x-auto hide-scrollbar">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-10 w-20 bg-gray-100 rounded-full animate-pulse flex-shrink-0" />
+            <div key={i} className="h-10 w-20 bg-gradient-to-r from-orange-100 to-orange-50 rounded-full animate-pulse flex-shrink-0" />
           ))}
         </div>
         {/* Menu cards skeleton */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-white rounded-xl shadow-savora-card overflow-hidden">
-              <div className="h-32 bg-gray-100 animate-pulse" />
+            <div key={i} className="bg-white rounded-2xl shadow-md shadow-orange-100/30 overflow-hidden border border-orange-50">
+              <div className="h-28 bg-gradient-to-br from-orange-50 to-orange-100 animate-pulse" />
               <div className="p-3 space-y-2">
-                <div className="h-4 bg-gray-100 rounded animate-pulse" />
-                <div className="h-3 bg-gray-100 rounded w-2/3 animate-pulse" />
+                <div className="h-4 bg-orange-100 rounded-lg animate-pulse" />
+                <div className="h-3 bg-orange-50 rounded-lg w-2/3 animate-pulse" />
               </div>
             </div>
           ))}
@@ -182,16 +183,16 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
   return (
     <div className="space-y-4">
       {/* Search Bar with Voice Order */}
-      <div className="sticky top-16 z-40 bg-[#F8F9FA] px-4 py-3">
+      <div className="sticky top-16 z-40 bg-gradient-to-b from-orange-50/80 to-transparent backdrop-blur-sm px-4 py-3">
         <div className="flex items-center gap-2">
           <div
-            className={`flex-1 flex items-center gap-3 h-12 rounded-xl px-4 transition-all duration-300 ${
+            className={`flex-1 flex items-center gap-3 h-12 rounded-2xl px-4 transition-all duration-300 ${
               isSearchFocused
-                ? 'bg-white border-2 border-primary shadow-savora-md'
-                : 'bg-[#F1F3F4] border-2 border-transparent'
+                ? 'bg-white border-2 border-orange-400 shadow-lg shadow-orange-100'
+                : 'bg-white/80 border-2 border-orange-100'
             }`}
           >
-            <Search className={`w-5 h-5 ${isSearchFocused ? 'text-primary' : 'text-[#9AA0A6]'}`} />
+            <Search className={`w-5 h-5 ${isSearchFocused ? 'text-orange-500' : 'text-gray-400'}`} />
             <input
               type="text"
               placeholder="Cari menu favorit kamu..."
@@ -199,13 +200,13 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
-              className="flex-1 bg-transparent outline-none text-sm text-[#202124] placeholder:text-[#9AA0A6]"
+              className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder:text-gray-400"
             />
           </div>
           {/* Voice Order Button */}
           <button
             onClick={() => setShowVoiceOrder(true)}
-            className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white flex items-center justify-center shadow-md hover:shadow-lg transition-all active:scale-95"
+            className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center shadow-lg shadow-orange-200 hover:shadow-xl hover:shadow-orange-300 transition-all active:scale-95"
             title="Pesan dengan suara"
           >
             <Mic className="w-5 h-5" />
@@ -215,14 +216,14 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
 
       {/* Category Tabs */}
       {!searchQuery && (
-        <div className="sticky top-[132px] z-30 bg-[#F8F9FA]">
-          <div className="flex gap-3 px-4 py-2 overflow-x-auto hide-scrollbar">
+        <div className="sticky top-[132px] z-30 bg-gradient-to-b from-white/80 to-transparent backdrop-blur-sm">
+          <div className="flex gap-2 px-4 py-2 overflow-x-auto hide-scrollbar">
             <button
               onClick={() => scrollToCategory('all')}
-              className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
+              className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
                 activeCategory === 'all'
-                  ? 'bg-primary text-white shadow-savora-md'
-                  : 'bg-white text-[#5F6368] border border-[#E8EAED] hover:border-[#DADCE0]'
+                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-200'
+                  : 'bg-white text-gray-600 border border-orange-100 hover:border-orange-300 hover:text-orange-600'
               }`}
             >
               Semua
@@ -231,10 +232,10 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
               <button
                 key={category.id}
                 onClick={() => scrollToCategory(category.id)}
-                className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
                   activeCategory === category.id
-                    ? 'bg-primary text-white shadow-savora-md'
-                    : 'bg-white text-[#5F6368] border border-[#E8EAED] hover:border-[#DADCE0]'
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-200'
+                    : 'bg-white text-gray-600 border border-orange-100 hover:border-orange-300 hover:text-orange-600'
                 }`}
               >
                 {category.name}
@@ -248,8 +249,10 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
       {!searchQuery && featuredItems.length > 0 && (
         <div className="px-4 pt-2">
           <div className="flex items-center gap-2 mb-4">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-bold text-[#202124]">Rekomendasi Untuk Kamu</h2>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+              <Flame className="w-4 h-4 text-white" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">Favorit Pelanggan</h2>
           </div>
           <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
             {featuredItems.map((item) => {
@@ -260,7 +263,7 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
               return (
                 <div
                   key={item.id}
-                  className="flex-shrink-0 w-[200px] bg-white rounded-2xl shadow-savora-card overflow-hidden transition-all duration-300 hover:shadow-savora-card-hover hover:-translate-y-1 cursor-pointer"
+                  className="flex-shrink-0 w-[200px] bg-white rounded-2xl shadow-lg shadow-orange-100/50 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-orange-200/50 hover:-translate-y-1 cursor-pointer border border-orange-50"
                   onClick={() => openMenuDetail(item)}
                 >
                   <div className="relative h-32">
@@ -272,33 +275,33 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
                         className="object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-[#F1F3F4] flex items-center justify-center">
-                        <UtensilsCrossed className="w-8 h-8 text-[#BDC1C6]" />
+                      <div className="w-full h-full bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center">
+                        <UtensilsCrossed className="w-8 h-8 text-orange-300" />
                       </div>
                     )}
                     {hasDiscount && (
-                      <span className="absolute top-2 right-2 bg-[#E74C3C] text-white text-xs font-bold px-2 py-1 rounded-md">
+                      <span className="absolute top-2 right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-md">
                         -{Math.round(((item.price - item.discount_price!) / item.price) * 100)}%
                       </span>
                     )}
-                    <span className="absolute top-2 left-2 bg-[#FDCB6E] text-[#202124] text-xs font-semibold px-2 py-1 rounded-md flex items-center gap-1">
+                    <span className="absolute top-2 left-2 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-xs font-semibold px-2 py-1 rounded-lg flex items-center gap-1 shadow-md">
                       <Star className="w-3 h-3 fill-current" />
                       Favorit
                     </span>
                   </div>
                   <div className="p-3">
-                    <h3 className="font-semibold text-sm text-[#202124] line-clamp-1">{item.name}</h3>
+                    <h3 className="font-semibold text-sm text-gray-900 line-clamp-1">{item.name}</h3>
                     <div className="mt-2 flex items-center justify-between">
                       <div>
-                        <p className="font-bold text-primary">{formatCurrency(displayPrice)}</p>
+                        <p className="font-bold text-orange-600">{formatCurrency(displayPrice)}</p>
                         {hasDiscount && (
-                          <p className="text-xs text-[#9AA0A6] line-through">{formatCurrency(item.price)}</p>
+                          <p className="text-xs text-gray-400 line-through">{formatCurrency(item.price)}</p>
                         )}
                       </div>
                       {quantity === 0 ? (
                         <button
                           onClick={(e) => { e.stopPropagation(); handleAddToCart(item) }}
-                          className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center shadow-savora-md transition-transform active:scale-95"
+                          className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center shadow-lg shadow-orange-200 transition-all active:scale-95 hover:shadow-xl"
                         >
                           <Plus className="w-5 h-5" />
                         </button>
@@ -306,14 +309,14 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
                         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={() => handleDecrement(item.id)}
-                            className="w-8 h-8 rounded-full bg-[#F1F3F4] text-[#5F6368] flex items-center justify-center transition-transform active:scale-95"
+                            className="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center transition-transform active:scale-95"
                           >
                             <Minus className="w-4 h-4" />
                           </button>
-                          <span className="w-6 text-center font-bold text-sm">{quantity}</span>
+                          <span className="w-6 text-center font-bold text-sm text-gray-900">{quantity}</span>
                           <button
                             onClick={() => handleIncrement(item)}
-                            className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center transition-transform active:scale-95"
+                            className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center transition-transform active:scale-95"
                           >
                             <Plus className="w-4 h-4" />
                           </button>
@@ -336,13 +339,15 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
             ref={(el) => { categoryRefs.current[category.id] = el }}
           >
             {!searchQuery && (
-              <div className="flex items-center gap-2 mb-4 sticky top-[180px] bg-[#F8F9FA] py-2 z-20">
-                <TrendingUp className="w-5 h-5 text-[#5F6368]" />
-                <h2 className="text-lg font-bold text-[#202124]">{category.name}</h2>
+              <div className="flex items-center gap-2 mb-4 sticky top-[180px] bg-gradient-to-r from-white/90 to-orange-50/90 backdrop-blur-sm py-2 px-3 -mx-3 z-20 rounded-xl">
+                <div className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-orange-600" />
+                </div>
+                <h2 className="text-lg font-bold text-gray-900">{category.name}</h2>
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               {category.menu_items.map((item) => {
                 const quantity = getItemQuantity(item.id)
                 const displayPrice = item.discount_price || item.price
@@ -351,7 +356,7 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
                 return (
                   <div
                     key={item.id}
-                    className="bg-white rounded-xl shadow-savora-card overflow-hidden transition-all duration-300 hover:shadow-savora-card-hover cursor-pointer"
+                    className="bg-white rounded-2xl shadow-md shadow-orange-100/30 overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-orange-200/40 cursor-pointer border border-orange-50"
                     onClick={() => openMenuDetail(item)}
                   >
                     <div className="relative h-28">
@@ -363,17 +368,17 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
                           className="object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-[#F1F3F4] flex items-center justify-center">
-                          <UtensilsCrossed className="w-8 h-8 text-[#BDC1C6]" />
+                        <div className="w-full h-full bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center">
+                          <UtensilsCrossed className="w-8 h-8 text-orange-300" />
                         </div>
                       )}
                       {hasDiscount && (
-                        <span className="absolute top-2 right-2 bg-[#E74C3C] text-white text-xs font-bold px-2 py-1 rounded-md">
+                        <span className="absolute top-2 right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-sm">
                           -{Math.round(((item.price - item.discount_price!) / item.price) * 100)}%
                         </span>
                       )}
                       {item.is_featured && (
-                        <span className="absolute top-2 left-2 bg-[#FDCB6E] text-[#202124] text-xs font-semibold px-2 py-1 rounded-md flex items-center gap-1">
+                        <span className="absolute top-2 left-2 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-xs font-semibold p-1.5 rounded-lg flex items-center gap-1 shadow-sm">
                           <Star className="w-3 h-3 fill-current" />
                         </span>
                       )}
@@ -381,36 +386,36 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
                       {quantity === 0 && (
                         <button
                           onClick={(e) => { e.stopPropagation(); handleAddToCart(item) }}
-                          className="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center shadow-savora-md transition-transform active:scale-95"
+                          className="absolute bottom-2 right-2 w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center shadow-lg shadow-orange-300/50 transition-all active:scale-95"
                         >
                           <Plus className="w-5 h-5" />
                         </button>
                       )}
                     </div>
                     <div className="p-3">
-                      <h3 className="font-semibold text-sm text-[#202124] line-clamp-2 min-h-[40px]">{item.name}</h3>
+                      <h3 className="font-semibold text-sm text-gray-900 line-clamp-2 min-h-[40px]">{item.name}</h3>
                       {item.description && (
-                        <p className="text-xs text-[#9AA0A6] line-clamp-1 mt-1">{item.description}</p>
+                        <p className="text-xs text-gray-500 line-clamp-1 mt-1">{item.description}</p>
                       )}
                       <div className="mt-2 flex items-center justify-between">
                         <div>
-                          <p className="font-bold text-primary text-sm">{formatCurrency(displayPrice)}</p>
+                          <p className="font-bold text-orange-600 text-sm">{formatCurrency(displayPrice)}</p>
                           {hasDiscount && (
-                            <p className="text-xs text-[#9AA0A6] line-through">{formatCurrency(item.price)}</p>
+                            <p className="text-xs text-gray-400 line-through">{formatCurrency(item.price)}</p>
                           )}
                         </div>
                         {quantity > 0 && (
                           <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => handleDecrement(item.id)}
-                              className="w-7 h-7 rounded-full bg-[#F1F3F4] text-[#5F6368] flex items-center justify-center transition-transform active:scale-95"
+                              className="w-7 h-7 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center transition-transform active:scale-95"
                             >
                               <Minus className="w-4 h-4" />
                             </button>
-                            <span className="w-5 text-center font-bold text-xs">{quantity}</span>
+                            <span className="w-5 text-center font-bold text-xs text-gray-900">{quantity}</span>
                             <button
                               onClick={() => handleIncrement(item)}
-                              className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center transition-transform active:scale-95"
+                              className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center transition-transform active:scale-95"
                             >
                               <Plus className="w-4 h-4" />
                             </button>
@@ -429,13 +434,13 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
       {/* Empty State */}
       {((searchQuery && filteredCategories.length === 0) || categories.length === 0) && (
         <div className="px-4 py-12 text-center">
-          <div className="w-32 h-32 mx-auto mb-6 bg-[#F1F3F4] rounded-full flex items-center justify-center">
-            <UtensilsCrossed className="w-12 h-12 text-[#BDC1C6]" />
+          <div className="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center">
+            <UtensilsCrossed className="w-12 h-12 text-orange-400" />
           </div>
-          <h3 className="text-xl font-semibold text-[#202124] mb-2">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
             {searchQuery ? 'Menu Tidak Ditemukan' : 'Belum Ada Menu'}
           </h3>
-          <p className="text-[#9AA0A6]">
+          <p className="text-gray-500">
             {searchQuery
               ? 'Coba kata kunci lain atau lihat semua menu'
               : 'Belum ada menu tersedia saat ini'}
@@ -443,7 +448,7 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="mt-4 px-6 py-2 bg-primary text-white rounded-xl font-medium transition-transform active:scale-95"
+              className="mt-4 px-6 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-semibold shadow-lg shadow-orange-200 transition-all active:scale-95 hover:shadow-xl"
             >
               Lihat Semua Menu
             </button>

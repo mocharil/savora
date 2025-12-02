@@ -17,7 +17,6 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Building2,
   Sparkles,
   Users,
   LogOut,
@@ -68,7 +67,6 @@ const menuGroups: MenuGroup[] = [
     label: 'Operasional',
     items: [
       { name: 'Pesanan', href: '/admin/orders', icon: ShoppingBag, badge: true, tourId: 'sidebar-orders' },
-      { name: 'Outlet', href: '/admin/outlets', icon: Building2, requiredRole: 'tenant_admin', tourId: 'sidebar-outlets' },
     ]
   },
   {

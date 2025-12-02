@@ -51,6 +51,7 @@ export function VoiceOrderButton({
 
   const recognitionRef = useRef<any>(null)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isRecordingRef = useRef(false)
 
   // Check browser support
   useEffect(() => {
@@ -84,7 +85,14 @@ export function VoiceOrderButton({
     }
 
     recognition.onerror = (event: any) => {
+      // Ignore "aborted" error - this happens when we intentionally stop/abort recognition
+      if (event.error === 'aborted') {
+        isRecordingRef.current = false
+        return
+      }
+
       console.error('Speech recognition error:', event.error)
+      isRecordingRef.current = false
       if (event.error === 'not-allowed') {
         setError('Akses mikrofon ditolak. Mohon izinkan akses mikrofon.')
       } else if (event.error === 'no-speech') {
@@ -95,7 +103,12 @@ export function VoiceOrderButton({
       setState('error')
     }
 
+    recognition.onstart = () => {
+      isRecordingRef.current = true
+    }
+
     recognition.onend = () => {
+      isRecordingRef.current = false
       if (state === 'recording') {
         // Auto-stop after silence
         processTranscript()
@@ -125,17 +138,27 @@ export function VoiceOrderButton({
 
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.abort()
+        try {
+          recognitionRef.current.abort()
+        } catch (e) {
+          // Ignore abort errors
+        }
       }
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
       }
+      isRecordingRef.current = false
     }
   }, [autoStart])
 
   const startRecording = useCallback(() => {
     if (!isSupported) {
       setError('Browser tidak mendukung pengenalan suara')
+      return
+    }
+
+    // Don't start if already recording
+    if (isRecordingRef.current) {
       return
     }
 
@@ -151,7 +174,12 @@ export function VoiceOrderButton({
       timeoutRef.current = setTimeout(() => {
         stopRecording()
       }, 10000)
-    } catch (err) {
+    } catch (err: any) {
+      // Handle "already started" error gracefully
+      if (err.name === 'InvalidStateError') {
+        console.warn('Recognition already started')
+        return
+      }
       console.error('Start recording error:', err)
       setError('Gagal memulai perekaman')
       setState('error')
@@ -237,6 +265,18 @@ export function VoiceOrderButton({
   }
 
   const reset = () => {
+    // Stop recognition if running
+    if (isRecordingRef.current && recognitionRef.current) {
+      try {
+        recognitionRef.current.abort()
+      } catch (e) {
+        // Ignore abort errors
+      }
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+    isRecordingRef.current = false
     setState('idle')
     setTranscript('')
     setParsedItems([])

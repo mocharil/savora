@@ -72,9 +72,9 @@ export default async function OrderPage({
       {/* Table Indicator */}
       {tableData && (
         <div className="px-4 pt-4">
-          <div className="bg-primary/10 rounded-full px-4 py-2 inline-flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold text-primary">
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl px-4 py-3 inline-flex items-center gap-2 shadow-lg shadow-orange-200">
+            <MapPin className="w-4 h-4 text-white" />
+            <span className="text-sm font-semibold text-white">
               Meja {tableData.table_number}
             </span>
           </div>
@@ -84,9 +84,9 @@ export default async function OrderPage({
       {/* Invalid QR Warning */}
       {!tableData && table && (
         <div className="px-4 pt-4">
-          <div className="bg-[#FDCB6E]/20 border border-[#FDCB6E] rounded-xl p-4 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-[#E55A2B] flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-[#2D3436]">
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-gray-700">
               QR code tidak valid. Anda masih bisa memesan tanpa nomor meja.
             </p>
           </div>
@@ -97,6 +97,7 @@ export default async function OrderPage({
       <MenuList
         categories={categoriesWithItems}
         storeId={store.id}
+        storeSlug={storeSlug}
         tableId={tableData?.id}
       />
 

@@ -1,22 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-})
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 export async function POST(request: NextRequest) {
   try {
+    // Check env variables
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing Supabase environment variables')
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      )
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+
     const formData = await request.formData()
     const file = formData.get('file') as File
     const bucket = formData.get('bucket') as string
     const path = formData.get('path') as string
+
+    console.log('Upload request:', { bucket, path, fileType: file?.type, fileSize: file?.size })
 
     if (!file || !bucket || !path) {
       return NextResponse.json(
@@ -70,10 +81,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('Upload successful:', data)
+
     // Get public URL
     const { data: { publicUrl } } = supabaseAdmin.storage
       .from(bucket)
       .getPublicUrl(path)
+
+    console.log('Public URL:', publicUrl)
 
     return NextResponse.json({
       success: true,

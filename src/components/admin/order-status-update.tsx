@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import {
   Loader2,
   CheckCircle,
@@ -64,7 +63,6 @@ interface OrderStatusUpdateProps {
 
 export function OrderStatusUpdate({ orderId, currentStatus }: OrderStatusUpdateProps) {
   const router = useRouter()
-  const supabase = createClient()
   const [loading, setLoading] = useState<OrderStatus | null>(null)
   const [error, setError] = useState('')
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
@@ -76,12 +74,17 @@ export function OrderStatusUpdate({ orderId, currentStatus }: OrderStatusUpdateP
     setError('')
 
     try {
-      const { error } = await supabase
-        .from('orders')
-        .update({ status: newStatus })
-        .eq('id', orderId)
+      const response = await fetch(`/api/admin/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      })
 
-      if (error) throw error
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Gagal mengubah status')
+      }
 
       router.refresh()
     } catch (err: any) {
