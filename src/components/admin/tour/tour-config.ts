@@ -349,6 +349,64 @@ export const TOUR_AI_PAGE: TourConfig = {
   ],
 }
 
+// POS Kasir Page Tour
+export const TOUR_POS_PAGE: TourConfig = {
+  id: 'tour_pos_page',
+  name: 'Tutorial POS Kasir',
+  description: 'Pelajari cara menggunakan sistem kasir',
+  category: 'page',
+  steps: [
+    {
+      target: '[data-tour="pos-header"]',
+      title: 'Selamat Datang di POS Kasir!',
+      description: 'Ini adalah sistem Point of Sale untuk memproses pesanan langsung dari kasir.',
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="pos-search"]',
+      title: 'Cari Menu',
+      description: 'Ketik nama menu untuk mencari dengan cepat. Anda juga bisa filter berdasarkan kategori.',
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="pos-categories"]',
+      title: 'Filter Kategori',
+      description: 'Klik kategori untuk menampilkan menu sesuai kategori. Klik "Semua" untuk melihat semua menu.',
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="pos-menu-grid"]',
+      title: 'Daftar Menu',
+      description: 'Klik item menu untuk menambahkan ke keranjang. Badge angka menunjukkan jumlah yang sudah dipilih.',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="pos-cart"]',
+      title: 'Keranjang Belanja',
+      description: 'Semua item yang dipilih akan muncul di sini. Anda bisa mengubah jumlah atau menghapus item.',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="pos-customer-info"]',
+      title: 'Info Pelanggan & Meja',
+      description: 'Masukkan nama pelanggan (opsional) dan WAJIB pilih nomor meja sebelum membuat pesanan.',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="pos-payment"]',
+      title: 'Metode Pembayaran',
+      description: 'Pilih metode pembayaran: Tunai, QRIS, atau Kartu. Untuk tunai, masukkan jumlah uang untuk menghitung kembalian.',
+      position: 'left',
+    },
+    {
+      target: '[data-tour="pos-checkout"]',
+      title: 'Proses Pesanan',
+      description: 'Setelah semua lengkap, klik tombol "Buat Pesanan" untuk memproses. Pesanan akan masuk ke daftar Pesanan.',
+      position: 'top',
+    },
+  ],
+}
+
 // All tours registry
 export const ALL_TOURS: TourConfig[] = [
   TOUR_FTUE_MAIN,
@@ -362,6 +420,7 @@ export const ALL_TOURS: TourConfig[] = [
   TOUR_ANALYTICS_PAGE,
   TOUR_AI_PAGE,
   TOUR_SETTINGS_PAGE,
+  TOUR_POS_PAGE,
 ]
 
 // Get tour by ID
@@ -377,6 +436,7 @@ export function getToursByCategory(category: TourConfig['category']): TourConfig
 // Get page tour ID from pathname
 export function getPageTourId(pathname: string): string | null {
   if (pathname.includes('/admin/dashboard')) return 'tour_dashboard_page'
+  if (pathname.includes('/admin/pos')) return 'tour_pos_page'
   if (pathname.includes('/admin/orders')) return 'tour_orders_page'
   if (pathname.includes('/admin/menu') && !pathname.includes('/create') && !pathname.includes('/edit')) return 'tour_menu_page'
   if (pathname.includes('/admin/categories') && !pathname.includes('/create') && !pathname.includes('/edit')) return 'tour_categories_page'

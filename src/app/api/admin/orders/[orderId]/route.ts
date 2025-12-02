@@ -73,10 +73,10 @@ export async function PATCH(
 
     const supabase = createAdminClient()
 
-    // Verify order belongs to user's store
+    // Verify order belongs to user's store and get table_id
     const { data: existingOrder } = await supabase
       .from('orders')
-      .select('id, store_id')
+      .select('id, store_id, table_id')
       .eq('id', orderId)
       .eq('store_id', user.storeId)
       .single()
@@ -103,6 +103,10 @@ export async function PATCH(
         { status: 500 }
       )
     }
+
+    // Note: Table status is NOT auto-released when order is completed
+    // Staff must manually release the table after customer leaves
+    // This is because customer may still be eating after order is served
 
     return NextResponse.json({
       success: true,

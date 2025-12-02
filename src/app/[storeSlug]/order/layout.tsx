@@ -1,8 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Script from 'next/script'
-import { Store, Sparkles, ClipboardList } from 'lucide-react'
-import Link from 'next/link'
+import { Store, Sparkles } from 'lucide-react'
+import { TrackOrderLink } from '@/components/customer/track-order-link'
 import type { Metadata } from 'next'
 
 // Generate dynamic metadata including favicon per store
@@ -112,13 +112,7 @@ export default async function OrderLayout({
               </div>
             </div>
             {/* Track Order Button */}
-            <Link
-              href={`/${storeSlug}/order/track`}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors"
-            >
-              <ClipboardList className="w-5 h-5 text-orange-600" />
-              <span className="text-sm font-medium text-orange-600 hidden sm:inline">Lacak Pesanan</span>
-            </Link>
+            <TrackOrderLink storeSlug={storeSlug} />
           </div>
         </header>
 

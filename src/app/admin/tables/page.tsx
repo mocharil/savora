@@ -8,7 +8,10 @@ import {
   Plus,
   QrCode,
   Search,
-  Users
+  Users,
+  CheckCircle,
+  Loader2,
+  AlertCircle
 } from 'lucide-react'
 import { PageTourButton } from '@/components/admin/tour'
 import { ShimmerButton } from '@/components/ui/shimmer-button'
@@ -71,6 +74,9 @@ export default function TablesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState('all')
   const [selectedTable, setSelectedTable] = useState<string | null>(null)
+  const [releasingTable, setReleasingTable] = useState<string | null>(null)
+  const [releaseError, setReleaseError] = useState<string | null>(null)
+  const [releaseSuccess, setReleaseSuccess] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchData() {
@@ -121,6 +127,43 @@ export default function TablesPage() {
     return matchesSearch && matchesFilter
   })
 
+  // Handle release table
+  const handleReleaseTable = async (tableId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setReleasingTable(tableId)
+    setReleaseError(null)
+    setReleaseSuccess(null)
+
+    try {
+      const response = await fetch(`/api/admin/tables/${tableId}/release`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setReleaseError(data.message || data.error || 'Gagal mengosongkan meja')
+        return
+      }
+
+      // Update local state
+      setTables(prev => prev.map(table =>
+        table.id === tableId
+          ? { ...table, status: 'available' as TableStatus }
+          : table
+      ))
+      setReleaseSuccess(data.message)
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setReleaseSuccess(null), 3000)
+    } catch (error) {
+      setReleaseError('Terjadi kesalahan. Silakan coba lagi.')
+    } finally {
+      setReleasingTable(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -131,6 +174,34 @@ export default function TablesPage() {
 
   return (
     <div className="space-y-6">
+      {/* Success Toast */}
+      {releaseSuccess && (
+        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-2 fade-in duration-300">
+          <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl shadow-lg">
+            <CheckCircle className="w-5 h-5 text-emerald-600" />
+            <span className="font-medium">{releaseSuccess}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Error Toast */}
+      {releaseError && (
+        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-2 fade-in duration-300">
+          <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl shadow-lg">
+            <AlertCircle className="w-5 h-5 text-red-600" />
+            <div>
+              <span className="font-medium">{releaseError}</span>
+              <button
+                onClick={() => setReleaseError(null)}
+                className="ml-3 text-red-600 hover:text-red-800 text-sm underline"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -230,20 +301,44 @@ export default function TablesPage() {
                   </span>
                 </div>
 
-                {/* View QR Code Button */}
-                <Link
-                  href={`/admin/tables/${table.id}/qr`}
-                  onClick={(e) => e.stopPropagation()}
-                  data-tour="tables-qr-download"
-                  className={`flex items-center justify-center gap-2 w-full h-10 rounded-lg text-sm font-medium transition-all ${
-                    isSelected
-                      ? 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm'
-                      : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
-                  }`}
-                >
-                  <QrCode className="w-4 h-4" />
-                  View QR Code
-                </Link>
+                {/* Action Buttons */}
+                <div className="space-y-2">
+                  {/* Release Table Button - only show for occupied tables */}
+                  {table.status === 'occupied' && (
+                    <button
+                      onClick={(e) => handleReleaseTable(table.id, e)}
+                      disabled={releasingTable === table.id}
+                      className="flex items-center justify-center gap-2 w-full h-10 rounded-lg text-sm font-medium transition-all bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                    >
+                      {releasingTable === table.id ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Memproses...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="w-4 h-4" />
+                          Kosongkan Meja
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {/* View QR Code Button */}
+                  <Link
+                    href={`/admin/tables/${table.id}/qr`}
+                    onClick={(e) => e.stopPropagation()}
+                    data-tour="tables-qr-download"
+                    className={`flex items-center justify-center gap-2 w-full h-10 rounded-lg text-sm font-medium transition-all ${
+                      isSelected
+                        ? 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm'
+                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+                    }`}
+                  >
+                    <QrCode className="w-4 h-4" />
+                    View QR Code
+                  </Link>
+                </div>
               </div>
             )
           })}

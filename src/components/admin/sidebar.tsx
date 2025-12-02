@@ -24,6 +24,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   MoreVertical,
+  Receipt,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -66,6 +67,7 @@ const menuGroups: MenuGroup[] = [
   {
     label: 'Operasional',
     items: [
+      { name: 'POS Kasir', href: '/admin/pos', icon: Receipt, tourId: 'sidebar-pos' },
       { name: 'Pesanan', href: '/admin/orders', icon: ShoppingBag, badge: true, tourId: 'sidebar-orders' },
     ]
   },

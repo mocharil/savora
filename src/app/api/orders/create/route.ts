@@ -123,6 +123,21 @@ export async function POST(request: NextRequest) {
       // Don't rollback, payment can be created later
     }
 
+    // Update table status to occupied if tableId is provided
+    if (tableId) {
+      const { error: tableError } = await supabase
+        .from('tables')
+        .update({ status: 'occupied' })
+        .eq('id', tableId)
+
+      if (tableError) {
+        console.error('Table status update error:', tableError)
+        // Non-critical, don't rollback
+      } else {
+        console.log('Table status updated to occupied')
+      }
+    }
+
     console.log('Order completed successfully:', order.id)
 
     return NextResponse.json({
