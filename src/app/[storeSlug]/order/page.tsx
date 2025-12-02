@@ -2,6 +2,8 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { MenuList } from '@/components/customer/menu-list'
 import { CartFloatingButton } from '@/components/customer/cart-floating-button'
+import { StoreHeader } from '@/components/customer/store-header'
+import { AIRecommendation } from '@/components/customer/AIRecommendation'
 import { MapPin, AlertCircle } from 'lucide-react'
 
 export default async function OrderPage({
@@ -17,7 +19,7 @@ export default async function OrderPage({
 
   const { data: store } = await supabase
     .from('stores')
-    .select('id, name, slug')
+    .select('id, name, slug, description, address, phone, logo_url, banner_url, operational_hours')
     .eq('slug', storeSlug)
     .single()
 
@@ -59,7 +61,7 @@ export default async function OrderPage({
     `)
     .eq('store_id', store.id)
     .eq('is_active', true)
-    .order('sort_order')
+    .order('name')
 
   // Filter to only show categories with available items
   const categoriesWithItems = categories?.map((cat: any) => ({
@@ -69,6 +71,19 @@ export default async function OrderPage({
 
   return (
     <div className="pb-28">
+      {/* Store Header with Banner, Logo, and Info */}
+      <StoreHeader
+        store={{
+          name: store.name,
+          description: store.description,
+          address: store.address,
+          phone: store.phone,
+          logo_url: store.logo_url,
+          banner_url: store.banner_url,
+          operational_hours: store.operational_hours as Record<string, { open: string; close: string; isOpen: boolean }>,
+        }}
+      />
+
       {/* Table Indicator */}
       {tableData && (
         <div className="px-4 pt-4">
@@ -99,6 +114,12 @@ export default async function OrderPage({
         storeId={store.id}
         storeSlug={storeSlug}
         tableId={tableData?.id}
+      />
+
+      {/* AI Recommendation Assistant */}
+      <AIRecommendation
+        storeId={store.id}
+        storeSlug={storeSlug}
       />
 
       {/* Floating Cart Button */}

@@ -180,18 +180,20 @@ export default async function OrderConfirmationPage({
                     </div>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-gray-900 line-clamp-1">{item.menu_item?.name}</p>
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <p className="font-medium text-sm text-gray-900 truncate pr-2">{item.menu_item?.name}</p>
                   {item.notes && (
-                    <p className="text-xs text-gray-400 italic mt-0.5 line-clamp-1">{item.notes}</p>
+                    <p className="text-xs text-gray-400 italic mt-0.5 truncate pr-2">{item.notes}</p>
                   )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    {formatCurrency(item.unit_price)} x {item.quantity}
-                  </p>
+                  <div className="flex items-center justify-between mt-1 gap-2">
+                    <p className="text-xs text-gray-500 truncate">
+                      {formatCurrency(item.unit_price)} x {item.quantity}
+                    </p>
+                    <p className="font-semibold text-sm text-gray-900 whitespace-nowrap flex-shrink-0">
+                      {formatCurrency(item.unit_price * item.quantity)}
+                    </p>
+                  </div>
                 </div>
-                <p className="font-semibold text-sm text-gray-900">
-                  {formatCurrency(item.unit_price * item.quantity)}
-                </p>
               </div>
             ))}
           </div>

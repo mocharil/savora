@@ -23,6 +23,7 @@ import { formatCurrency } from '@/lib/utils'
 import { getUserFromToken } from '@/lib/tenant-context'
 import { OrderStatusUpdate } from '@/components/admin/order-status-update'
 import { PaymentStatusUpdate } from '@/components/admin/payment-status-update'
+import { PrintInvoiceButton } from '@/components/admin/print-invoice-button'
 
 type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled'
 type PaymentStatus = 'pending' | 'paid' | 'failed'
@@ -59,8 +60,8 @@ const statusConfig: Record<OrderStatus, {
   },
   completed: {
     label: 'Selesai',
-    bgColor: 'bg-[#6B7280]/10',
-    textColor: 'text-[#6B7280]',
+    bgColor: 'bg-[#3B82F6]/10',
+    textColor: 'text-[#3B82F6]',
     icon: <CheckCheck className="w-4 h-4" />
   },
   cancelled: {
@@ -158,13 +159,7 @@ export default async function OrderDetailPage({
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 h-10 px-4 bg-white border border-[#E5E7EB] rounded-lg text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors">
-            <Printer className="w-4 h-4" />
-            Print
-          </button>
-          <button className="flex items-center justify-center w-10 h-10 bg-white border border-[#E5E7EB] rounded-lg text-[#6B7280] hover:bg-[#F9FAFB] transition-colors">
-            <MoreVertical className="w-5 h-5" />
-          </button>
+          <PrintInvoiceButton order={order} />
         </div>
       </div>
 

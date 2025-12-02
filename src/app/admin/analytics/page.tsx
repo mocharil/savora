@@ -1,22 +1,24 @@
 // @ts-nocheck
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { formatCurrency } from '@/lib/utils'
 import { getUserFromToken } from '@/lib/tenant-context'
 import { redirect } from 'next/navigation'
 import {
   TrendingUp,
   TrendingDown,
-  DollarSign,
-  ShoppingBag,
-  Users,
-  UtensilsCrossed,
-  Calendar,
   ArrowUpRight,
   ArrowDownRight,
   Clock,
   Star,
   BarChart3,
-  PieChart
+  PieChart,
+  Flame,
+  Activity,
+  Target,
+  CreditCard,
+  CalendarDays,
+  Utensils,
+  CircleDollarSign
 } from 'lucide-react'
 import { AnalyticsPageClient } from './AnalyticsPageClient'
 
@@ -50,7 +52,7 @@ export default async function AnalyticsPage({
 }: {
   searchParams: Promise<{ period?: string }>
 }) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { period = 'week' } = await searchParams
 
   // Get user from token
@@ -60,7 +62,6 @@ export default async function AnalyticsPage({
   }
 
   const storeId = user.storeId
-
   const { start, end } = getDateRange(period)
 
   // Get current period stats
@@ -89,8 +90,8 @@ export default async function AnalyticsPage({
   const completedOrders = currentOrders?.filter(o => o.status === 'completed') || []
   const prevCompletedOrders = previousOrders?.filter(o => o.status === 'completed') || []
 
-  const totalRevenue = completedOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
-  const prevRevenue = prevCompletedOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
+  const totalRevenue = completedOrders.reduce((sum, o) => sum + (o.total || 0), 0)
+  const prevRevenue = prevCompletedOrders.reduce((sum, o) => sum + (o.total || 0), 0)
   const revenueChange = prevRevenue > 0 ? ((totalRevenue - prevRevenue) / prevRevenue) * 100 : 0
 
   const totalOrders = currentOrders?.length || 0
@@ -98,23 +99,21 @@ export default async function AnalyticsPage({
   const ordersChange = prevTotalOrders > 0 ? ((totalOrders - prevTotalOrders) / prevTotalOrders) * 100 : 0
 
   const avgOrderValue = completedOrders.length > 0 ? totalRevenue / completedOrders.length : 0
-  const prevAvgValue = prevCompletedOrders.length > 0
-    ? prevRevenue / prevCompletedOrders.length
-    : 0
+  const prevAvgValue = prevCompletedOrders.length > 0 ? prevRevenue / prevCompletedOrders.length : 0
   const avgChange = prevAvgValue > 0 ? ((avgOrderValue - prevAvgValue) / prevAvgValue) * 100 : 0
 
-  // Get top selling items
-  const { data: orderItems } = await supabase
-    .from('order_items')
-    .select(`
-      quantity,
-      price,
-      menu_item:menu_items(id, name, price)
-    `)
-    .in('order_id', completedOrders.map(o => o.id))
+  // Get top selling items - only from completed orders for accurate sales data
+  const completedOrderIds = completedOrders?.map(o => o.id) || []
+  const { data: orderItems } = completedOrderIds.length > 0
+    ? await supabase
+        .from('order_items')
+        .select(`quantity, unit_price, subtotal, menu_item:menu_items(id, name)`)
+        .in('order_id', completedOrderIds)
+    : { data: [] }
 
   // Aggregate top items
   const itemSales: Record<string, { name: string; quantity: number; revenue: number }> = {}
+  let totalItemsSold = 0
   orderItems?.forEach(item => {
     const menuItem = item.menu_item as any
     if (menuItem) {
@@ -122,7 +121,8 @@ export default async function AnalyticsPage({
         itemSales[menuItem.id] = { name: menuItem.name, quantity: 0, revenue: 0 }
       }
       itemSales[menuItem.id].quantity += item.quantity
-      itemSales[menuItem.id].revenue += item.price * item.quantity
+      itemSales[menuItem.id].revenue += item.subtotal || (item.unit_price * item.quantity)
+      totalItemsSold += item.quantity
     }
   })
 
@@ -133,12 +133,41 @@ export default async function AnalyticsPage({
   // Get orders by status
   const ordersByStatus = {
     pending: currentOrders?.filter(o => o.status === 'pending').length || 0,
-    confirmed: currentOrders?.filter(o => o.status === 'confirmed').length || 0,
     preparing: currentOrders?.filter(o => o.status === 'preparing').length || 0,
     ready: currentOrders?.filter(o => o.status === 'ready').length || 0,
     completed: currentOrders?.filter(o => o.status === 'completed').length || 0,
     cancelled: currentOrders?.filter(o => o.status === 'cancelled').length || 0,
   }
+
+  // Payment analytics
+  const paidOrders = currentOrders?.filter(o => o.payment_status === 'paid') || []
+  const unpaidOrders = currentOrders?.filter(o => o.payment_status === 'unpaid') || []
+  const paidRevenue = paidOrders.reduce((sum, o) => sum + (o.total || 0), 0)
+  const unpaidRevenue = unpaidOrders.reduce((sum, o) => sum + (o.total || 0), 0)
+
+  // Daily breakdown for the period
+  const dailyData: Record<string, { orders: number; revenue: number; date: Date }> = {}
+  currentOrders?.forEach(order => {
+    const orderDate = new Date(order.created_at)
+    const dateKey = orderDate.toISOString().split('T')[0]
+    if (!dailyData[dateKey]) {
+      dailyData[dateKey] = { orders: 0, revenue: 0, date: orderDate }
+    }
+    dailyData[dateKey].orders++
+    if (order.payment_status === 'paid') {
+      dailyData[dateKey].revenue += order.total || 0
+    }
+  })
+
+  const dailyBreakdown = Object.entries(dailyData)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, data]) => ({
+      date: new Date(data.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+      orders: data.orders,
+      revenue: data.revenue
+    }))
+  const maxDailyOrders = Math.max(...dailyBreakdown.map(d => d.orders), 1)
+  const maxDailyRevenue = Math.max(...dailyBreakdown.map(d => d.revenue), 1)
 
   // Get hourly distribution
   const hourlyOrders: Record<number, number> = {}
@@ -148,6 +177,8 @@ export default async function AnalyticsPage({
     hourlyOrders[hour]++
   })
   const peakHour = Object.entries(hourlyOrders).reduce((a, b) => a[1] > b[1] ? a : b, ['0', 0])
+  const totalHourlyOrders = Object.values(hourlyOrders).reduce((a, b) => a + b, 0)
+  const maxHourlyCount = Math.max(...Object.values(hourlyOrders), 1)
 
   // Period tabs
   const periods = [
@@ -157,140 +188,193 @@ export default async function AnalyticsPage({
     { value: 'month', label: '30 Hari' },
   ]
 
+  const periodLabel = periods.find(p => p.value === period)?.label || '7 Hari'
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <AnalyticsPageClient />
 
-      {/* Period Tabs */}
-      <div data-tour="analytics-date-range" className="flex gap-2 p-1 bg-[#F3F4F6] rounded-lg w-fit">
-        {periods.map((p) => (
-          <a
-            key={p.value}
-            href={`/admin/analytics?period=${p.value}`}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              period === p.value
-                ? 'bg-white text-[#111827] shadow-sm'
-                : 'text-[#6B7280] hover:text-[#111827]'
-            }`}
-          >
-            {p.label}
-          </a>
-        ))}
-      </div>
-
-      {/* Stats Cards */}
-      <div data-tour="analytics-charts" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Revenue */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-[#10B981]/10 flex items-center justify-center">
-              <DollarSign className="w-5 h-5 text-[#10B981]" />
-            </div>
-            <div className={`flex items-center gap-1 text-sm font-medium ${
-              revenueChange >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'
-            }`}>
-              {revenueChange >= 0 ? (
-                <ArrowUpRight className="w-4 h-4" />
-              ) : (
-                <ArrowDownRight className="w-4 h-4" />
-              )}
-              {Math.abs(revenueChange).toFixed(1)}%
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-[#111827]">{formatCurrency(totalRevenue)}</p>
-          <p className="text-sm text-[#6B7280]">Total Pendapatan</p>
+      {/* Hero Section - Main Revenue Focus */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 via-orange-600 to-amber-600 p-6 text-white shadow-xl">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white" />
+          <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-white" />
         </div>
 
-        {/* Orders */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
-              <ShoppingBag className="w-5 h-5 text-orange-500" />
+        <div className="relative">
+          {/* Period Tabs */}
+          <div data-tour="analytics-date-range" className="flex flex-wrap gap-2 mb-6">
+            {periods.map((p) => (
+              <a
+                key={p.value}
+                href={`/admin/analytics?period=${p.value}`}
+                className={`px-4 py-2 text-sm font-medium rounded-full transition-all ${
+                  period === p.value
+                    ? 'bg-white text-orange-600 shadow-lg'
+                    : 'bg-white/20 text-white hover:bg-white/30'
+                }`}
+              >
+                {p.label}
+              </a>
+            ))}
+          </div>
+
+          {/* Main Revenue Display */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-orange-100 mb-1">
+                <Activity className="w-4 h-4" />
+                <span className="text-sm font-medium">Total Pendapatan ({periodLabel})</span>
+              </div>
+              <div className="flex items-baseline gap-3">
+                <span className="text-4xl md:text-5xl font-bold tracking-tight">
+                  {formatCurrency(totalRevenue)}
+                </span>
+                {revenueChange !== 0 && (
+                  <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm font-medium ${
+                    revenueChange >= 0 ? 'bg-green-500/20 text-green-100' : 'bg-red-500/20 text-red-100'
+                  }`}>
+                    {revenueChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    {Math.abs(revenueChange).toFixed(1)}%
+                  </div>
+                )}
+              </div>
+              <p className="text-orange-100 text-sm mt-1">
+                vs periode sebelumnya: {formatCurrency(prevRevenue)}
+              </p>
             </div>
-            <div className={`flex items-center gap-1 text-sm font-medium ${
-              ordersChange >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'
+          </div>
+        </div>
+      </div>
+
+      {/* KPI Cards - Unique Metrics Only */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Total Orders */}
+        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
+              <BarChart3 className="w-5 h-5 text-white" />
+            </div>
+            <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
+              ordersChange >= 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
             }`}>
-              {ordersChange >= 0 ? (
-                <ArrowUpRight className="w-4 h-4" />
-              ) : (
-                <ArrowDownRight className="w-4 h-4" />
-              )}
+              {ordersChange >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
               {Math.abs(ordersChange).toFixed(1)}%
             </div>
           </div>
-          <p className="text-2xl font-bold text-[#111827]">{totalOrders}</p>
-          <p className="text-sm text-[#6B7280]">Total Pesanan</p>
+          <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
+          <p className="text-sm text-gray-500">Total Pesanan</p>
         </div>
 
         {/* Avg Order Value */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
+        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-[#8B5CF6]/10 flex items-center justify-center">
-              <BarChart3 className="w-5 h-5 text-[#8B5CF6]" />
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
+              <Target className="w-5 h-5 text-white" />
             </div>
-            <div className={`flex items-center gap-1 text-sm font-medium ${
-              avgChange >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'
+            <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
+              avgChange >= 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
             }`}>
-              {avgChange >= 0 ? (
-                <ArrowUpRight className="w-4 h-4" />
-              ) : (
-                <ArrowDownRight className="w-4 h-4" />
-              )}
+              {avgChange >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
               {Math.abs(avgChange).toFixed(1)}%
             </div>
           </div>
-          <p className="text-2xl font-bold text-[#111827]">{formatCurrency(avgOrderValue)}</p>
-          <p className="text-sm text-[#6B7280]">Rata-rata Pesanan</p>
+          <p className="text-2xl font-bold text-gray-900">{formatCurrency(avgOrderValue)}</p>
+          <p className="text-sm text-gray-500">Rata-rata per Pesanan</p>
+        </div>
+
+        {/* Items Sold */}
+        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+              <Utensils className="w-5 h-5 text-white" />
+            </div>
+          </div>
+          <p className="text-2xl font-bold text-gray-900">{totalItemsSold}</p>
+          <p className="text-sm text-gray-500">Item Terjual</p>
         </div>
 
         {/* Peak Hour */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
+        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-[#F59E0B]/10 flex items-center justify-center">
-              <Clock className="w-5 h-5 text-[#F59E0B]" />
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+              <Clock className="w-5 h-5 text-white" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-[#111827]">
-            {peakHour[0].toString().padStart(2, '0')}:00
-          </p>
-          <p className="text-sm text-[#6B7280]">Jam Tersibuk ({peakHour[1]} pesanan)</p>
+          <p className="text-2xl font-bold text-gray-900">{peakHour[0].toString().padStart(2, '0')}:00</p>
+          <p className="text-sm text-gray-500">Jam Tersibuk ({peakHour[1]} pesanan)</p>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Orders by Status */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
-          <div className="px-6 py-4 border-b border-[#E5E7EB]">
-            <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-              <PieChart className="w-4 h-4 text-orange-500" />
-              Status Pesanan
+      {/* Payment Analytics */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Paid */}
+        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                <CreditCard className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Sudah Dibayar</p>
+                <p className="text-xl font-bold text-green-600">{formatCurrency(paidRevenue)}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold text-gray-900">{paidOrders.length}</p>
+              <p className="text-xs text-gray-400">transaksi</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Unpaid */}
+        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Belum Dibayar</p>
+                <p className="text-xl font-bold text-amber-600">{formatCurrency(unpaidRevenue)}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold text-gray-900">{unpaidOrders.length}</p>
+              <p className="text-xs text-gray-400">transaksi</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Daily Trend Chart - Combined */}
+      {dailyBreakdown.length > 1 && (
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                <CalendarDays className="w-4 h-4 text-white" />
+              </div>
+              Tren Harian
             </h2>
           </div>
           <div className="p-6">
-            <div className="space-y-4">
-              {[
-                { status: 'completed', label: 'Selesai', color: '#10B981', count: ordersByStatus.completed },
-                { status: 'preparing', label: 'Diproses', color: '#8B5CF6', count: ordersByStatus.preparing },
-                { status: 'ready', label: 'Siap', color: 'orange-500', count: ordersByStatus.ready },
-                { status: 'pending', label: 'Menunggu', color: '#F59E0B', count: ordersByStatus.pending },
-                { status: 'cancelled', label: 'Dibatalkan', color: '#EF4444', count: ordersByStatus.cancelled },
-              ].map((item) => {
-                const percentage = totalOrders > 0 ? (item.count / totalOrders) * 100 : 0
+            <div className="space-y-3">
+              {dailyBreakdown.map((data, index) => {
+                const orderWidth = (data.orders / maxDailyOrders) * 100
                 return (
-                  <div key={item.status} className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-[#374151]">{item.label}</span>
-                      <span className="font-medium text-[#111827]">{item.count}</span>
-                    </div>
-                    <div className="h-2 bg-[#F3F4F6] rounded-full overflow-hidden">
+                  <div key={index} className="flex items-center gap-3">
+                    <span className="text-xs text-gray-500 w-14 flex-shrink-0">{data.date}</span>
+                    <div className="flex-1 h-5 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full rounded-full transition-all"
-                        style={{
-                          width: `${percentage}%`,
-                          backgroundColor: item.color
-                        }}
+                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+                        style={{ width: `${Math.max(orderWidth, 8)}%` }}
                       />
+                    </div>
+                    <div className="flex items-center gap-4 text-xs">
+                      <span className="text-gray-600 font-medium w-8">{data.orders} <span className="text-gray-400">psn</span></span>
+                      <span className="text-green-600 font-medium w-20 text-right">{formatCurrency(data.revenue)}</span>
                     </div>
                   </div>
                 )
@@ -298,89 +382,206 @@ export default async function AnalyticsPage({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Hourly Distribution */}
+      <div data-tour="analytics-charts" className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+          <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+              <Clock className="w-4 h-4 text-white" />
+            </div>
+            Distribusi Pesanan per Jam
+          </h2>
+        </div>
+        <div className="p-6">
+          {totalHourlyOrders === 0 ? (
+            <div className="text-center py-8">
+              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                <BarChart3 className="w-6 h-6 text-gray-300" />
+              </div>
+              <p className="text-gray-500 text-sm">Belum ada data pesanan</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-end gap-1 h-32">
+                {Object.entries(hourlyOrders).map(([hour, count]) => {
+                  const heightPercent = (count / maxHourlyCount) * 100
+                  const isActive = Number(hour) >= 9 && Number(hour) <= 21
+                  const hasOrders = count > 0
+                  const isPeak = Number(hour) === Number(peakHour[0]) && count > 0
+
+                  return (
+                    <div key={hour} className="flex-1 flex flex-col items-center justify-end h-full group">
+                      <div className="w-full flex flex-col items-center justify-end flex-1">
+                        {hasOrders && (
+                          <span className="text-[10px] font-medium text-gray-500 mb-1">{count}</span>
+                        )}
+                        <div
+                          className={`w-full rounded-t transition-all ${
+                            isPeak
+                              ? 'bg-gradient-to-t from-orange-600 to-amber-400'
+                              : hasOrders
+                              ? 'bg-gradient-to-t from-blue-500 to-cyan-400'
+                              : isActive
+                              ? 'bg-blue-100'
+                              : 'bg-gray-100'
+                          }`}
+                          style={{
+                            height: hasOrders ? `${Math.max(heightPercent, 15)}%` : '4px',
+                            minHeight: hasOrders ? '16px' : '4px'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              {/* X-axis labels - fixed alignment */}
+              <div className="flex gap-1">
+                {Object.keys(hourlyOrders).map((hour) => (
+                  <div key={`label-${hour}`} className="flex-1 text-center">
+                    {Number(hour) % 4 === 0 && (
+                      <span className="text-[10px] text-gray-400">{hour.toString().padStart(2, '0')}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Orders by Status - Pie Chart */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                <PieChart className="w-4 h-4 text-white" />
+              </div>
+              Status Pesanan
+            </h2>
+          </div>
+          <div className="p-6">
+            <div className="flex items-center justify-center mb-6">
+              <div className="relative w-28 h-28">
+                <svg className="w-28 h-28 transform -rotate-90">
+                  {(() => {
+                    const statuses = [
+                      { key: 'completed', color: '#10B981', count: ordersByStatus.completed },
+                      { key: 'preparing', color: '#8B5CF6', count: ordersByStatus.preparing },
+                      { key: 'ready', color: '#F97316', count: ordersByStatus.ready },
+                      { key: 'pending', color: '#F59E0B', count: ordersByStatus.pending },
+                      { key: 'cancelled', color: '#EF4444', count: ordersByStatus.cancelled },
+                    ]
+                    let offset = 0
+                    const circumference = 2 * Math.PI * 50
+
+                    return statuses.map((status) => {
+                      const percentage = totalOrders > 0 ? (status.count / totalOrders) * 100 : 0
+                      const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`
+                      const strokeDashoffset = -offset
+                      offset += (percentage / 100) * circumference
+
+                      if (status.count === 0) return null
+
+                      return (
+                        <circle
+                          key={status.key}
+                          cx="56" cy="56" r="50"
+                          stroke={status.color}
+                          strokeWidth="12"
+                          fill="none"
+                          strokeDasharray={strokeDasharray}
+                          strokeDashoffset={strokeDashoffset}
+                        />
+                      )
+                    })
+                  })()}
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-xl font-bold text-gray-900">{totalOrders}</span>
+                  <span className="text-[10px] text-gray-500">Total</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {[
+                { label: 'Selesai', color: 'bg-green-500', count: ordersByStatus.completed },
+                { label: 'Diproses', color: 'bg-purple-500', count: ordersByStatus.preparing },
+                { label: 'Siap', color: 'bg-orange-500', count: ordersByStatus.ready },
+                { label: 'Pending', color: 'bg-amber-500', count: ordersByStatus.pending },
+                { label: 'Batal', color: 'bg-red-500', count: ordersByStatus.cancelled },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-2 text-sm">
+                  <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
+                  <span className="text-gray-600 flex-1">{item.label}</span>
+                  <span className="font-semibold text-gray-900">{item.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
         {/* Top Selling Items */}
-        <div data-tour="analytics-top-items" className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
-          <div className="px-6 py-4 border-b border-[#E5E7EB]">
-            <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-              <Star className="w-4 h-4 text-orange-500" />
+        <div data-tour="analytics-top-items" className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
+                <Star className="w-4 h-4 text-white" />
+              </div>
               Menu Terlaris
             </h2>
           </div>
           <div className="p-6">
             {topItems.length > 0 ? (
               <div className="space-y-4">
-                {topItems.map((item, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
-                      index === 0
-                        ? 'bg-[#F59E0B]/10 text-[#F59E0B]'
-                        : index === 1
-                        ? 'bg-[#9CA3AF]/10 text-[#6B7280]'
-                        : index === 2
-                        ? 'bg-[#CD7F32]/10 text-[#CD7F32]'
-                        : 'bg-[#F3F4F6] text-[#9CA3AF]'
-                    }`}>
-                      {index + 1}
+                {topItems.map((item, index) => {
+                  const maxQty = topItems[0]?.quantity || 1
+                  const barWidth = (item.quantity / maxQty) * 100
+
+                  return (
+                    <div key={index} className="space-y-1.5">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
+                          index === 0 ? 'bg-gradient-to-br from-amber-400 to-yellow-500 text-white' :
+                          index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-white' :
+                          index === 2 ? 'bg-gradient-to-br from-orange-400 to-amber-600 text-white' :
+                          'bg-gray-100 text-gray-500'
+                        }`}>
+                          {index < 3 ? <Flame className="w-3.5 h-3.5" /> : index + 1}
+                        </div>
+                        <span className="flex-1 text-sm font-medium text-gray-900 truncate">{item.name}</span>
+                        <div className="text-right text-xs">
+                          <span className="font-bold text-gray-900">{item.quantity}</span>
+                          <span className="text-gray-400 ml-1">terjual</span>
+                        </div>
+                      </div>
+                      <div className="h-1 bg-gray-100 rounded-full overflow-hidden ml-10">
+                        <div
+                          className={`h-full rounded-full ${
+                            index === 0 ? 'bg-gradient-to-r from-amber-400 to-yellow-500' :
+                            index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400' :
+                            index === 2 ? 'bg-gradient-to-r from-orange-400 to-amber-600' :
+                            'bg-gray-300'
+                          }`}
+                          style={{ width: `${barWidth}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-[#111827] truncate">{item.name}</p>
-                      <p className="text-sm text-[#6B7280]">{item.quantity} terjual</p>
-                    </div>
-                    <p className="font-semibold text-[#111827]">{formatCurrency(item.revenue)}</p>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <div className="text-center py-8">
-                <UtensilsCrossed className="w-12 h-12 text-[#D1D5DB] mx-auto mb-3" />
-                <p className="text-[#6B7280]">Belum ada data penjualan</p>
+                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                  <Star className="w-6 h-6 text-gray-300" />
+                </div>
+                <p className="text-gray-500 text-sm">Belum ada data penjualan</p>
               </div>
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* Hourly Distribution */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
-        <div className="px-6 py-4 border-b border-[#E5E7EB]">
-          <h2 className="font-semibold text-[#111827] flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-orange-500" />
-            Distribusi Pesanan per Jam
-          </h2>
-        </div>
-        <div className="p-6">
-          <div className="flex items-end gap-1 h-40">
-            {Object.entries(hourlyOrders).map(([hour, count]) => {
-              const maxCount = Math.max(...Object.values(hourlyOrders))
-              const height = maxCount > 0 ? (count / maxCount) * 100 : 0
-              const isActive = Number(hour) >= 10 && Number(hour) <= 21
-
-              return (
-                <div key={hour} className="flex-1 flex flex-col items-center gap-1">
-                  <div
-                    className={`w-full rounded-t transition-all ${
-                      isActive ? 'bg-orange-500' : 'bg-[#E5E7EB]'
-                    }`}
-                    style={{ height: `${Math.max(height, 4)}%` }}
-                    title={`${hour}:00 - ${count} pesanan`}
-                  />
-                  {Number(hour) % 3 === 0 && (
-                    <span className="text-[10px] text-[#9CA3AF]">{hour}</span>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-          <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-[#E5E7EB]">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-orange-500" />
-              <span className="text-sm text-[#6B7280]">Jam Operasional</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-[#E5E7EB]" />
-              <span className="text-sm text-[#6B7280]">Di Luar Jam</span>
-            </div>
           </div>
         </div>
       </div>

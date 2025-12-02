@@ -11,76 +11,66 @@ import {
   Trash2,
   Loader2,
   User,
-  Shield,
   ShieldCheck,
   UserCog,
   X,
   Check,
   Eye,
   EyeOff,
-  Building2,
   RefreshCw,
+  ChefHat,
+  Utensils,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageTourButton } from '@/components/admin/tour'
 import { ShimmerButton } from '@/components/ui/shimmer-button'
 
-interface Outlet {
-  id: string
-  name: string
-  slug: string
-}
-
-interface UserOutlet {
-  outlet_id: string
-  outlet_name: string
-  role: 'outlet_admin' | 'staff'
-  permissions: {
-    canManageMenu: boolean
-    canManageOrders: boolean
-    canManageTables: boolean
-    canViewAnalytics: boolean
-  }
-  is_primary: boolean
-}
-
 interface UserData {
   id: string
   email: string
   full_name: string
-  role: 'tenant_admin' | 'outlet_admin' | 'staff'
+  role: 'tenant_admin' | 'kitchen_staff' | 'waiter' | 'cashier'
   is_active: boolean
   created_at: string
-  outlets: UserOutlet[]
 }
 
 interface Props {
-  outlets: Outlet[]
   currentUserId: string
 }
 
-const ROLE_LABELS = {
-  tenant_admin: 'Tenant Admin',
-  outlet_admin: 'Outlet Admin',
-  staff: 'Staff',
+const ROLE_LABELS: Record<string, string> = {
+  tenant_admin: 'Admin',
+  kitchen_staff: 'Staff Dapur',
+  waiter: 'Pelayan',
+  cashier: 'Kasir',
 }
 
-const ROLE_ICONS = {
+const ROLE_DESCRIPTIONS: Record<string, string> = {
+  tenant_admin: 'Akses penuh ke semua fitur',
+  kitchen_staff: 'Melihat dan mengelola pesanan dapur',
+  waiter: 'Melihat pesanan, meja, dan menu',
+  cashier: 'Mengelola pembayaran dan pesanan',
+}
+
+const ROLE_ICONS: Record<string, any> = {
   tenant_admin: ShieldCheck,
-  outlet_admin: Shield,
-  staff: User,
+  kitchen_staff: ChefHat,
+  waiter: Utensils,
+  cashier: User,
 }
 
-const ROLE_COLORS = {
+const ROLE_COLORS: Record<string, string> = {
   tenant_admin: 'bg-purple-100 text-purple-700',
-  outlet_admin: 'bg-orange-100 text-orange-700',
-  staff: 'bg-gray-100 text-gray-700',
+  kitchen_staff: 'bg-orange-100 text-orange-700',
+  waiter: 'bg-blue-100 text-blue-700',
+  cashier: 'bg-green-100 text-green-700',
 }
 
-export function UserManagement({ outlets, currentUserId }: Props) {
+export function UserManagement({ currentUserId }: Props) {
   const [users, setUsers] = useState<UserData[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [roleFilter, setRoleFilter] = useState<string>('all')
   const [showModal, setShowModal] = useState(false)
   const [editingUser, setEditingUser] = useState<UserData | null>(null)
   const [saving, setSaving] = useState(false)
@@ -91,9 +81,8 @@ export function UserManagement({ outlets, currentUserId }: Props) {
     email: '',
     password: '',
     name: '',
-    role: 'staff' as 'tenant_admin' | 'outlet_admin' | 'staff',
+    role: 'waiter' as 'tenant_admin' | 'kitchen_staff' | 'waiter' | 'cashier',
     is_active: true,
-    outlets: [] as { outlet_id: string; role: 'outlet_admin' | 'staff'; is_primary: boolean }[],
   })
 
   useEffect(() => {
@@ -120,9 +109,8 @@ export function UserManagement({ outlets, currentUserId }: Props) {
       email: '',
       password: '',
       name: '',
-      role: 'staff',
+      role: 'waiter',
       is_active: true,
-      outlets: [],
     })
     setEditingUser(null)
     setShowPassword(false)
@@ -141,11 +129,6 @@ export function UserManagement({ outlets, currentUserId }: Props) {
       name: user.full_name,
       role: user.role,
       is_active: user.is_active,
-      outlets: user.outlets.map(o => ({
-        outlet_id: o.outlet_id,
-        role: o.role,
-        is_primary: o.is_primary,
-      })),
     })
     setShowModal(true)
   }
@@ -172,11 +155,6 @@ export function UserManagement({ outlets, currentUserId }: Props) {
         payload.password = formData.password
       } else if (formData.password) {
         payload.password = formData.password
-      }
-
-      // Only include outlets for non-tenant_admin roles
-      if (formData.role !== 'tenant_admin') {
-        payload.outlets = formData.outlets
       }
 
       const response = await fetch(url, {
@@ -231,32 +209,23 @@ export function UserManagement({ outlets, currentUserId }: Props) {
     }
   }
 
-  const toggleOutlet = (outletId: string) => {
-    const exists = formData.outlets.find(o => o.outlet_id === outletId)
-    if (exists) {
-      setFormData(prev => ({
-        ...prev,
-        outlets: prev.outlets.filter(o => o.outlet_id !== outletId),
-      }))
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        outlets: [
-          ...prev.outlets,
-          {
-            outlet_id: outletId,
-            role: formData.role === 'outlet_admin' ? 'outlet_admin' : 'staff',
-            is_primary: prev.outlets.length === 0,
-          },
-        ],
-      }))
-    }
-  }
+  const filteredUsers = users.filter(user => {
+    const matchesSearch =
+      user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase())
 
-  const filteredUsers = users.filter(user =>
-    user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+    const matchesRole = roleFilter === 'all' || user.role === roleFilter
+
+    return matchesSearch && matchesRole
+  })
+
+  const roleOptions = [
+    { value: 'all', label: 'Semua Role' },
+    { value: 'tenant_admin', label: 'Admin' },
+    { value: 'kitchen_staff', label: 'Staff Dapur' },
+    { value: 'waiter', label: 'Pelayan' },
+    { value: 'cashier', label: 'Kasir' },
+  ]
 
   if (loading) {
     return (
@@ -271,8 +240,8 @@ export function UserManagement({ outlets, currentUserId }: Props) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-500 mt-1">Kelola user dan akses outlet</p>
+          <h1 className="text-2xl font-bold text-gray-900">Manajemen User</h1>
+          <p className="text-gray-500 mt-1">Kelola user dan akses staff restoran</p>
         </div>
         <div className="flex items-center gap-3">
           <PageTourButton />
@@ -293,35 +262,60 @@ export function UserManagement({ outlets, currentUserId }: Props) {
       </div>
 
       {/* Search & Filter */}
-      <div className="flex gap-4">
-        <div className="flex-1 relative" data-tour="users-search">
+      <div className="flex flex-wrap gap-4 items-center bg-gray-50 rounded-xl p-4 border">
+        <div className="flex-1 relative min-w-[200px]" data-tour="users-search">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari nama atau email..."
-            className="pl-9"
+            className="pl-9 bg-white"
           />
         </div>
-        <Button variant="outline" onClick={fetchUsers}>
+
+        {/* Role Filter Tabs */}
+        <div className="flex items-center gap-1 bg-white rounded-lg border p-1" data-tour="users-filter-role">
+          {roleOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setRoleFilter(option.value)}
+              className={`h-8 px-3 rounded-md text-sm font-medium transition-all ${
+                roleFilter === option.value
+                  ? 'bg-orange-500 text-white shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        <Button variant="outline" onClick={fetchUsers} className="bg-white">
           <RefreshCw className="w-4 h-4" />
         </Button>
+
+        {/* Results count */}
+        <div className="text-sm text-gray-500">
+          {filteredUsers.length} dari {users.length} user
+        </div>
       </div>
 
       {/* Role Legend */}
-      <div className="flex gap-4 text-sm" data-tour="users-filter-role">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-purple-600" />
-          <span className="text-gray-600">Tenant Admin - Akses semua</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Shield className="w-4 h-4 text-orange-600" />
-          <span className="text-gray-600">Outlet Admin - Kelola outlet tertentu</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <User className="w-4 h-4 text-gray-600" />
-          <span className="text-gray-600">Staff - Akses terbatas</span>
-        </div>
+      <div className="flex flex-wrap gap-4 text-sm">
+        {Object.entries(ROLE_LABELS).map(([role, label]) => {
+          const Icon = ROLE_ICONS[role]
+          return (
+            <div key={role} className="flex items-center gap-2">
+              <Icon className={`w-4 h-4 ${
+                role === 'tenant_admin' ? 'text-purple-600' :
+                role === 'kitchen_staff' ? 'text-orange-600' :
+                role === 'waiter' ? 'text-blue-600' :
+                'text-green-600'
+              }`} />
+              <span className="text-gray-600">{label} - {ROLE_DESCRIPTIONS[role]}</span>
+            </div>
+          )
+        })}
       </div>
 
       {/* Users Table */}
@@ -331,7 +325,6 @@ export function UserManagement({ outlets, currentUserId }: Props) {
             <tr>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">User</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">Role</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">Outlets</th>
               <th className="text-center px-4 py-3 text-sm font-medium text-gray-600">Status</th>
               <th className="text-right px-4 py-3 text-sm font-medium text-gray-600">Aksi</th>
             </tr>
@@ -339,13 +332,13 @@ export function UserManagement({ outlets, currentUserId }: Props) {
           <tbody className="divide-y">
             {filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
                   {users.length === 0 ? 'Belum ada user' : 'Tidak ada user yang cocok'}
                 </td>
               </tr>
             ) : (
               filteredUsers.map(user => {
-                const RoleIcon = ROLE_ICONS[user.role]
+                const RoleIcon = ROLE_ICONS[user.role] || User
                 return (
                   <tr key={user.id} className="hover:bg-gray-50">
                     {/* User Info */}
@@ -368,31 +361,10 @@ export function UserManagement({ outlets, currentUserId }: Props) {
 
                     {/* Role */}
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${ROLE_COLORS[user.role]}`}>
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${ROLE_COLORS[user.role] || 'bg-gray-100 text-gray-700'}`}>
                         <RoleIcon className="w-3.5 h-3.5" />
-                        {ROLE_LABELS[user.role]}
+                        {ROLE_LABELS[user.role] || user.role}
                       </span>
-                    </td>
-
-                    {/* Outlets */}
-                    <td className="px-4 py-3">
-                      {user.role === 'tenant_admin' ? (
-                        <span className="text-sm text-gray-500 italic">Semua outlet</span>
-                      ) : user.outlets.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {user.outlets.map(o => (
-                            <span
-                              key={o.outlet_id}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded text-xs"
-                            >
-                              <Building2 className="w-3 h-3" />
-                              {o.outlet_name}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-400">-</span>
-                      )}
                     </td>
 
                     {/* Status */}
@@ -512,21 +484,15 @@ export function UserManagement({ outlets, currentUserId }: Props) {
               {/* Role */}
               <div>
                 <Label>Role *</Label>
-                <div className="grid grid-cols-3 gap-2 mt-2">
-                  {(['tenant_admin', 'outlet_admin', 'staff'] as const).map(role => {
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {(['tenant_admin', 'kitchen_staff', 'waiter', 'cashier'] as const).map(role => {
                     const Icon = ROLE_ICONS[role]
                     const isSelected = formData.role === role
                     return (
                       <button
                         key={role}
                         type="button"
-                        onClick={() => {
-                          setFormData(prev => ({
-                            ...prev,
-                            role,
-                            outlets: role === 'tenant_admin' ? [] : prev.outlets,
-                          }))
-                        }}
+                        onClick={() => setFormData(prev => ({ ...prev, role }))}
                         className={`flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-all ${
                           isSelected
                             ? 'border-orange-500 bg-orange-50'
@@ -537,54 +503,14 @@ export function UserManagement({ outlets, currentUserId }: Props) {
                         <span className={`text-xs font-medium ${isSelected ? 'text-orange-700' : 'text-gray-600'}`}>
                           {ROLE_LABELS[role]}
                         </span>
+                        <span className="text-[10px] text-gray-400 text-center">
+                          {ROLE_DESCRIPTIONS[role]}
+                        </span>
                       </button>
                     )
                   })}
                 </div>
               </div>
-
-              {/* Outlet Assignment (for non-tenant_admin) */}
-              {formData.role !== 'tenant_admin' && (
-                <div>
-                  <Label>Assign ke Outlet *</Label>
-                  <p className="text-xs text-gray-500 mb-2">
-                    Pilih outlet yang dapat diakses user ini
-                  </p>
-                  <div className="space-y-2 max-h-40 overflow-y-auto border rounded-lg p-2">
-                    {outlets.length === 0 ? (
-                      <p className="text-sm text-gray-500 text-center py-2">
-                        Belum ada outlet
-                      </p>
-                    ) : (
-                      outlets.map(outlet => {
-                        const isSelected = formData.outlets.some(o => o.outlet_id === outlet.id)
-                        return (
-                          <label
-                            key={outlet.id}
-                            className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
-                              isSelected ? 'bg-orange-50' : 'hover:bg-gray-50'
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => toggleOutlet(outlet.id)}
-                              className="w-4 h-4 rounded text-orange-600"
-                            />
-                            <Building2 className="w-4 h-4 text-gray-400" />
-                            <span className="text-sm">{outlet.name}</span>
-                          </label>
-                        )
-                      })
-                    )}
-                  </div>
-                  {(formData.role as string) !== 'tenant_admin' && formData.outlets.length === 0 && (
-                    <p className="text-xs text-red-500 mt-1">
-                      Pilih minimal satu outlet
-                    </p>
-                  )}
-                </div>
-              )}
 
               {/* Status */}
               <div>
@@ -618,7 +544,7 @@ export function UserManagement({ outlets, currentUserId }: Props) {
                 <Button
                   type="submit"
                   className="flex-1"
-                  disabled={saving || (formData.role !== 'tenant_admin' && formData.outlets.length === 0)}
+                  disabled={saving}
                 >
                   {saving ? (
                     <>

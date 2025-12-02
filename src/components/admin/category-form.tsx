@@ -11,8 +11,7 @@ import {
   Trash2,
   FileText,
   ToggleLeft,
-  ToggleRight,
-  ArrowUpDown
+  ToggleRight
 } from 'lucide-react'
 import type { Category } from '@/types/database'
 
@@ -33,7 +32,6 @@ export function CategoryForm({ storeId, initialData }: CategoryFormProps) {
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     description: initialData?.description || '',
-    sort_order: initialData?.sort_order || 0,
     is_active: initialData?.is_active ?? true,
   })
 
@@ -54,7 +52,6 @@ export function CategoryForm({ storeId, initialData }: CategoryFormProps) {
       const dataToSave = {
         name: formData.name,
         description: formData.description || null,
-        sort_order: Number(formData.sort_order),
         is_active: formData.is_active,
       }
 
@@ -202,27 +199,8 @@ export function CategoryForm({ storeId, initialData }: CategoryFormProps) {
                   rows={3}
                   className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all resize-none"
                 />
-              </div>
-
-              {/* Sort Order */}
-              <div className="space-y-2">
-                <label htmlFor="sort_order" className="block text-sm font-medium text-[#374151]">
-                  Urutan Tampilan
-                </label>
-                <div className="relative">
-                  <ArrowUpDown className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
-                  <input
-                    id="sort_order"
-                    type="number"
-                    value={formData.sort_order}
-                    onChange={(e) => setFormData({ ...formData, sort_order: Number(e.target.value) })}
-                    placeholder="0"
-                    min="0"
-                    className="w-full h-11 pl-11 pr-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
-                  />
-                </div>
                 <p className="text-xs text-[#6B7280]">
-                  Semakin kecil angka, semakin awal ditampilkan
+                  Kategori akan diurutkan berdasarkan abjad (A-Z)
                 </p>
               </div>
             </div>
