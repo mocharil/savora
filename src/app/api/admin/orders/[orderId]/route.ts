@@ -73,16 +73,24 @@ export async function PATCH(
 
     const supabase = createAdminClient()
 
-    // Verify order belongs to user's store and get table_id
+    // Verify order belongs to user's store and get payment status
     const { data: existingOrder } = await supabase
       .from('orders')
-      .select('id, store_id, table_id')
+      .select('id, store_id, table_id, payment_status')
       .eq('id', orderId)
       .eq('store_id', user.storeId)
       .single()
 
     if (!existingOrder) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    }
+
+    // Prevent setting status to 'completed' if payment is not done
+    if (status === 'completed' && existingOrder.payment_status !== 'paid') {
+      return NextResponse.json(
+        { error: 'Pesanan tidak bisa diselesaikan sebelum pembayaran lunas' },
+        { status: 400 }
+      )
     }
 
     // Update order status

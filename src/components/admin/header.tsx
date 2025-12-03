@@ -16,6 +16,7 @@ import { HelpCenter } from './tour'
 import { formatDistanceToNow } from 'date-fns'
 import { id } from 'date-fns/locale'
 import Link from 'next/link'
+import BlockLoader from '@/components/ui/block-loader'
 
 interface Order {
   id: string
@@ -65,6 +66,12 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
   }, [])
 
   const unreadCount = notifications.filter(n => !n.is_read).length
+
+  const markAllAsRead = () => {
+    // Clear notifications from UI
+    setNotifications([])
+    setShowNotifications(false)
+  }
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -155,7 +162,10 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
                 <div className="flex items-center justify-between px-4 py-3 border-b border-[#E5E7EB]">
                   <h3 className="font-semibold text-[#111827]">Notifikasi</h3>
                   {notifications.length > 0 && (
-                    <button className="text-xs text-orange-500 hover:underline">
+                    <button
+                      onClick={markAllAsRead}
+                      className="text-xs text-orange-500 hover:underline"
+                    >
                       Tandai semua dibaca
                     </button>
                   )}
@@ -165,7 +175,13 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
                 <div className="max-h-[400px] overflow-y-auto">
                   {loading ? (
                     <div className="flex items-center justify-center py-8">
-                      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                      <BlockLoader
+                        blockColor="bg-orange-500"
+                        borderColor="border-orange-500"
+                        size={30}
+                        gap={3}
+                        speed={1}
+                      />
                     </div>
                   ) : notifications.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 px-4">

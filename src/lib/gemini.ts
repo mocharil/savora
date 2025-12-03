@@ -1,28 +1,51 @@
 import { VertexAI } from '@google-cloud/vertexai'
+import fs from 'fs'
 import path from 'path'
+import os from 'os'
 
-// Path to service account JSON
-const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-  path.join(process.cwd(), 'skilled-compass.json')
-
-// Set environment variable for Google Cloud auth
-if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-  process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath
-}
-
-// Project ID from the service account
+// Project ID and location
 const projectId = 'paper-ds-production'
 const location = 'us-central1'
 
 let vertexAI: VertexAI | null = null
 
-try {
-  vertexAI = new VertexAI({
-    project: projectId,
-    location: location,
-  })
-} catch (error) {
-  console.warn('Failed to initialize Vertex AI:', error)
+function setupCredentials(): boolean {
+  try {
+    // Option 1: Check for GEMINI_CREDENTIALS env var (for production/deployment)
+    const geminiCredentials = process.env.GEMINI_CREDENTIALS
+    if (geminiCredentials) {
+      // Write to temp file (Google Cloud SDK requires a file path)
+      const tempPath = path.join(os.tmpdir(), 'gemini-credentials.json')
+      fs.writeFileSync(tempPath, geminiCredentials)
+      process.env.GOOGLE_APPLICATION_CREDENTIALS = tempPath
+      return true
+    }
+
+    // Option 2: Check for local file (for development)
+    const localPath = path.join(process.cwd(), 'gemini-credentials.json')
+    if (fs.existsSync(localPath)) {
+      process.env.GOOGLE_APPLICATION_CREDENTIALS = localPath
+      return true
+    }
+
+    console.warn('No Gemini credentials found. Set GEMINI_CREDENTIALS env var or create gemini-credentials.json')
+    return false
+  } catch (error) {
+    console.warn('Failed to setup Gemini credentials:', error)
+    return false
+  }
+}
+
+// Setup credentials and initialize Vertex AI
+if (setupCredentials()) {
+  try {
+    vertexAI = new VertexAI({
+      project: projectId,
+      location: location,
+    })
+  } catch (error) {
+    console.warn('Failed to initialize Vertex AI:', error)
+  }
 }
 
 export function getGeminiModel(modelName: string = 'gemini-2.5-flash-lite') {

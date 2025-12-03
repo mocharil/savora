@@ -2,14 +2,18 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { createClient } from '@supabase/supabase-js'
 import { jwtVerify } from 'jose'
-import { AdminSidebar } from '@/components/admin/sidebar'
+import { AdminSidebar } from '@/components/admin/Sidebar'
 import { AdminHeader } from '@/components/admin/header'
 import { AdminLayoutClient } from '@/components/admin/AdminLayoutClient'
 import { FTUEProvider } from '@/components/admin/ftue'
 import { TourProvider, TourOverlay } from '@/components/admin/tour'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+// Use service role key if available, otherwise fall back to anon key
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY &&
+  process.env.SUPABASE_SERVICE_ROLE_KEY !== 'your_service_role_key'
+    ? process.env.SUPABASE_SERVICE_ROLE_KEY
+    : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const jwtSecret = new TextEncoder().encode(
   process.env.JWT_SECRET || 'your-super-secret-jwt-key-min-32-chars!'
 )
@@ -39,7 +43,7 @@ export default async function AdminLayout({
     redirect('/login')
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceKey)
+  const supabase = createClient(supabaseUrl, supabaseKey)
 
   // Get user data
   const { data: user } = await supabase

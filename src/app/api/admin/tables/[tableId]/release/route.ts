@@ -39,8 +39,9 @@ export async function POST(
     if (!unpaidError && unpaidOrders && unpaidOrders.length > 0) {
       return NextResponse.json({
         error: 'Tidak dapat mengosongkan meja',
-        message: `Masih ada ${unpaidOrders.length} pesanan yang belum dibayar`,
-        unpaidOrders: unpaidOrders.map(o => o.order_number)
+        message: `Masih ada ${unpaidOrders.length} pesanan yang belum dibayar. Silakan selesaikan pembayaran di menu Pesanan terlebih dahulu.`,
+        unpaidOrders: unpaidOrders.map(o => o.order_number),
+        hasUnpaidOrders: true
       }, { status: 400 })
     }
 

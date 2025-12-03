@@ -1,12 +1,12 @@
 // @ts-nocheck
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { getUserFromToken } from '@/lib/tenant-context'
 import { redirect } from 'next/navigation'
 import { MenuPageClient } from './MenuPageClient'
 import { MenuFilters } from '@/components/admin/menu-filters'
 
 export default async function MenuPage() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Get user from token
   const user = await getUserFromToken()

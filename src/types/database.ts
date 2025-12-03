@@ -30,6 +30,7 @@ export interface Database {
           service_charge_percentage: number
           operational_hours: Json
           is_active: boolean
+          theme_settings: Json | null
           created_at: string
           updated_at: string
         }
@@ -47,6 +48,7 @@ export interface Database {
           service_charge_percentage?: number
           operational_hours?: Json
           is_active?: boolean
+          theme_settings?: Json | null
           created_at?: string
           updated_at?: string
         }
@@ -64,6 +66,7 @@ export interface Database {
           service_charge_percentage?: number
           operational_hours?: Json
           is_active?: boolean
+          theme_settings?: Json | null
           created_at?: string
           updated_at?: string
         }

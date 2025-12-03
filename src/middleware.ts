@@ -76,6 +76,8 @@ export async function middleware(request: NextRequest) {
       '/api/payment/webhook',
       '/api/stores/', // Public store lookup
       '/api/outlets/', // Public outlet lookup
+      '/api/customer/', // Customer-facing APIs (AI recommend, orders, etc.)
+      '/api/ai/voice-order', // Voice ordering API
     ]
 
     if (publicApiRoutes.some(route => pathname.startsWith(route))) {
@@ -118,8 +120,11 @@ export async function middleware(request: NextRequest) {
   // Admin routes - require auth
   if (pathname.startsWith('/admin')) {
     const token = request.cookies.get('auth_token')?.value
+    console.log('[Middleware] Admin route:', pathname)
+    console.log('[Middleware] Token exists:', !!token)
 
     if (!token) {
+      console.log('[Middleware] No token, redirecting to login')
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       url.searchParams.set('redirect', pathname)
@@ -128,11 +133,13 @@ export async function middleware(request: NextRequest) {
 
     try {
       const { payload } = await jwtVerify(token, jwtSecret)
+      console.log('[Middleware] Token verified, role:', payload.role)
 
       // Check if user has valid admin role
-      // Support both old roles (owner, staff) and new roles (tenant_admin, outlet_admin, staff)
-      const validAdminRoles = ['owner', 'staff', 'tenant_admin', 'outlet_admin']
+      // Support both old roles (owner, staff) and new roles (tenant_admin, outlet_admin, kitchen_staff, waiter, cashier)
+      const validAdminRoles = ['owner', 'staff', 'tenant_admin', 'outlet_admin', 'kitchen_staff', 'waiter', 'cashier']
       if (!validAdminRoles.includes(payload.role as string)) {
+        console.log('[Middleware] Invalid role, redirecting to home')
         return NextResponse.redirect(new URL('/', request.url))
       }
 
@@ -149,8 +156,9 @@ export async function middleware(request: NextRequest) {
       }
 
       return response
-    } catch {
+    } catch (err) {
       // Invalid token - redirect to login
+      console.log('[Middleware] Token verification failed:', err)
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       url.searchParams.set('redirect', pathname)

@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/utils'
+import { PageTourButton } from '@/components/admin/tour'
 import {
   Clock,
   CheckCircle,
@@ -20,7 +22,9 @@ import {
   ChevronRight,
   ArrowUpDown,
   SortAsc,
-  SortDesc
+  SortDesc,
+  CreditCard,
+  ChevronDown
 } from 'lucide-react'
 
 type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled'
@@ -108,12 +112,34 @@ interface OrdersPageClientProps {
 const ITEMS_PER_PAGE = 10
 
 export function OrdersPageClient({ orders, statusCounts }: OrdersPageClientProps) {
+  const searchParams = useSearchParams()
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortField, setSortField] = useState<SortField>('created_at')
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const [currentPage, setCurrentPage] = useState(1)
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week'>('all')
+  const [tableFilter, setTableFilter] = useState<string>('all')
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all')
+
+  // Handle query parameter for initial payment filter
+  useEffect(() => {
+    const paymentParam = searchParams.get('payment')
+    if (paymentParam === 'unpaid' || paymentParam === 'paid') {
+      setPaymentFilter(paymentParam)
+    }
+  }, [searchParams])
+
+  // Get unique table numbers from orders
+  const tableNumbers = useMemo(() => {
+    const tables = new Set<number>()
+    orders.forEach(order => {
+      if (order.table?.table_number) {
+        tables.add(order.table.table_number)
+      }
+    })
+    return Array.from(tables).sort((a, b) => a - b)
+  }, [orders])
 
   // Calculate total count
   const totalCount = Object.values(statusCounts).reduce((a, b) => a + b, 0)
@@ -154,6 +180,24 @@ export function OrdersPageClient({ orders, statusCounts }: OrdersPageClientProps
       })
     }
 
+    // Table filter
+    if (tableFilter !== 'all') {
+      result = result.filter(order =>
+        order.table?.table_number?.toString() === tableFilter
+      )
+    }
+
+    // Payment filter
+    if (paymentFilter !== 'all') {
+      result = result.filter(order => {
+        if (paymentFilter === 'paid') {
+          return order.payment_status === 'paid'
+        } else {
+          return order.payment_status !== 'paid'
+        }
+      })
+    }
+
     // Sort
     result.sort((a, b) => {
       let comparison = 0
@@ -168,7 +212,7 @@ export function OrdersPageClient({ orders, statusCounts }: OrdersPageClientProps
     })
 
     return result
-  }, [orders, statusFilter, searchQuery, sortField, sortOrder, dateFilter])
+  }, [orders, statusFilter, searchQuery, sortField, sortOrder, dateFilter, tableFilter, paymentFilter])
 
   // Pagination
   const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE)
@@ -206,10 +250,11 @@ export function OrdersPageClient({ orders, statusCounts }: OrdersPageClientProps
           <h1 className="text-2xl font-bold text-gray-900">Pesanan</h1>
           <p className="text-sm text-gray-500">Kelola pesanan dari pelanggan</p>
         </div>
+        <PageTourButton />
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200" data-tour="orders-tabs">
         <div className="flex gap-0 overflow-x-auto hide-scrollbar">
           {tabConfig.map((tab) => {
             const isActive = statusFilter === tab.value
@@ -247,9 +292,9 @@ export function OrdersPageClient({ orders, statusCounts }: OrdersPageClientProps
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-wrap gap-2 items-center" data-tour="orders-filters">
         {/* Search */}
-        <div className="flex items-center gap-2 h-9 px-3 bg-white rounded-lg border border-gray-200 flex-1 min-w-[180px] max-w-xs">
+        <div className="flex items-center gap-2 h-9 px-3 bg-white rounded-lg border border-gray-200 flex-1 min-w-[180px] max-w-xs" data-tour="orders-search">
           <Search className="w-4 h-4 text-gray-400" />
           <input
             type="text"
@@ -261,7 +306,7 @@ export function OrdersPageClient({ orders, statusCounts }: OrdersPageClientProps
         </div>
 
         {/* Date Filter */}
-        <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+        <div className="flex rounded-lg border border-gray-200 overflow-hidden" data-tour="orders-date-filter">
           {[
             { value: 'all', label: 'Semua' },
             { value: 'today', label: 'Hari Ini' },
@@ -272,6 +317,46 @@ export function OrdersPageClient({ orders, statusCounts }: OrdersPageClientProps
               onClick={() => { setDateFilter(option.value as any); setCurrentPage(1) }}
               className={`px-3 py-2 text-xs font-medium transition-colors ${
                 dateFilter === option.value
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Table Filter */}
+        <div className="relative" data-tour="orders-table-filter">
+          <select
+            value={tableFilter}
+            onChange={(e) => { setTableFilter(e.target.value); setCurrentPage(1) }}
+            className={`appearance-none pl-3 pr-8 py-2 text-xs font-medium rounded-lg border transition-colors cursor-pointer ${
+              tableFilter !== 'all'
+                ? 'bg-orange-50 border-orange-200 text-orange-600'
+                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <option value="all">Semua Meja</option>
+            {tableNumbers.map(num => (
+              <option key={num} value={num.toString()}>Meja {num}</option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+        </div>
+
+        {/* Payment Filter */}
+        <div className="flex rounded-lg border border-gray-200 overflow-hidden" data-tour="orders-payment-filter">
+          {[
+            { value: 'all', label: 'Semua' },
+            { value: 'paid', label: 'Lunas' },
+            { value: 'unpaid', label: 'Belum Bayar' },
+          ].map((option) => (
+            <button
+              key={option.value}
+              onClick={() => { setPaymentFilter(option.value as any); setCurrentPage(1) }}
+              className={`px-3 py-2 text-xs font-medium transition-colors ${
+                paymentFilter === option.value
                   ? 'bg-orange-500 text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-50'
               }`}
@@ -325,7 +410,7 @@ export function OrdersPageClient({ orders, statusCounts }: OrdersPageClientProps
 
       {/* Order List - Compact Table Style */}
       {paginatedOrders.length > 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden" data-tour="orders-list">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>

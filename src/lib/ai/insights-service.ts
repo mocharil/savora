@@ -16,10 +16,14 @@ import type { BusinessInsights, InsightHighlight, TopItem, PeakHour } from './ty
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+// Use service role key if available, otherwise fall back to anon key
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY &&
+  process.env.SUPABASE_SERVICE_ROLE_KEY !== 'your_service_role_key'
+    ? process.env.SUPABASE_SERVICE_ROLE_KEY
+    : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 function getSupabase() {
-  return createClient(supabaseUrl, supabaseServiceKey)
+  return createClient(supabaseUrl, supabaseKey)
 }
 
 const CACHE_TTL_HOURS = 1

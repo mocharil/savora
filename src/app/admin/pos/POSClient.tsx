@@ -83,6 +83,45 @@ export function POSClient({ categories, menuItems, tables, storeId }: POSClientP
     })
   }, [menuItems, searchQuery, selectedCategory])
 
+  // Group menu items by category
+  const groupedItems = useMemo(() => {
+    const groups: { category: Category; items: MenuItem[] }[] = []
+
+    // If a specific category is selected, just return that
+    if (selectedCategory) {
+      const category = categories.find(c => c.id === selectedCategory)
+      if (category) {
+        groups.push({
+          category,
+          items: filteredItems
+        })
+      }
+      return groups
+    }
+
+    // Group by category
+    categories.forEach(category => {
+      const categoryItems = filteredItems.filter(item => item.category_id === category.id)
+      if (categoryItems.length > 0) {
+        groups.push({
+          category,
+          items: categoryItems
+        })
+      }
+    })
+
+    // Add uncategorized items if any
+    const uncategorizedItems = filteredItems.filter(item => !item.category_id || !categories.find(c => c.id === item.category_id))
+    if (uncategorizedItems.length > 0) {
+      groups.push({
+        category: { id: 'uncategorized', name: 'Lainnya' },
+        items: uncategorizedItems
+      })
+    }
+
+    return groups
+  }, [filteredItems, categories, selectedCategory])
+
   // Cart calculations
   const subtotal = cart.reduce((sum, item) => sum + (item.menuItem.price * item.quantity), 0)
   const tax = Math.round(subtotal * 0.11) // 11% PPN
@@ -333,57 +372,75 @@ export function POSClient({ categories, menuItems, tables, storeId }: POSClientP
           </div>
         </div>
 
-        {/* Menu Grid */}
+        {/* Menu Grid - Grouped by Category */}
         <div className="flex-1 overflow-y-auto p-4" data-tour="pos-menu-grid">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {filteredItems.map(item => {
-              const inCart = cart.find(c => c.menuItem.id === item.id)
-
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => addToCart(item)}
-                  className={`group relative bg-white rounded-xl border-2 p-3 text-left transition-all hover:shadow-lg ${
-                    inCart ? 'border-orange-500 ring-2 ring-orange-200' : 'border-gray-100 hover:border-orange-300'
-                  }`}
-                >
-                  {/* Image */}
-                  <div className="aspect-square rounded-lg bg-gray-100 mb-3 overflow-hidden relative">
-                    {item.image_url ? (
-                      <Image
-                        src={item.image_url}
-                        alt={item.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <ChefHat className="w-8 h-8 text-gray-300" />
-                      </div>
-                    )}
-                    {inCart && (
-                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center">
-                        {inCart.quantity}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <p className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">{item.name}</p>
-                  <p className="text-sm font-bold text-orange-600">{formatCurrency(item.price)}</p>
-
-                  {/* Quick add indicator */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 rounded-xl transition-all opacity-0 group-hover:opacity-100">
-                    <div className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg">
-                      <Plus className="w-5 h-5" />
+          {groupedItems.length > 0 ? (
+            <div className="space-y-6">
+              {groupedItems.map(group => (
+                <div key={group.category.id}>
+                  {/* Category Header */}
+                  <div className="sticky top-0 z-10 bg-gray-50 pb-3 -mx-4 px-4 pt-1">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-1 rounded-full bg-gradient-to-b from-orange-500 to-amber-500" />
+                      <h3 className="text-base font-bold text-gray-900">{group.category.name}</h3>
+                      <span className="text-xs font-medium text-gray-400 bg-gray-200 px-2 py-0.5 rounded-full">
+                        {group.items.length} menu
+                      </span>
                     </div>
                   </div>
-                </button>
-              )
-            })}
-          </div>
 
-          {filteredItems.length === 0 && (
+                  {/* Menu Items Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {group.items.map(item => {
+                      const inCart = cart.find(c => c.menuItem.id === item.id)
+
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => addToCart(item)}
+                          className={`group relative bg-white rounded-xl border-2 p-3 text-left transition-all hover:shadow-lg ${
+                            inCart ? 'border-orange-500 ring-2 ring-orange-200' : 'border-gray-100 hover:border-orange-300'
+                          }`}
+                        >
+                          {/* Image */}
+                          <div className="aspect-square rounded-lg bg-gray-100 mb-3 overflow-hidden relative">
+                            {item.image_url ? (
+                              <Image
+                                src={item.image_url}
+                                alt={item.name}
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <ChefHat className="w-8 h-8 text-gray-300" />
+                              </div>
+                            )}
+                            {inCart && (
+                              <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center">
+                                {inCart.quantity}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Info */}
+                          <p className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">{item.name}</p>
+                          <p className="text-sm font-bold text-orange-600">{formatCurrency(item.price)}</p>
+
+                          {/* Quick add indicator */}
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 rounded-xl transition-all opacity-0 group-hover:opacity-100">
+                            <div className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg">
+                              <Plus className="w-5 h-5" />
+                            </div>
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <ChefHat className="w-12 h-12 text-gray-300 mb-3" />
               <p className="text-gray-500">Menu tidak ditemukan</p>
@@ -526,103 +583,109 @@ export function POSClient({ categories, menuItems, tables, storeId }: POSClientP
           )}
         </div>
 
-        {/* Payment Method */}
-        {cart.length > 0 && (
-          <div className="p-4 border-t border-gray-200" data-tour="pos-payment">
-            <label className="text-xs font-medium text-gray-500 mb-2 block">Metode Pembayaran</label>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { id: 'cash', label: 'Tunai', icon: Banknote },
-                { id: 'qris', label: 'QRIS', icon: QrCode },
-                { id: 'card', label: 'Kartu', icon: CreditCard },
-              ].map(method => (
-                <button
-                  key={method.id}
-                  onClick={() => {
-                    setPaymentMethod(method.id as any)
-                    if (method.id !== 'cash') {
-                      setCashAmount('')
-                      setChangeAmount(0)
-                    }
-                  }}
-                  className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all ${
-                    paymentMethod === method.id
-                      ? 'border-orange-500 bg-orange-50 text-orange-600'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                  }`}
-                >
-                  <method.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{method.label}</span>
-                </button>
-              ))}
+        {/* Payment Method - Always visible for tour, but content changes based on cart */}
+        <div className="p-4 border-t border-gray-200" data-tour="pos-payment">
+          <label className="text-xs font-medium text-gray-500 mb-2 block">Metode Pembayaran</label>
+          {cart.length === 0 ? (
+            <div className="text-center py-4 text-gray-400 text-sm">
+              Tambahkan menu ke keranjang untuk memilih metode pembayaran
             </div>
-
-            {/* Cash Payment Input */}
-            {paymentMethod === 'cash' && (
-              <div className="mt-4 space-y-3">
-                {/* Quick Amount Buttons */}
-                <div className="flex flex-wrap gap-2">
-                  {quickCashAmounts.map((item) => (
-                    <button
-                      key={item.label}
-                      onClick={() => {
-                        setCashAmount(item.value.toString())
-                        setChangeAmount(item.value >= total ? item.value - total : 0)
-                      }}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                        parseInt(cashAmount) === item.value
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Cash Input */}
-                <div>
-                  <label className="text-xs font-medium text-gray-500 mb-1 block">Jumlah Uang Diterima</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">Rp</span>
-                    <input
-                      type="text"
-                      value={cashAmount ? parseInt(cashAmount).toLocaleString('id-ID') : ''}
-                      onChange={(e) => handleCashAmountChange(e.target.value.replace(/\./g, ''))}
-                      placeholder="0"
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-right text-lg font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                {/* Change Display */}
-                {parseInt(cashAmount) > 0 && (
-                  <div className={`p-3 rounded-xl ${
-                    parseInt(cashAmount) >= total
-                      ? 'bg-emerald-50 border border-emerald-200'
-                      : 'bg-red-50 border border-red-200'
-                  }`}>
-                    {parseInt(cashAmount) >= total ? (
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-emerald-700">Kembalian</span>
-                        <span className="text-xl font-bold text-emerald-600">
-                          {formatCurrency(changeAmount)}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-red-700">Kurang</span>
-                        <span className="text-xl font-bold text-red-600">
-                          {formatCurrency(total - parseInt(cashAmount))}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'cash', label: 'Tunai', icon: Banknote },
+                  { id: 'qris', label: 'QRIS', icon: QrCode },
+                  { id: 'card', label: 'Kartu', icon: CreditCard },
+                ].map(method => (
+                  <button
+                    key={method.id}
+                    onClick={() => {
+                      setPaymentMethod(method.id as any)
+                      if (method.id !== 'cash') {
+                        setCashAmount('')
+                        setChangeAmount(0)
+                      }
+                    }}
+                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all ${
+                      paymentMethod === method.id
+                        ? 'border-orange-500 bg-orange-50 text-orange-600'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    <method.icon className="w-5 h-5" />
+                    <span className="text-xs font-medium">{method.label}</span>
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
-        )}
+
+              {/* Cash Payment Input */}
+              {paymentMethod === 'cash' && (
+                <div className="mt-4 space-y-3">
+                  {/* Quick Amount Buttons */}
+                  <div className="flex flex-wrap gap-2">
+                    {quickCashAmounts.map((item) => (
+                      <button
+                        key={item.label}
+                        onClick={() => {
+                          setCashAmount(item.value.toString())
+                          setChangeAmount(item.value >= total ? item.value - total : 0)
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                          parseInt(cashAmount) === item.value
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Cash Input */}
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-1 block">Jumlah Uang Diterima</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">Rp</span>
+                      <input
+                        type="text"
+                        value={cashAmount ? parseInt(cashAmount).toLocaleString('id-ID') : ''}
+                        onChange={(e) => handleCashAmountChange(e.target.value.replace(/\./g, ''))}
+                        placeholder="0"
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-right text-lg font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Change Display */}
+                  {parseInt(cashAmount) > 0 && (
+                    <div className={`p-3 rounded-xl ${
+                      parseInt(cashAmount) >= total
+                        ? 'bg-emerald-50 border border-emerald-200'
+                        : 'bg-red-50 border border-red-200'
+                    }`}>
+                      {parseInt(cashAmount) >= total ? (
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium text-emerald-700">Kembalian</span>
+                          <span className="text-xl font-bold text-emerald-600">
+                            {formatCurrency(changeAmount)}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium text-red-700">Kurang</span>
+                          <span className="text-xl font-bold text-red-600">
+                            {formatCurrency(total - parseInt(cashAmount))}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
 
         {/* Totals & Checkout */}
         <div className="p-4 border-t border-gray-200 bg-gray-50" data-tour="pos-checkout">

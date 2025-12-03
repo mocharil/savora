@@ -104,17 +104,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!['tenant_admin', 'outlet_admin', 'staff'].includes(role)) {
+    if (!['tenant_admin', 'kitchen_staff', 'waiter', 'cashier'].includes(role)) {
       return NextResponse.json(
         { error: 'Role tidak valid' },
-        { status: 400 }
-      )
-    }
-
-    // outlet_admin and staff must have at least one outlet assigned
-    if ((role === 'outlet_admin' || role === 'staff') && (!outlets || outlets.length === 0)) {
-      return NextResponse.json(
-        { error: 'Outlet admin dan staff harus di-assign ke minimal satu outlet' },
         { status: 400 }
       )
     }
@@ -155,28 +147,6 @@ export async function POST(request: NextRequest) {
     if (createError) {
       console.error('Error creating user:', createError)
       return NextResponse.json({ error: 'Gagal membuat user' }, { status: 500 })
-    }
-
-    // Create outlet assignments if provided
-    if (outlets && outlets.length > 0) {
-      const outletAssignments = outlets.map((o: any) => ({
-        user_id: newUser.id,
-        outlet_id: o.outlet_id,
-        role: o.role || (role === 'outlet_admin' ? 'outlet_admin' : 'staff'),
-        is_primary: o.is_primary || false,
-      }))
-
-      const { error: assignError } = await supabase
-        .from('user_outlets')
-        .insert(outletAssignments)
-
-      if (assignError) {
-        console.error('Error assigning outlets:', assignError)
-        // Return error so user knows assignment failed
-        return NextResponse.json({
-          error: 'User berhasil dibuat tapi gagal assign outlet: ' + assignError.message
-        }, { status: 500 })
-      }
     }
 
     return NextResponse.json({

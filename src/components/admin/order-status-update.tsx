@@ -50,9 +50,9 @@ const statusButtons: {
     status: 'completed',
     label: 'Selesai',
     icon: <CheckCheck className="w-4 h-4" />,
-    color: 'text-[#6B7280]',
-    bgColor: 'bg-[#6B7280]/10',
-    hoverBgColor: 'hover:bg-[#6B7280]/20'
+    color: 'text-[#3775f0]',
+    bgColor: 'bg-[#3775f0]/10',
+    hoverBgColor: 'hover:bg-[#3775f0]/20'
   },
 ]
 

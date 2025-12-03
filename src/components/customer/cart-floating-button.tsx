@@ -7,12 +7,20 @@ import { ShoppingBag, ChevronRight } from 'lucide-react'
 import { useCartStore } from '@/stores/cart-store'
 import { formatCurrency } from '@/lib/utils'
 
+interface ThemeSettings {
+  primary_color: string
+  secondary_color: string
+}
+
 interface CartFloatingButtonProps {
   storeSlug: string
   outletSlug?: string
+  theme?: ThemeSettings
 }
 
-export function CartFloatingButton({ storeSlug, outletSlug }: CartFloatingButtonProps) {
+export function CartFloatingButton({ storeSlug, outletSlug, theme }: CartFloatingButtonProps) {
+  const primaryColor = theme?.primary_color || '#f97316'
+  const secondaryColor = theme?.secondary_color || '#ef4444'
   const { getTotalItems, getTotalAmount } = useCartStore()
   const [mounted, setMounted] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
@@ -49,14 +57,18 @@ export function CartFloatingButton({ storeSlug, outletSlug }: CartFloatingButton
     <div className="fixed bottom-6 left-4 right-4 z-50 max-w-lg mx-auto">
       <Link
         href={cartUrl}
-        className={`flex items-center justify-between w-full h-[60px] px-5 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 shadow-xl shadow-orange-300/50 transition-all duration-300 ${
+        className={`flex items-center justify-between w-full h-[60px] px-5 rounded-2xl shadow-xl transition-all duration-300 ${
           isAnimating ? 'scale-105' : 'scale-100'
         }`}
+        style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})` }}
       >
         {/* Left - Icon with Badge */}
         <div className="relative">
           <ShoppingBag className="w-6 h-6 text-white" />
-          <span className="absolute -top-2 -right-2 w-5 h-5 bg-white text-orange-600 text-xs font-bold rounded-full flex items-center justify-center shadow-sm">
+          <span
+            className="absolute -top-2 -right-2 w-5 h-5 bg-white text-xs font-bold rounded-full flex items-center justify-center shadow-sm"
+            style={{ color: primaryColor }}
+          >
             {totalItems}
           </span>
         </div>

@@ -6,7 +6,8 @@ const allowedFields = [
   'name', 'description', 'address', 'phone',
   'logo_url', 'banner_url',
   'tax_percentage', 'service_charge_percentage',
-  'operational_hours', 'is_active'
+  'operational_hours', 'is_active',
+  'theme_settings'
 ]
 
 export async function POST(request: NextRequest) {

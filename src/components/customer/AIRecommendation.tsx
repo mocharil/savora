@@ -167,7 +167,7 @@ export function AIRecommendation({
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button - positioned above cart button (bottom-24 = 96px, above cart's bottom-6 = 24px + 60px height) */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
@@ -175,7 +175,7 @@ export function AIRecommendation({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white"
+            className="fixed bottom-[100px] right-4 z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white"
             style={{ backgroundColor: primaryColor }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -346,8 +346,8 @@ export function AIRecommendation({
                 </div>
               )}
 
-              {/* Input */}
-              <div className="p-4 border-t border-gray-100">
+              {/* Input - pb-20 to account for floating cart button */}
+              <div className="p-4 pb-24 border-t border-gray-100">
                 <div className="flex items-center gap-2">
                   <input
                     ref={inputRef}

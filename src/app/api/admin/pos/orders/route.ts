@@ -58,6 +58,10 @@ export async function POST(request: NextRequest) {
     const supabase = createAdminClient()
     const orderNumber = generateOrderNumber()
 
+    // For POS orders with payment method, set payment_status to 'paid' immediately
+    // since payment is done at the counter
+    const isPaid = !!paymentMethod
+
     // Create order (matches actual schema)
     const { data: order, error: orderError } = await supabase
       .from('orders')
@@ -67,7 +71,7 @@ export async function POST(request: NextRequest) {
         order_number: orderNumber,
         customer_name: customerName || (isTakeAway ? 'Take Away' : 'Walk-in Customer'),
         status: 'pending',
-        payment_status: 'unpaid',
+        payment_status: isPaid ? 'paid' : 'unpaid',
         subtotal: subtotal,
         tax_amount: tax,
         total: total,
@@ -133,6 +137,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create payment record if payment method is provided
+    // For POS orders, payment is done immediately so status is 'paid'
     if (paymentMethod) {
       const { error: paymentError } = await supabase
         .from('payments')
@@ -140,7 +145,8 @@ export async function POST(request: NextRequest) {
           order_id: order.id,
           payment_method: paymentMethod,
           amount: total,
-          status: 'pending'
+          status: 'paid',
+          paid_at: new Date().toISOString()
         })
 
       if (paymentError) {

@@ -3,8 +3,12 @@ import { generateJSON } from '@/lib/gemini'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+// Use service role key if available, otherwise fall back to anon key
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY &&
+  process.env.SUPABASE_SERVICE_ROLE_KEY !== 'your_service_role_key'
+    ? process.env.SUPABASE_SERVICE_ROLE_KEY
+    : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 // System prompt to restrict AI to only food recommendations
 const SYSTEM_PROMPT = `Kamu adalah asisten rekomendasi menu di restoran. Tugasmu HANYA untuk:
@@ -184,10 +188,28 @@ PENTING:
       recommended_items: enrichedRecommendations,
       is_food_related: aiResponse.is_food_related,
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI Recommendation error:', error)
+    console.error('Error details:', {
+      message: error?.message,
+      name: error?.name,
+      code: error?.code,
+      stack: error?.stack?.split('\n').slice(0, 5).join('\n')
+    })
+
+    // Check for common AI configuration errors
+    let errorMessage = 'Maaf, terjadi kesalahan. Silakan coba lagi.'
+    if (error?.message?.includes('credentials') || error?.message?.includes('GOOGLE_APPLICATION_CREDENTIALS')) {
+      errorMessage = 'Layanan AI tidak tersedia saat ini. Silakan coba lagi nanti.'
+      console.error('AI Credentials Error: Check GOOGLE_APPLICATION_CREDENTIALS or skilled-compass.json')
+    } else if (error?.message?.includes('quota') || error?.message?.includes('rate limit')) {
+      errorMessage = 'Layanan AI sedang sibuk. Silakan coba lagi dalam beberapa menit.'
+    } else if (error?.message?.includes('model')) {
+      errorMessage = 'Model AI tidak tersedia. Silakan coba lagi nanti.'
+    }
+
     return NextResponse.json(
-      { error: 'Maaf, terjadi kesalahan. Silakan coba lagi.' },
+      { error: errorMessage },
       { status: 500 }
     )
   }

@@ -85,7 +85,7 @@ export default function TablesPage() {
   const [activeFilter, setActiveFilter] = useState('all')
   const [selectedTable, setSelectedTable] = useState<string | null>(null)
   const [releasingTable, setReleasingTable] = useState<string | null>(null)
-  const [releaseError, setReleaseError] = useState<string | null>(null)
+  const [releaseError, setReleaseError] = useState<{ message: string; hasUnpaidOrders?: boolean } | null>(null)
   const [releaseSuccess, setReleaseSuccess] = useState<string | null>(null)
 
   useEffect(() => {
@@ -153,7 +153,10 @@ export default function TablesPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setReleaseError(data.message || data.error || 'Gagal mengosongkan meja')
+        setReleaseError({
+          message: data.message || data.error || 'Gagal mengosongkan meja',
+          hasUnpaidOrders: data.hasUnpaidOrders
+        })
         return
       }
 
@@ -168,7 +171,7 @@ export default function TablesPage() {
       // Clear success message after 3 seconds
       setTimeout(() => setReleaseSuccess(null), 3000)
     } catch (error) {
-      setReleaseError('Terjadi kesalahan. Silakan coba lagi.')
+      setReleaseError({ message: 'Terjadi kesalahan. Silakan coba lagi.' })
     } finally {
       setReleasingTable(null)
     }
@@ -194,19 +197,48 @@ export default function TablesPage() {
         </div>
       )}
 
-      {/* Error Toast */}
+      {/* Error Toast - Modern Design */}
       {releaseError && (
         <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-2 fade-in duration-300">
-          <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl shadow-lg">
-            <AlertCircle className="w-5 h-5 text-red-600" />
-            <div>
-              <span className="font-medium">{releaseError}</span>
-              <button
-                onClick={() => setReleaseError(null)}
-                className="ml-3 text-red-600 hover:text-red-800 text-sm underline"
-              >
-                Tutup
-              </button>
+          <div className="relative bg-white rounded-2xl shadow-2xl shadow-red-500/10 border border-red-100 overflow-hidden max-w-sm">
+            {/* Top accent bar */}
+            <div className="h-1 bg-gradient-to-r from-red-500 to-orange-500" />
+
+            <div className="p-4">
+              {/* Header */}
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-lg shadow-red-500/30">
+                  <AlertCircle className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-gray-900 text-sm">Tidak Dapat Mengosongkan</h4>
+                  <p className="text-gray-600 text-sm mt-0.5">{releaseError.message}</p>
+                </div>
+                <button
+                  onClick={() => setReleaseError(null)}
+                  className="flex-shrink-0 w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Action Button */}
+              {releaseError.hasUnpaidOrders && (
+                <div className="mt-4 pt-3 border-t border-gray-100">
+                  <Link
+                    href="/admin/orders?payment=unpaid"
+                    onClick={() => setReleaseError(null)}
+                    className="flex items-center justify-center gap-2 w-full h-10 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl text-sm font-semibold transition-all shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/30"
+                  >
+                    <span>Lihat Pesanan Belum Bayar</span>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>

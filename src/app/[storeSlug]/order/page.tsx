@@ -19,7 +19,7 @@ export default async function OrderPage({
 
   const { data: store } = await supabase
     .from('stores')
-    .select('id, name, slug, description, address, phone, logo_url, banner_url, operational_hours')
+    .select('id, name, slug, description, address, phone, logo_url, banner_url, operational_hours, theme_settings')
     .eq('slug', storeSlug)
     .single()
 
@@ -69,8 +69,20 @@ export default async function OrderPage({
     menu_items: cat.menu_items?.filter((item: any) => item.is_available) || []
   })).filter((cat: any) => cat.menu_items.length > 0) || []
 
+  // Parse theme settings
+  const themeSettings = (store.theme_settings as any) || {
+    primary_color: '#f97316',
+    secondary_color: '#ef4444',
+    accent_color: '#10b981',
+    text_color: '#1f2937',
+    background_color: '#ffffff',
+  }
+
   return (
-    <div className="pb-28">
+    <div
+      className="pb-28 min-h-screen"
+      style={{ backgroundColor: themeSettings.background_color }}
+    >
       {/* Store Header with Banner, Logo, and Info */}
       <StoreHeader
         store={{
@@ -87,7 +99,12 @@ export default async function OrderPage({
       {/* Table Indicator */}
       {tableData && (
         <div className="px-4 pt-4">
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl px-4 py-3 inline-flex items-center gap-2 shadow-lg shadow-orange-200">
+          <div
+            className="rounded-2xl px-4 py-3 inline-flex items-center gap-2 shadow-lg"
+            style={{
+              background: `linear-gradient(to right, ${themeSettings.primary_color}, ${themeSettings.secondary_color})`,
+            }}
+          >
             <MapPin className="w-4 h-4 text-white" />
             <span className="text-sm font-semibold text-white">
               Meja {tableData.table_number}
@@ -114,16 +131,18 @@ export default async function OrderPage({
         storeId={store.id}
         storeSlug={storeSlug}
         tableId={tableData?.id}
+        theme={themeSettings}
       />
 
       {/* AI Recommendation Assistant */}
       <AIRecommendation
         storeId={store.id}
         storeSlug={storeSlug}
+        theme={{ primaryColor: themeSettings.primary_color }}
       />
 
       {/* Floating Cart Button */}
-      <CartFloatingButton storeSlug={storeSlug} />
+      <CartFloatingButton storeSlug={storeSlug} theme={themeSettings} />
     </div>
   )
 }

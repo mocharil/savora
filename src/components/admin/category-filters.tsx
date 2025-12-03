@@ -86,7 +86,7 @@ export function CategoryFilters({ categories }: CategoryFiltersProps) {
   return (
     <>
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center bg-[#F9FAFB] rounded-xl p-4 border border-[#E5E7EB]">
+      <div className="flex flex-wrap gap-3 items-center bg-[#F9FAFB] rounded-xl p-4 border border-[#E5E7EB]" data-tour="categories-filters">
         {/* Search */}
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
@@ -161,36 +161,48 @@ export function CategoryFilters({ categories }: CategoryFiltersProps) {
             {paginatedCategories.map((category) => (
               <div
                 key={category.id}
-                className="flex items-center gap-4 p-4 hover:bg-[#F9FAFB] transition-colors group"
+                className={`flex items-center gap-4 p-4 transition-colors group ${
+                  category.is_active
+                    ? 'hover:bg-[#F9FAFB]'
+                    : 'bg-amber-50/50 hover:bg-amber-50 border-l-4 border-l-amber-400'
+                }`}
               >
                 {/* Category Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-[#111827]">{category.name}</h3>
-                    {!category.is_active && (
-                      <span className="px-2 py-0.5 text-xs font-medium bg-[#F59E0B]/10 text-[#F59E0B] rounded">
+                    <h3 className={`font-medium ${category.is_active ? 'text-[#111827]' : 'text-gray-500'}`}>
+                      {category.name}
+                    </h3>
+                    {category.is_active ? (
+                      <span className="px-2 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700 rounded">
+                        Aktif
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded">
                         Nonaktif
                       </span>
                     )}
                   </div>
                   {category.description && (
-                    <p className="text-sm text-[#6B7280] line-clamp-1 mt-0.5">
+                    <p className={`text-sm line-clamp-1 mt-0.5 ${category.is_active ? 'text-[#6B7280]' : 'text-gray-400'}`}>
                       {category.description}
                     </p>
                   )}
                 </div>
 
                 {/* Menu Count */}
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F3F4F6]">
-                  <Package className="w-4 h-4 text-[#6B7280]" />
-                  <span className="text-sm font-medium text-[#374151]">
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${
+                  category.is_active ? 'bg-[#F3F4F6]' : 'bg-amber-100/50'
+                }`}>
+                  <Package className={`w-4 h-4 ${category.is_active ? 'text-[#6B7280]' : 'text-amber-600'}`} />
+                  <span className={`text-sm font-medium ${category.is_active ? 'text-[#374151]' : 'text-amber-700'}`}>
                     {category.menu_items?.[0]?.count || 0} menu
                   </span>
                 </div>
 
                 {/* Status Indicator */}
                 <div className={`w-3 h-3 rounded-full ${
-                  category.is_active ? 'bg-[#10B981]' : 'bg-[#D1D5DB]'
+                  category.is_active ? 'bg-[#10B981]' : 'bg-amber-400'
                 }`} />
 
                 {/* Edit Button */}

@@ -198,7 +198,7 @@ export function MenuFilters({ categories, menuItems }: MenuFiltersProps) {
   return (
     <>
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center bg-[#F9FAFB] rounded-xl p-4 border border-[#E5E7EB]">
+      <div className="flex flex-wrap gap-3 items-center bg-[#F9FAFB] rounded-xl p-4 border border-[#E5E7EB]" data-tour="menu-category-filter">
         {/* Search */}
         <div className="relative flex-1 min-w-[200px] max-w-sm" data-tour="menu-search">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
@@ -225,7 +225,6 @@ export function MenuFilters({ categories, menuItems }: MenuFiltersProps) {
           onChange={setSelectedCategory}
           options={categoryOptions}
           placeholder="Semua Kategori"
-          data-tour="menu-category-filter"
         />
 
         {/* Status Filter */}
@@ -267,7 +266,9 @@ export function MenuFilters({ categories, menuItems }: MenuFiltersProps) {
           {filteredItems.map((item) => (
             <div
               key={item.id}
-              className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden hover:shadow-admin-md transition-all group"
+              className={`bg-white rounded-xl border overflow-hidden hover:shadow-admin-md transition-all group ${
+                item.is_available ? 'border-[#E5E7EB]' : 'border-red-200 bg-red-50/30'
+              }`}
             >
               {/* Image */}
               <div className="relative aspect-[4/3] bg-[#F3F4F6]">
@@ -276,11 +277,20 @@ export function MenuFilters({ categories, menuItems }: MenuFiltersProps) {
                     src={item.image_url}
                     alt={item.name}
                     fill
-                    className="object-cover"
+                    className={`object-cover ${!item.is_available ? 'grayscale opacity-60' : ''}`}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <UtensilsCrossed className="w-12 h-12 text-[#D1D5DB]" />
+                  </div>
+                )}
+
+                {/* Unavailable Overlay */}
+                {!item.is_available && (
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                    <span className="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg shadow-lg">
+                      TIDAK TERSEDIA
+                    </span>
                   </div>
                 )}
 

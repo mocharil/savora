@@ -26,6 +26,14 @@ interface Category {
   menu_items: MenuItem[]
 }
 
+interface ThemeSettings {
+  primary_color: string
+  secondary_color: string
+  accent_color: string
+  text_color: string
+  background_color: string
+}
+
 interface MenuListProps {
   categories: Category[]
   storeId: string
@@ -33,9 +41,18 @@ interface MenuListProps {
   tableId: string | null | undefined
   storeSlug?: string
   outletSlug?: string
+  theme?: ThemeSettings
 }
 
-export function MenuList({ categories, storeId, outletId, tableId, storeSlug, outletSlug }: MenuListProps) {
+const defaultTheme: ThemeSettings = {
+  primary_color: '#f97316',
+  secondary_color: '#ef4444',
+  accent_color: '#10b981',
+  text_color: '#1f2937',
+  background_color: '#ffffff',
+}
+
+export function MenuList({ categories, storeId, outletId, tableId, storeSlug, outletSlug, theme = defaultTheme }: MenuListProps) {
   const { items, addItem, updateQuantity, setContext } = useCartStore()
   const [mounted, setMounted] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -206,7 +223,8 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
           {/* Voice Order Button */}
           <button
             onClick={() => setShowVoiceOrder(true)}
-            className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center shadow-lg shadow-orange-200 hover:shadow-xl hover:shadow-orange-300 transition-all active:scale-95"
+            className="flex-shrink-0 w-12 h-12 rounded-2xl text-white flex items-center justify-center shadow-lg transition-all active:scale-95"
+            style={{ background: `linear-gradient(to bottom right, ${theme.primary_color}, ${theme.secondary_color})` }}
             title="Pesan dengan suara"
           >
             <Mic className="w-5 h-5" />
@@ -222,9 +240,10 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
               onClick={() => scrollToCategory('all')}
               className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
                 activeCategory === 'all'
-                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-200'
-                  : 'bg-white text-gray-600 border border-orange-100 hover:border-orange-300 hover:text-orange-600'
+                  ? 'text-white shadow-lg'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
               }`}
+              style={activeCategory === 'all' ? { background: `linear-gradient(to right, ${theme.primary_color}, ${theme.secondary_color})` } : {}}
             >
               Semua
             </button>
@@ -234,9 +253,10 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
                 onClick={() => scrollToCategory(category.id)}
                 className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
                   activeCategory === category.id
-                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-200'
-                    : 'bg-white text-gray-600 border border-orange-100 hover:border-orange-300 hover:text-orange-600'
+                    ? 'text-white shadow-lg'
+                    : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
                 }`}
+                style={activeCategory === category.id ? { background: `linear-gradient(to right, ${theme.primary_color}, ${theme.secondary_color})` } : {}}
               >
                 {category.name}
               </button>
@@ -249,10 +269,13 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
       {!searchQuery && featuredItems.length > 0 && (
         <div className="px-4 pt-2">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: `linear-gradient(to bottom right, ${theme.primary_color}, ${theme.secondary_color})` }}
+            >
               <Flame className="w-4 h-4 text-white" />
             </div>
-            <h2 className="text-lg font-bold text-gray-900">Favorit Pelanggan</h2>
+            <h2 className="text-lg font-bold" style={{ color: theme.text_color }}>Favorit Pelanggan</h2>
           </div>
           <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
             {featuredItems.map((item) => {
@@ -293,7 +316,7 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
                     <h3 className="font-semibold text-sm text-gray-900 line-clamp-1">{item.name}</h3>
                     <div className="mt-2 flex items-center justify-between">
                       <div>
-                        <p className="font-bold text-orange-600">{formatCurrency(displayPrice)}</p>
+                        <p className="font-bold" style={{ color: theme.primary_color }}>{formatCurrency(displayPrice)}</p>
                         {hasDiscount && (
                           <p className="text-xs text-gray-400 line-through">{formatCurrency(item.price)}</p>
                         )}
@@ -301,7 +324,8 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
                       {quantity === 0 ? (
                         <button
                           onClick={(e) => { e.stopPropagation(); handleAddToCart(item) }}
-                          className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center shadow-lg shadow-orange-200 transition-all active:scale-95 hover:shadow-xl"
+                          className="w-9 h-9 rounded-xl text-white flex items-center justify-center shadow-lg transition-all active:scale-95 hover:shadow-xl"
+                          style={{ background: `linear-gradient(to bottom right, ${theme.primary_color}, ${theme.secondary_color})` }}
                         >
                           <Plus className="w-5 h-5" />
                         </button>
@@ -309,14 +333,16 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
                         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={() => handleDecrement(item.id)}
-                            className="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center transition-transform active:scale-95"
+                            className="w-8 h-8 rounded-xl flex items-center justify-center transition-transform active:scale-95"
+                            style={{ backgroundColor: `${theme.primary_color}20`, color: theme.primary_color }}
                           >
                             <Minus className="w-4 h-4" />
                           </button>
                           <span className="w-6 text-center font-bold text-sm text-gray-900">{quantity}</span>
                           <button
                             onClick={() => handleIncrement(item)}
-                            className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center transition-transform active:scale-95"
+                            className="w-8 h-8 rounded-xl text-white flex items-center justify-center transition-transform active:scale-95"
+                            style={{ background: `linear-gradient(to bottom right, ${theme.primary_color}, ${theme.secondary_color})` }}
                           >
                             <Plus className="w-4 h-4" />
                           </button>
@@ -339,11 +365,14 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
             ref={(el) => { categoryRefs.current[category.id] = el }}
           >
             {!searchQuery && (
-              <div className="flex items-center gap-2 mb-4 sticky top-[180px] bg-gradient-to-r from-white/90 to-orange-50/90 backdrop-blur-sm py-2 px-3 -mx-3 z-20 rounded-xl">
-                <div className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-orange-600" />
+              <div className="flex items-center gap-2 mb-4 sticky top-[180px] bg-white/90 backdrop-blur-sm py-2 px-3 -mx-3 z-20 rounded-xl">
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: `${theme.primary_color}20` }}
+                >
+                  <TrendingUp className="w-4 h-4" style={{ color: theme.primary_color }} />
                 </div>
-                <h2 className="text-lg font-bold text-gray-900">{category.name}</h2>
+                <h2 className="text-lg font-bold" style={{ color: theme.text_color }}>{category.name}</h2>
               </div>
             )}
 
@@ -386,7 +415,8 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
                       {quantity === 0 && (
                         <button
                           onClick={(e) => { e.stopPropagation(); handleAddToCart(item) }}
-                          className="absolute bottom-2 right-2 w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center shadow-lg shadow-orange-300/50 transition-all active:scale-95"
+                          className="absolute bottom-2 right-2 w-9 h-9 rounded-xl text-white flex items-center justify-center shadow-lg transition-all active:scale-95"
+                          style={{ background: `linear-gradient(to bottom right, ${theme.primary_color}, ${theme.secondary_color})` }}
                         >
                           <Plus className="w-5 h-5" />
                         </button>
@@ -399,7 +429,7 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
                       )}
                       <div className="mt-2 flex items-center justify-between">
                         <div>
-                          <p className="font-bold text-orange-600 text-sm">{formatCurrency(displayPrice)}</p>
+                          <p className="font-bold text-sm" style={{ color: theme.primary_color }}>{formatCurrency(displayPrice)}</p>
                           {hasDiscount && (
                             <p className="text-xs text-gray-400 line-through">{formatCurrency(item.price)}</p>
                           )}
@@ -408,14 +438,16 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
                           <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => handleDecrement(item.id)}
-                              className="w-7 h-7 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center transition-transform active:scale-95"
+                              className="w-7 h-7 rounded-lg flex items-center justify-center transition-transform active:scale-95"
+                              style={{ backgroundColor: `${theme.primary_color}20`, color: theme.primary_color }}
                             >
                               <Minus className="w-4 h-4" />
                             </button>
                             <span className="w-5 text-center font-bold text-xs text-gray-900">{quantity}</span>
                             <button
                               onClick={() => handleIncrement(item)}
-                              className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center transition-transform active:scale-95"
+                              className="w-7 h-7 rounded-lg text-white flex items-center justify-center transition-transform active:scale-95"
+                              style={{ background: `linear-gradient(to bottom right, ${theme.primary_color}, ${theme.secondary_color})` }}
                             >
                               <Plus className="w-4 h-4" />
                             </button>

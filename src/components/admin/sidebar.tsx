@@ -47,7 +47,7 @@ interface MenuItem {
   href: string
   icon: typeof LayoutDashboard
   badge?: boolean
-  requiredRole?: string
+  allowedRoles?: string[] // List of roles allowed to see this item
   tourId?: string // For product tour targeting
 }
 
@@ -55,6 +55,12 @@ interface MenuGroup {
   label: string
   items: MenuItem[]
 }
+
+// Role definitions:
+// - tenant_admin: Full access (Admin/Owner)
+// - kitchen_staff: Dashboard, Pesanan (Staff Dapur)
+// - waiter: Dashboard, Pesanan, Menu, Meja & QR (Pelayan)
+// - cashier: Dashboard, POS Kasir, Pesanan (Kasir)
 
 // Menu grouping structure
 const menuGroups: MenuGroup[] = [
@@ -67,30 +73,30 @@ const menuGroups: MenuGroup[] = [
   {
     label: 'Operasional',
     items: [
-      { name: 'POS Kasir', href: '/admin/pos', icon: Receipt, tourId: 'sidebar-pos' },
+      { name: 'POS Kasir', href: '/admin/pos', icon: Receipt, allowedRoles: ['tenant_admin', 'cashier'], tourId: 'sidebar-pos' },
       { name: 'Pesanan', href: '/admin/orders', icon: ShoppingBag, badge: true, tourId: 'sidebar-orders' },
     ]
   },
   {
     label: 'Menu & Meja',
     items: [
-      { name: 'Menu', href: '/admin/menu', icon: UtensilsCrossed, tourId: 'sidebar-menu' },
-      { name: 'Kategori', href: '/admin/categories', icon: FolderOpen, tourId: 'sidebar-categories' },
-      { name: 'Meja & QR', href: '/admin/tables', icon: QrCode, tourId: 'sidebar-tables' },
+      { name: 'Menu', href: '/admin/menu', icon: UtensilsCrossed, allowedRoles: ['tenant_admin', 'waiter'], tourId: 'sidebar-menu' },
+      { name: 'Kategori', href: '/admin/categories', icon: FolderOpen, allowedRoles: ['tenant_admin'], tourId: 'sidebar-categories' },
+      { name: 'Meja & QR', href: '/admin/tables', icon: QrCode, allowedRoles: ['tenant_admin', 'waiter'], tourId: 'sidebar-tables' },
     ]
   },
   {
     label: 'Pengguna & Insight',
     items: [
-      { name: 'Users', href: '/admin/users', icon: Users, requiredRole: 'tenant_admin', tourId: 'sidebar-users' },
-      { name: 'AI Assistant', href: '/admin/ai', icon: Sparkles, tourId: 'sidebar-ai' },
-      { name: 'Analytics', href: '/admin/analytics', icon: BarChart3, requiredRole: 'tenant_admin', tourId: 'sidebar-analytics' },
+      { name: 'Users', href: '/admin/users', icon: Users, allowedRoles: ['tenant_admin'], tourId: 'sidebar-users' },
+      { name: 'AI Assistant', href: '/admin/ai', icon: Sparkles, allowedRoles: ['tenant_admin'], tourId: 'sidebar-ai' },
+      { name: 'Analytics', href: '/admin/analytics', icon: BarChart3, allowedRoles: ['tenant_admin'], tourId: 'sidebar-analytics' },
     ]
   },
   {
     label: 'Pengaturan',
     items: [
-      { name: 'Pengaturan', href: '/admin/settings', icon: Settings, requiredRole: 'tenant_admin', tourId: 'sidebar-settings' },
+      { name: 'Pengaturan', href: '/admin/settings', icon: Settings, allowedRoles: ['tenant_admin'], tourId: 'sidebar-settings' },
     ]
   },
 ]
@@ -127,9 +133,10 @@ export function AdminSidebar({
   // Get display role
   const getRoleLabel = (role: string) => {
     switch (role) {
-      case 'tenant_admin': return 'Owner'
-      case 'outlet_admin': return 'Outlet Admin'
-      case 'staff': return 'Staff'
+      case 'tenant_admin': return 'Admin'
+      case 'kitchen_staff': return 'Staff Dapur'
+      case 'waiter': return 'Pelayan'
+      case 'cashier': return 'Kasir'
       default: return role
     }
   }
@@ -147,10 +154,10 @@ export function AdminSidebar({
   // Filter menu items based on user role
   const filterMenuItems = (items: typeof menuGroups[0]['items']) => {
     return items.filter(item => {
-      if (!item.requiredRole) return true
-      if (userRole === 'tenant_admin') return true
-      if (item.requiredRole === 'outlet_admin' && (userRole === 'outlet_admin' || userRole === 'tenant_admin')) return true
-      return false
+      // If no allowedRoles specified, all users can access
+      if (!item.allowedRoles || item.allowedRoles.length === 0) return true
+      // Check if user's role is in the allowed roles list
+      return item.allowedRoles.includes(userRole)
     })
   }
 

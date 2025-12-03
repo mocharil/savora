@@ -53,6 +53,37 @@ export function VoiceOrderButton({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isRecordingRef = useRef(false)
 
+  // Request microphone permission first
+  const requestMicrophonePermission = async () => {
+    try {
+      // Check if getUserMedia is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Perangkat tidak mendukung akses mikrofon')
+      }
+
+      // Request permission
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+
+      // Stop the stream immediately - we just needed permission
+      stream.getTracks().forEach(track => track.stop())
+
+      return true
+    } catch (err: any) {
+      console.error('Microphone permission error:', err)
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setError('Akses mikrofon ditolak. Mohon izinkan akses mikrofon di pengaturan browser Anda, lalu refresh halaman.')
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setError('Mikrofon tidak ditemukan. Pastikan perangkat Anda memiliki mikrofon.')
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        setError('Mikrofon sedang digunakan aplikasi lain. Tutup aplikasi lain yang menggunakan mikrofon.')
+      } else {
+        setError(`Gagal mengakses mikrofon: ${err.message}`)
+      }
+      setState('error')
+      return false
+    }
+  }
+
   // Check browser support
   useEffect(() => {
     const SpeechRecognition =
@@ -94,11 +125,15 @@ export function VoiceOrderButton({
       console.error('Speech recognition error:', event.error)
       isRecordingRef.current = false
       if (event.error === 'not-allowed') {
-        setError('Akses mikrofon ditolak. Mohon izinkan akses mikrofon.')
+        setError('Akses mikrofon ditolak. Mohon izinkan akses mikrofon di pengaturan browser Anda, lalu refresh halaman.')
       } else if (event.error === 'no-speech') {
-        setError('Tidak terdengar suara. Silakan coba lagi.')
+        setError('Tidak terdengar suara. Pastikan mikrofon berfungsi dan coba bicara lebih keras.')
+      } else if (event.error === 'audio-capture') {
+        setError('Mikrofon tidak terdeteksi. Pastikan mikrofon tersambung dan diizinkan.')
+      } else if (event.error === 'network') {
+        setError('Koneksi internet bermasalah. Periksa koneksi Anda.')
       } else {
-        setError('Terjadi kesalahan. Silakan coba lagi.')
+        setError(`Terjadi kesalahan: ${event.error}. Silakan coba lagi.`)
       }
       setState('error')
     }
@@ -119,21 +154,26 @@ export function VoiceOrderButton({
 
     // Auto-start recording if autoStart is true
     if (autoStart) {
-      try {
-        recognition.start()
-        // Auto-stop after 10 seconds of recording
-        timeoutRef.current = setTimeout(() => {
+      // First request microphone permission, then start recognition
+      requestMicrophonePermission().then(hasPermission => {
+        if (hasPermission) {
           try {
-            recognition.stop()
-          } catch (e) {
-            console.error('Auto-stop error:', e)
+            recognition.start()
+            // Auto-stop after 15 seconds of recording
+            timeoutRef.current = setTimeout(() => {
+              try {
+                recognition.stop()
+              } catch (e) {
+                console.error('Auto-stop error:', e)
+              }
+            }, 15000)
+          } catch (err) {
+            console.error('Auto-start recording error:', err)
+            setError('Gagal memulai perekaman. Pastikan mikrofon diizinkan.')
+            setState('error')
           }
-        }, 10000)
-      } catch (err) {
-        console.error('Auto-start recording error:', err)
-        setError('Gagal memulai perekaman')
-        setState('error')
-      }
+        }
+      })
     }
 
     return () => {
@@ -151,7 +191,7 @@ export function VoiceOrderButton({
     }
   }, [autoStart])
 
-  const startRecording = useCallback(() => {
+  const startRecording = useCallback(async () => {
     if (!isSupported) {
       setError('Browser tidak mendukung pengenalan suara')
       return
@@ -167,13 +207,19 @@ export function VoiceOrderButton({
     setParsedItems([])
     setState('recording')
 
+    // Request microphone permission first
+    const hasPermission = await requestMicrophonePermission()
+    if (!hasPermission) {
+      return
+    }
+
     try {
       recognitionRef.current?.start()
 
-      // Auto-stop after 10 seconds of recording
+      // Auto-stop after 15 seconds of recording
       timeoutRef.current = setTimeout(() => {
         stopRecording()
-      }, 10000)
+      }, 15000)
     } catch (err: any) {
       // Handle "already started" error gracefully
       if (err.name === 'InvalidStateError') {
@@ -206,7 +252,7 @@ export function VoiceOrderButton({
 
   const processTranscript = async () => {
     if (!transcript.trim()) {
-      setError('Tidak ada suara yang terdeteksi')
+      setError('Tidak ada suara yang terdeteksi. Pastikan mikrofon berfungsi dengan baik dan coba bicara lebih keras atau lebih dekat ke mikrofon.')
       setState('error')
       return
     }

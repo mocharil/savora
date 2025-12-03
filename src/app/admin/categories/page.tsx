@@ -1,6 +1,6 @@
 // @ts-nocheck
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { getUserFromToken } from '@/lib/tenant-context'
 import { redirect } from 'next/navigation'
 import { CategoriesPageClient } from './CategoriesPageClient'
@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 
 export default async function CategoriesPage() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Get user from token
   const user = await getUserFromToken()
@@ -42,7 +42,7 @@ export default async function CategoriesPage() {
       <CategoriesPageClient />
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-tour="categories-stats">
         <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">

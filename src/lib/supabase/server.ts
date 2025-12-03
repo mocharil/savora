@@ -31,9 +31,15 @@ export async function createClient() {
 // Admin client with service role - bypasses RLS
 // Use this for server-side operations where user is already authenticated via custom JWT
 export function createAdminClient() {
+  // Use service role key if available, otherwise fall back to anon key
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY &&
+    process.env.SUPABASE_SERVICE_ROLE_KEY !== 'your_service_role_key'
+      ? process.env.SUPABASE_SERVICE_ROLE_KEY
+      : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
   return createSupabaseClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    supabaseKey,
     {
       auth: {
         autoRefreshToken: false,

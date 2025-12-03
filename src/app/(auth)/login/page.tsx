@@ -29,6 +29,7 @@ function LoginForm() {
       })
 
       const data = await res.json()
+      console.log('Login response:', data)
 
       if (!res.ok) {
         setError(data.error || 'Login gagal')
@@ -36,11 +37,17 @@ function LoginForm() {
         return
       }
 
-      // If there's a specific redirect URL, use it
-      // Otherwise go to admin/dashboard (which will redirect to onboarding if needed)
-      router.push(redirectUrl || '/admin/dashboard')
-      router.refresh()
-    } catch (err) {
+      // Login successful - redirect to dashboard
+      if (data.success) {
+        const destination = redirectUrl || '/admin/dashboard'
+        console.log('Redirecting to:', destination)
+        window.location.replace(destination)
+      } else {
+        setError('Login gagal')
+        setLoading(false)
+      }
+    } catch (err: any) {
+      console.error('Login error:', err)
       setError('Terjadi kesalahan. Coba lagi.')
       setLoading(false)
     }

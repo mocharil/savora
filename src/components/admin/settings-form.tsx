@@ -12,20 +12,13 @@ import {
   X,
   Save,
   ImageIcon,
-  CreditCard,
   Store,
   MapPin,
   Phone,
   Globe,
-  Bell,
   Shield,
   Palette,
-  QrCode,
   Receipt,
-  Settings,
-  HelpCircle,
-  ExternalLink,
-  Copy,
   CheckCircle
 } from 'lucide-react'
 import type { Store as StoreType } from '@/types/database'
@@ -40,13 +33,13 @@ type OperationalHours = {
 }
 
 const defaultOperationalHours: OperationalHours = {
-  monday: { open: '09:00', close: '22:00', isOpen: true },
-  tuesday: { open: '09:00', close: '22:00', isOpen: true },
-  wednesday: { open: '09:00', close: '22:00', isOpen: true },
-  thursday: { open: '09:00', close: '23:00', isOpen: true },
-  friday: { open: '09:00', close: '23:00', isOpen: true },
-  saturday: { open: '10:00', close: '23:59', isOpen: true },
-  sunday: { open: '10:00', close: '22:00', isOpen: false },
+  monday: { open: '09:00', close: '21:00', isOpen: true },
+  tuesday: { open: '09:00', close: '21:00', isOpen: true },
+  wednesday: { open: '09:00', close: '21:00', isOpen: true },
+  thursday: { open: '09:00', close: '21:00', isOpen: true },
+  friday: { open: '09:00', close: '21:00', isOpen: true },
+  saturday: { open: '09:00', close: '21:00', isOpen: true },
+  sunday: { open: '09:00', close: '21:00', isOpen: true },
 }
 
 const dayNames: Record<string, string> = {
@@ -74,7 +67,15 @@ export function SettingsForm({ store }: SettingsFormProps) {
   const [uploading, setUploading] = useState<'logo' | 'banner' | null>(null)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const [copied, setCopied] = useState(false)
+
+  // Default theme settings
+  const defaultThemeSettings = {
+    primary_color: '#f97316', // Orange-500
+    secondary_color: '#ef4444', // Red-500
+    accent_color: '#10b981', // Emerald-500
+    text_color: '#1f2937', // Gray-800
+    background_color: '#ffffff', // White
+  }
 
   const [formData, setFormData] = useState({
     name: store?.name || '',
@@ -88,17 +89,8 @@ export function SettingsForm({ store }: SettingsFormProps) {
     service_charge_percentage: store?.service_charge_percentage || 0,
     operational_hours: (store?.operational_hours as OperationalHours) || defaultOperationalHours,
     is_active: store?.is_active ?? true,
+    theme_settings: (store?.theme_settings as typeof defaultThemeSettings) || defaultThemeSettings,
   })
-
-  const storeUrl = store?.slug ? `${typeof window !== 'undefined' ? window.location.origin : ''}/${store.slug}/order` : ''
-
-  const copyStoreUrl = () => {
-    if (storeUrl) {
-      navigator.clipboard.writeText(storeUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
 
   const handleImageUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -203,6 +195,7 @@ export function SettingsForm({ store }: SettingsFormProps) {
             service_charge_percentage: Number(formData.service_charge_percentage),
             operational_hours: formData.operational_hours,
             is_active: formData.is_active,
+            theme_settings: formData.theme_settings,
           }
         })
       })
@@ -239,6 +232,23 @@ export function SettingsForm({ store }: SettingsFormProps) {
     })
   }
 
+  const updateThemeColor = (field: string, value: string) => {
+    setFormData({
+      ...formData,
+      theme_settings: {
+        ...formData.theme_settings,
+        [field]: value
+      }
+    })
+  }
+
+  const resetThemeToDefault = () => {
+    setFormData({
+      ...formData,
+      theme_settings: defaultThemeSettings
+    })
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Page Header */}
@@ -252,6 +262,7 @@ export function SettingsForm({ store }: SettingsFormProps) {
           <button
             type="submit"
             disabled={loading || success}
+            data-tour="settings-save-btn"
             className="flex items-center gap-2 h-10 px-5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg text-sm font-medium hover:from-orange-600 hover:to-red-600 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25"
           >
             {loading ? (
@@ -449,62 +460,6 @@ export function SettingsForm({ store }: SettingsFormProps) {
           </div>
         </div>
 
-        {/* Link Toko */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-violet-50 to-purple-50">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-                <QrCode className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-gray-900">Link Pemesanan</h2>
-                <p className="text-xs text-gray-500">URL untuk pelanggan</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6">
-            <p className="text-xs text-gray-500 mb-3">
-              Bagikan link ini kepada pelanggan atau cetak QR Code untuk meja restoran
-            </p>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={storeUrl}
-                readOnly
-                className="flex-1 h-10 px-3 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-600 truncate"
-              />
-              <button
-                type="button"
-                onClick={copyStoreUrl}
-                className="h-10 w-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
-              >
-                {copied ? (
-                  <Check className="w-4 h-4 text-emerald-500" />
-                ) : (
-                  <Copy className="w-4 h-4 text-gray-600" />
-                )}
-              </button>
-            </div>
-            <a
-              href={storeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 flex items-center justify-center gap-2 h-10 w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl text-sm font-medium hover:from-violet-600 hover:to-purple-700 transition-all"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Buka Halaman Pemesanan
-            </a>
-
-            <div className="mt-4 p-3 bg-violet-50 rounded-xl">
-              <p className="text-xs text-violet-700 flex items-start gap-2">
-                <HelpCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>Untuk membuat QR Code per meja, pergi ke menu <strong>Meja & QR</strong></span>
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Jam Operasional */}
         <div data-tour="settings-operation" className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-teal-50">
@@ -649,7 +604,7 @@ export function SettingsForm({ store }: SettingsFormProps) {
         </div>
 
         {/* Status Toko */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div data-tour="settings-status" className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
@@ -695,6 +650,177 @@ export function SettingsForm({ store }: SettingsFormProps) {
                       ? 'Pelanggan dapat melakukan pemesanan melalui QR Code'
                       : 'Pelanggan tidak dapat melakukan pemesanan saat ini'}
                   </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Design Settings - Customer Theme */}
+        <div data-tour="settings-design" className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-violet-50 to-purple-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                  <Palette className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold text-gray-900">Tampilan Pelanggan</h2>
+                  <p className="text-xs text-gray-500">Kustomisasi warna halaman pemesanan</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={resetThemeToDefault}
+                className="text-xs font-medium text-violet-600 hover:text-violet-700 hover:underline"
+              >
+                Reset ke Default
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              {/* Primary Color */}
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-2">
+                  Warna Utama
+                </label>
+                <div className="relative">
+                  <input
+                    type="color"
+                    value={formData.theme_settings.primary_color}
+                    onChange={(e) => updateThemeColor('primary_color', e.target.value)}
+                    className="w-full h-12 rounded-xl cursor-pointer border-2 border-gray-200 hover:border-violet-400 transition-colors"
+                  />
+                  <div className="absolute -bottom-5 left-0 right-0 text-center">
+                    <span className="text-[10px] text-gray-400 font-mono">{formData.theme_settings.primary_color}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Secondary Color */}
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-2">
+                  Warna Sekunder
+                </label>
+                <div className="relative">
+                  <input
+                    type="color"
+                    value={formData.theme_settings.secondary_color}
+                    onChange={(e) => updateThemeColor('secondary_color', e.target.value)}
+                    className="w-full h-12 rounded-xl cursor-pointer border-2 border-gray-200 hover:border-violet-400 transition-colors"
+                  />
+                  <div className="absolute -bottom-5 left-0 right-0 text-center">
+                    <span className="text-[10px] text-gray-400 font-mono">{formData.theme_settings.secondary_color}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Accent Color */}
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-2">
+                  Warna Aksen
+                </label>
+                <div className="relative">
+                  <input
+                    type="color"
+                    value={formData.theme_settings.accent_color}
+                    onChange={(e) => updateThemeColor('accent_color', e.target.value)}
+                    className="w-full h-12 rounded-xl cursor-pointer border-2 border-gray-200 hover:border-violet-400 transition-colors"
+                  />
+                  <div className="absolute -bottom-5 left-0 right-0 text-center">
+                    <span className="text-[10px] text-gray-400 font-mono">{formData.theme_settings.accent_color}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Text Color */}
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-2">
+                  Warna Teks
+                </label>
+                <div className="relative">
+                  <input
+                    type="color"
+                    value={formData.theme_settings.text_color}
+                    onChange={(e) => updateThemeColor('text_color', e.target.value)}
+                    className="w-full h-12 rounded-xl cursor-pointer border-2 border-gray-200 hover:border-violet-400 transition-colors"
+                  />
+                  <div className="absolute -bottom-5 left-0 right-0 text-center">
+                    <span className="text-[10px] text-gray-400 font-mono">{formData.theme_settings.text_color}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Background Color */}
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-2">
+                  Warna Latar
+                </label>
+                <div className="relative">
+                  <input
+                    type="color"
+                    value={formData.theme_settings.background_color}
+                    onChange={(e) => updateThemeColor('background_color', e.target.value)}
+                    className="w-full h-12 rounded-xl cursor-pointer border-2 border-gray-200 hover:border-violet-400 transition-colors"
+                  />
+                  <div className="absolute -bottom-5 left-0 right-0 text-center">
+                    <span className="text-[10px] text-gray-400 font-mono">{formData.theme_settings.background_color}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Preview Section */}
+            <div className="mt-10 pt-6 border-t border-gray-100">
+              <p className="text-xs font-medium text-gray-500 mb-4">Preview Tampilan</p>
+              <div
+                className="rounded-xl p-6 border-2 border-gray-200 overflow-hidden"
+                style={{ backgroundColor: formData.theme_settings.background_color }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: formData.theme_settings.primary_color }}
+                  >
+                    <Store className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p
+                      className="font-semibold text-sm"
+                      style={{ color: formData.theme_settings.text_color }}
+                    >
+                      {formData.name || 'Nama Toko'}
+                    </p>
+                    <p
+                      className="text-xs opacity-60"
+                      style={{ color: formData.theme_settings.text_color }}
+                    >
+                      Halaman Pemesanan
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded-lg text-white text-xs font-medium"
+                    style={{
+                      background: `linear-gradient(135deg, ${formData.theme_settings.primary_color}, ${formData.theme_settings.secondary_color})`
+                    }}
+                  >
+                    Tombol Utama
+                  </button>
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded-lg text-xs font-medium border-2"
+                    style={{
+                      borderColor: formData.theme_settings.accent_color,
+                      color: formData.theme_settings.accent_color
+                    }}
+                  >
+                    Tombol Sekunder
+                  </button>
                 </div>
               </div>
             </div>
