@@ -16,9 +16,10 @@ interface CartFloatingButtonProps {
   storeSlug: string
   outletSlug?: string
   theme?: ThemeSettings
+  hidden?: boolean
 }
 
-export function CartFloatingButton({ storeSlug, outletSlug, theme }: CartFloatingButtonProps) {
+export function CartFloatingButton({ storeSlug, outletSlug, theme, hidden }: CartFloatingButtonProps) {
   const primaryColor = theme?.primary_color || '#f97316'
   const secondaryColor = theme?.secondary_color || '#ef4444'
   const { getTotalItems, getTotalAmount } = useCartStore()
@@ -48,6 +49,9 @@ export function CartFloatingButton({ storeSlug, outletSlug, theme }: CartFloatin
 
   // Don't show on cart or checkout pages
   if (pathname.includes('/cart') || pathname.includes('/checkout') || pathname.includes('/confirmation')) return null
+
+  // Hide when AI chat is open
+  if (hidden) return null
 
   const cartUrl = outletSlug
     ? `/${storeSlug}/${outletSlug}/order/cart`

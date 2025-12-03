@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Loader2, Mail, Lock, Eye, EyeOff, User, Store, CheckCircle } from 'lucide-react'
+import { PoweredBySavora } from '@/components/ui/powered-by-savora'
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState('')
@@ -256,9 +257,9 @@ export default function RegisterPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-gray-500 text-sm mt-4">
-          &copy; {new Date().getFullYear()} Savora. All rights reserved.
-        </p>
+        <div className="mt-6">
+          <PoweredBySavora variant="dark" size="md" />
+        </div>
       </div>
     </div>
   )

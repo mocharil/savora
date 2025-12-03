@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import {
   Sparkles,
   X,
@@ -12,7 +13,13 @@ import {
   Bot,
   User,
   Plus,
+  Minus,
+  Check,
+  ChefHat,
+  Star,
+  CreditCard,
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/stores/cart-store'
 import { formatCurrency } from '@/lib/utils'
 
@@ -31,6 +38,7 @@ interface RecommendedItem {
   discount_price: number | null
   description: string | null
   category: string
+  image_url?: string | null
 }
 
 interface AIRecommendationProps {
@@ -41,6 +49,18 @@ interface AIRecommendationProps {
   theme?: {
     primaryColor?: string
   }
+  onOpenChange?: (isOpen: boolean) => void
+}
+
+// Parse markdown bold (**text**) to React elements
+function parseMarkdownBold(text: string): React.ReactNode[] {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={index} className="font-semibold">{part.slice(2, -2)}</strong>
+    }
+    return part
+  })
 }
 
 const QUICK_PROMPTS = [
@@ -56,16 +76,24 @@ export function AIRecommendation({
   storeSlug,
   outletSlug,
   theme,
+  onOpenChange,
 }: AIRecommendationProps) {
+  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const { addItem } = useCartStore()
+  const { addItem, items, updateQuantity, removeItem, getTotalItems, getTotalAmount } = useCartStore()
 
   const primaryColor = theme?.primaryColor || '#10b981'
+
+  // Notify parent when open state changes
+  const handleOpenChange = useCallback((open: boolean) => {
+    setIsOpen(open)
+    onOpenChange?.(open)
+  }, [onOpenChange])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -158,6 +186,26 @@ export function AIRecommendation({
     })
   }
 
+  const handleDecreaseQuantity = (menuItemId: string) => {
+    const cartItem = items.find(i => i.menuItemId === menuItemId)
+    if (cartItem) {
+      if (cartItem.quantity <= 1) {
+        removeItem(cartItem.id) // Use cart item's id, not menuItemId
+      } else {
+        updateQuantity(cartItem.id, cartItem.quantity - 1) // Use cart item's id
+      }
+    }
+  }
+
+  const handleIncreaseQuantity = (item: RecommendedItem) => {
+    const cartItem = items.find(i => i.menuItemId === item.id)
+    if (cartItem) {
+      updateQuantity(cartItem.id, cartItem.quantity + 1) // Use cart item's id
+    } else {
+      handleAddToCart(item)
+    }
+  }
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -174,7 +222,7 @@ export function AIRecommendation({
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            onClick={() => setIsOpen(true)}
+            onClick={() => handleOpenChange(true)}
             className="fixed bottom-[100px] right-4 z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white"
             style={{ backgroundColor: primaryColor }}
             whileHover={{ scale: 1.1 }}
@@ -197,7 +245,7 @@ export function AIRecommendation({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
+              onClick={() => handleOpenChange(false)}
               className="fixed inset-0 bg-black/50 z-50"
             />
 
@@ -224,7 +272,7 @@ export function AIRecommendation({
                   </div>
                 </div>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => handleOpenChange(false)}
                   className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-colors"
                 >
                   <ChevronDown className="w-5 h-5" />
@@ -247,7 +295,7 @@ export function AIRecommendation({
                       </div>
                     )}
 
-                    <div className={`max-w-[80%] ${message.role === 'user' ? 'order-first' : ''}`}>
+                    <div className={`max-w-[85%] ${message.role === 'user' ? 'order-first' : ''}`}>
                       <div
                         className={`rounded-2xl px-4 py-2.5 ${
                           message.role === 'user'
@@ -256,48 +304,121 @@ export function AIRecommendation({
                         }`}
                         style={message.role === 'user' ? { backgroundColor: primaryColor } : {}}
                       >
-                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        <p className="text-sm whitespace-pre-wrap">{parseMarkdownBold(message.content)}</p>
                       </div>
 
-                      {/* Recommendations */}
+                      {/* Recommendations - Modern Menu Cards */}
                       {message.recommendations && message.recommendations.length > 0 && (
-                        <div className="mt-3 space-y-2">
-                          {message.recommendations.map((item) => (
-                            <div
-                              key={item.id}
-                              className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm"
-                            >
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="flex-1">
-                                  <h4 className="font-semibold text-gray-900 text-sm">
-                                    {item.name}
-                                  </h4>
-                                  <p className="text-xs text-gray-500 mt-0.5">{item.category}</p>
-                                  <p className="text-xs text-gray-600 mt-1 italic">
-                                    "{item.reason}"
-                                  </p>
-                                  <p
-                                    className="font-bold text-sm mt-2"
-                                    style={{ color: primaryColor }}
-                                  >
-                                    {formatCurrency(item.discount_price || item.price)}
-                                    {item.discount_price && (
-                                      <span className="text-gray-400 line-through text-xs ml-2">
-                                        {formatCurrency(item.price)}
-                                      </span>
-                                    )}
-                                  </p>
-                                </div>
-                                <button
-                                  onClick={() => handleAddToCart(item)}
-                                  className="w-9 h-9 rounded-full flex items-center justify-center text-white flex-shrink-0 transition-transform active:scale-95"
-                                  style={{ backgroundColor: primaryColor }}
+                        <div className="mt-3">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Star className="w-4 h-4 text-yellow-500" />
+                            <span className="text-xs font-medium text-gray-600">Menu Rekomendasi</span>
+                          </div>
+                          <div className="space-y-3">
+                            {message.recommendations.map((item) => {
+                              const cartItem = items.find(i => i.menuItemId === item.id)
+                              const quantityInCart = cartItem?.quantity || 0
+                              return (
+                                <motion.div
+                                  key={item.id}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden"
                                 >
-                                  <Plus className="w-5 h-5" />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
+                                  <div className="flex">
+                                    {/* Menu Image */}
+                                    <div className="w-24 h-24 relative flex-shrink-0 bg-gray-100">
+                                      {item.image_url ? (
+                                        <Image
+                                          src={item.image_url}
+                                          alt={item.name}
+                                          fill
+                                          className="object-cover"
+                                        />
+                                      ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                          <ChefHat className="w-8 h-8 text-gray-300" />
+                                        </div>
+                                      )}
+                                      {item.discount_price && (
+                                        <div className="absolute top-1 left-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                          PROMO
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {/* Menu Info */}
+                                    <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
+                                      <div>
+                                        <h4 className="font-semibold text-gray-900 text-sm line-clamp-1">
+                                          {item.name}
+                                        </h4>
+                                        <span
+                                          className="inline-block text-[10px] font-medium px-2 py-0.5 rounded-full mt-1"
+                                          style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
+                                        >
+                                          {item.category}
+                                        </span>
+                                        <p className="text-[11px] text-gray-500 mt-1 line-clamp-2 italic">
+                                          "{item.reason}"
+                                        </p>
+                                      </div>
+
+                                      <div className="flex items-center justify-between mt-2 gap-2">
+                                        <div className="flex-shrink-0">
+                                          <span
+                                            className="font-bold text-sm"
+                                            style={{ color: primaryColor }}
+                                          >
+                                            {formatCurrency(item.discount_price || item.price)}
+                                          </span>
+                                          {item.discount_price && (
+                                            <span className="text-gray-400 line-through text-[10px] ml-1">
+                                              {formatCurrency(item.price)}
+                                            </span>
+                                          )}
+                                        </div>
+                                        {quantityInCart > 0 ? (
+                                          <div
+                                            className="flex items-center gap-1 rounded-full overflow-hidden"
+                                            style={{ backgroundColor: primaryColor }}
+                                          >
+                                            <motion.button
+                                              onClick={() => handleDecreaseQuantity(item.id)}
+                                              className="w-7 h-7 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                                              whileTap={{ scale: 0.9 }}
+                                            >
+                                              <Minus className="w-3 h-3" />
+                                            </motion.button>
+                                            <span className="text-white text-xs font-bold min-w-[20px] text-center">
+                                              {quantityInCart}
+                                            </span>
+                                            <motion.button
+                                              onClick={() => handleIncreaseQuantity(item)}
+                                              className="w-7 h-7 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                                              whileTap={{ scale: 0.9 }}
+                                            >
+                                              <Plus className="w-3 h-3" />
+                                            </motion.button>
+                                          </div>
+                                        ) : (
+                                          <motion.button
+                                            onClick={() => handleAddToCart(item)}
+                                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-semibold text-white flex-shrink-0"
+                                            style={{ backgroundColor: primaryColor }}
+                                            whileTap={{ scale: 0.95 }}
+                                          >
+                                            <Plus className="w-3 h-3" />
+                                            <span>Tambah</span>
+                                          </motion.button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              )
+                            })}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -346,8 +467,40 @@ export function AIRecommendation({
                 </div>
               )}
 
-              {/* Input - pb-20 to account for floating cart button */}
-              <div className="p-4 pb-24 border-t border-gray-100">
+              {/* Cart Summary & Checkout */}
+              {getTotalItems() > 0 && (
+                <div className="mx-4 mb-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <ShoppingCart className="w-4 h-4 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        {getTotalItems()} item di keranjang
+                      </span>
+                    </div>
+                    <span className="text-sm font-bold" style={{ color: primaryColor }}>
+                      {formatCurrency(getTotalAmount())}
+                    </span>
+                  </div>
+                  <motion.button
+                    onClick={() => {
+                      handleOpenChange(false)
+                      const cartUrl = outletSlug
+                        ? `/${storeSlug}/${outletSlug}/order/cart`
+                        : `/${storeSlug}/order/cart`
+                      router.push(cartUrl)
+                    }}
+                    className="w-full py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2"
+                    style={{ backgroundColor: primaryColor }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    Lanjut ke Pembayaran
+                  </motion.button>
+                </div>
+              )}
+
+              {/* Input */}
+              <div className="p-4 pt-0 border-t border-gray-100">
                 <div className="flex items-center gap-2">
                   <input
                     ref={inputRef}
@@ -373,9 +526,20 @@ export function AIRecommendation({
                     )}
                   </button>
                 </div>
-                <p className="text-[10px] text-gray-400 text-center mt-2">
-                  AI dapat membuat kesalahan. Periksa informasi penting.
-                </p>
+                <div className="flex items-center justify-center gap-1.5 mt-3 pt-3 border-t border-gray-100">
+                  <span className="text-[10px] text-gray-400">Powered by</span>
+                  <a
+                    href="https://savora.id"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[10px] font-semibold text-orange-500 hover:text-orange-600 transition-colors"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Savora AI
+                  </a>
+                </div>
               </div>
             </motion.div>
           </>

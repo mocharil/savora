@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Store } from '@/types/database'
 import { useSidebar } from './AdminLayoutClient'
+import { PoweredBySavora } from '@/components/ui/powered-by-savora'
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -419,6 +420,13 @@ export function AdminSidebar({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          )}
+
+          {/* Powered by Savora */}
+          {!isCollapsed && (
+            <div className="mt-3 pt-3 border-t border-white/10">
+              <PoweredBySavora variant="light" size="sm" />
+            </div>
           )}
         </div>
       </aside>

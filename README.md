@@ -1,190 +1,380 @@
-# 🍽️ Savora - Digital Food Ordering System
+<p align="center">
+  <img src="public/savora_logo.png" alt="Savora Logo" width="120" />
+</p>
 
-A complete food ordering application for Indonesian SMEs (UMKM) with QR code-based ordering, real-time updates, and integrated payment processing.
+<h1 align="center">Savora</h1>
 
-## 🚀 Features
+<p align="center">
+  <strong>Platform Manajemen Restoran Berbasis AI Pertama di Indonesia untuk UMKM F&B</strong>
+</p>
 
-### Admin Side
-- **Dashboard** - Real-time statistics and order overview
-- **Menu Management** - Full CRUD for menu items with images
-- **Category Management** - Organize menu items by categories
-- **Table Management** - Generate QR codes for tables
-- **Order Management** - View and update order status in real-time
-- **Analytics** - Sales reports and popular items tracking
+<p align="center">
+  <a href="#fitur-utama">Fitur</a> •
+  <a href="#tech-stack">Tech Stack</a> •
+  <a href="#instalasi">Instalasi</a> •
+  <a href="#menjalankan-aplikasi">Menjalankan</a> •
+  <a href="#demo">Demo</a>
+</p>
 
-### Customer Side
-- **QR Code Ordering** - Scan table QR code to start ordering
-- **Menu Browsing** - Browse menu by categories
-- **Shopping Cart** - Add items, customize orders
-- **Payment** - Multiple payment methods via Midtrans
-- **Order Tracking** - Real-time order status updates
+---
 
-## 🛠️ Tech Stack
+## Tentang Savora
 
-- **Framework**: Next.js 14+ (App Router)
-- **Language**: TypeScript
-- **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth
-- **Storage**: Supabase Storage
-- **Styling**: Tailwind CSS + shadcn/ui
-- **State Management**: Zustand
-- **Forms**: React Hook Form + Zod
-- **Real-time**: Supabase Realtime
-- **Payment**: Midtrans
-- **QR Codes**: qrcode library
+Savora adalah platform manajemen restoran all-in-one yang dirancang khusus untuk UMKM F&B di Indonesia. Dengan fitur AI terintegrasi menggunakan **Google Gemini**, Savora membantu pemilik bisnis kuliner untuk mengelola operasional, meningkatkan penjualan, dan memberikan pengalaman terbaik kepada pelanggan.
 
-## 📦 Installation
+### Mengapa Savora?
+
+- **AI-Powered**: Fitur AI canggih untuk voice ordering, business insights, forecasting, dan smart pricing
+- **Multi-tenant**: Satu platform untuk banyak toko dengan manajemen terpisah
+- **QR Ordering**: Pelanggan pesan langsung dari meja via scan QR code
+- **Real-time**: Update pesanan dan notifikasi secara real-time
+- **Mobile-first**: Desain responsif untuk penggunaan di berbagai device
+
+---
+
+## Fitur Utama
+
+### 🤖 AI Features (Gemini-Powered)
+
+| Fitur | Deskripsi |
+|-------|-----------|
+| **Voice Ordering** | Pelanggan bisa memesan dengan berbicara dalam Bahasa Indonesia |
+| **AI Food Assistant** | Chatbot rekomendasi menu personal berdasarkan preferensi pelanggan |
+| **Business Insights** | Analisis bisnis otomatis dengan tips actionable |
+| **Sales Forecasting** | Prediksi penjualan 14 hari ke depan untuk perencanaan stok |
+| **Smart Pricing** | Rekomendasi harga optimal berdasarkan data penjualan |
+
+### 📱 Customer Side
+
+| Fitur | Deskripsi |
+|-------|-----------|
+| **QR Code Ordering** | Scan QR di meja untuk mulai pesan |
+| **Menu Browsing** | Jelajahi menu dengan filter kategori |
+| **AI Recommendations** | Rekomendasi menu personal dari AI |
+| **Shopping Cart** | Keranjang belanja dengan update real-time |
+| **Order Tracking** | Lacak status pesanan secara real-time |
+| **Multiple Payment** | QRIS, e-wallet, transfer bank, tunai |
+
+### 🏪 Admin Dashboard
+
+| Fitur | Deskripsi |
+|-------|-----------|
+| **Dashboard Analytics** | Statistik penjualan, grafik, dan overview |
+| **Menu Management** | Kelola menu dengan gambar dan kategori |
+| **Category Management** | Organisasi menu berdasarkan kategori |
+| **Table & QR Management** | Generate dan kelola QR code untuk setiap meja |
+| **Order Management** | Kelola pesanan dengan update status real-time |
+| **POS System** | Point of Sale untuk kasir dengan UI modern |
+| **Reports** | Laporan penjualan dan analitik |
+| **Settings** | Pengaturan toko, tema, dan konfigurasi |
+
+### 🎨 UI/UX Features
+
+- **Modern Design**: UI clean dan modern dengan Tailwind CSS
+- **Custom Theming**: Setiap toko bisa kustomisasi warna tema
+- **Loading States**: Animasi loading yang menarik (BlockLoader)
+- **Responsive**: Optimal di desktop dan mobile
+- **Dark/Light Mode**: Support tema gelap dan terang
+
+---
+
+## Tech Stack
+
+| Kategori | Teknologi |
+|----------|-----------|
+| **Framework** | Next.js 16 (App Router + Turbopack) |
+| **Language** | TypeScript |
+| **Database** | Supabase (PostgreSQL) |
+| **AI/ML** | Google Gemini AI |
+| **Styling** | Tailwind CSS + shadcn/ui |
+| **State Management** | Zustand |
+| **Animation** | Framer Motion |
+| **Authentication** | JWT + bcrypt |
+| **Real-time** | Supabase Realtime |
+| **Payment** | Midtrans |
+
+---
+
+## Instalasi
 
 ### Prerequisites
-- Node.js 18+
-- npm or yarn
-- Supabase account
-- Midtrans account (for payments)
 
-### Quick Start
+- **Node.js** 18.0 atau lebih baru
+- **npm** atau **yarn** atau **pnpm**
+- **Supabase** account (gratis)
+- **Google Cloud** account untuk Gemini AI (opsional)
 
-1. **Clone and install dependencies**
-   ```bash
-   cd savora
-   npm install
-   ```
+### Step 1: Clone Repository
 
-2. **Setup environment variables**
+```bash
+git clone https://github.com/mocharil/savora.git
+cd savora
+```
 
-   Copy `.env.example` to `.env.local` and fill in your credentials:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+### Step 2: Install Dependencies
 
-   NEXT_PUBLIC_APP_URL=http://localhost:3000
+```bash
+npm install
+# atau
+yarn install
+# atau
+pnpm install
+```
 
-   MIDTRANS_SERVER_KEY=your_midtrans_server_key
-   MIDTRANS_CLIENT_KEY=your_midtrans_client_key
-   MIDTRANS_IS_PRODUCTION=false
-   ```
+### Step 3: Setup Environment Variables
 
-3. **Setup Supabase**
+Buat file `.env.local` di root project:
 
-   - Create a new Supabase project
-   - Go to SQL Editor
-   - Run the migration script from `supabase/migrations/001_initial_schema.sql`
-   - Create storage buckets: `store-logos`, `store-banners`, `menu-images`, `category-images`, `qr-codes`
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-4. **Run development server**
-   ```bash
-   npm run dev
-   ```
+# App Configuration
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+JWT_SECRET=your_jwt_secret_key_min_32_chars
 
-5. **Open your browser**
+# Gemini AI (Optional - untuk fitur AI)
+GEMINI_CREDENTIALS={"type":"service_account",...}
+# atau simpan di file gemini-credentials.json
 
-   Navigate to [http://localhost:3000](http://localhost:3000)
+# Midtrans Payment (Optional)
+MIDTRANS_SERVER_KEY=your_midtrans_server_key
+MIDTRANS_CLIENT_KEY=your_midtrans_client_key
+MIDTRANS_IS_PRODUCTION=false
+```
 
-## 📖 Documentation
+### Step 4: Setup Database
 
-- **SETUP.md** - Detailed setup instructions and current progress
-- **guide.md** - Complete development guide with all specifications
+1. Buat project baru di [Supabase](https://supabase.com)
+2. Buka **SQL Editor** di Supabase Dashboard
+3. Jalankan migration script dari folder `supabase/migrations/` secara berurutan
+4. **Disable RLS** untuk development (atau setup policies sesuai kebutuhan)
 
-## 🏗️ Project Structure
+```sql
+-- Disable RLS untuk semua tabel (development only)
+ALTER TABLE stores DISABLE ROW LEVEL SECURITY;
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE categories DISABLE ROW LEVEL SECURITY;
+ALTER TABLE menu_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE tables DISABLE ROW LEVEL SECURITY;
+ALTER TABLE orders DISABLE ROW LEVEL SECURITY;
+ALTER TABLE order_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE payments DISABLE ROW LEVEL SECURITY;
+```
+
+5. Buat Storage Buckets:
+   - `store-logos`
+   - `store-banners`
+   - `menu-images`
+   - `category-images`
+   - `qr-codes`
+
+### Step 5: Setup Gemini AI (Opsional)
+
+Untuk mengaktifkan fitur AI:
+
+1. Buat project di [Google Cloud Console](https://console.cloud.google.com)
+2. Enable **Vertex AI API**
+3. Buat Service Account dan download JSON key
+4. Simpan credentials di `gemini-credentials.json` atau sebagai env var `GEMINI_CREDENTIALS`
+
+---
+
+## Menjalankan Aplikasi
+
+### Development Mode
+
+```bash
+npm run dev
+```
+
+Aplikasi akan berjalan di [http://localhost:3000](http://localhost:3000)
+
+### Production Build
+
+```bash
+npm run build
+npm start
+```
+
+### Linting
+
+```bash
+npm run lint
+```
+
+---
+
+## Struktur Project
 
 ```
 savora/
 ├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── (auth)/            # Authentication pages
-│   │   ├── (customer)/        # Customer-facing pages
-│   │   ├── admin/             # Admin dashboard pages
-│   │   └── api/               # API routes
-│   ├── components/            # React components
-│   │   ├── ui/               # shadcn/ui components
-│   │   ├── admin/            # Admin components
-│   │   ├── customer/         # Customer components
-│   │   └── shared/           # Shared components
-│   ├── lib/                  # Utility libraries
-│   │   ├── supabase/        # Supabase clients
-│   │   ├── utils.ts         # Utility functions
-│   │   └── validations.ts   # Zod schemas
-│   ├── hooks/               # Custom React hooks
-│   ├── stores/              # Zustand stores
-│   ├── types/               # TypeScript types
-│   └── middleware.ts        # Next.js middleware
+│   ├── app/                      # Next.js App Router
+│   │   ├── (auth)/              # Login, Register pages
+│   │   ├── [storeSlug]/         # Customer-facing pages (dynamic)
+│   │   ├── admin/               # Admin dashboard pages
+│   │   └── api/                 # API routes
+│   │       ├── admin/           # Admin APIs
+│   │       ├── ai/              # AI-related APIs
+│   │       ├── auth/            # Authentication APIs
+│   │       └── customer/        # Customer APIs
+│   ├── components/
+│   │   ├── admin/               # Admin components
+│   │   ├── customer/            # Customer components
+│   │   └── ui/                  # shadcn/ui + custom components
+│   ├── lib/
+│   │   ├── ai/                  # AI services (forecast, insights, pricing)
+│   │   ├── supabase/            # Supabase clients
+│   │   ├── gemini.ts            # Gemini AI client
+│   │   └── utils.ts             # Utility functions
+│   ├── stores/                  # Zustand stores
+│   ├── types/                   # TypeScript types
+│   └── middleware.ts            # Auth middleware
+├── public/                      # Static assets
 ├── supabase/
-│   └── migrations/          # Database migrations
-└── public/                  # Static assets
+│   └── migrations/              # Database migrations
+└── sql/                         # Additional SQL scripts
 ```
-
-## 🎯 Current Progress
-
-### ✅ Completed
-- [x] Project setup and configuration
-- [x] Database schema and types
-- [x] Authentication system
-- [x] Admin layout and navigation
-- [x] Admin dashboard with statistics
-
-### 🔄 In Progress
-- [ ] Menu management pages
-- [ ] Category management
-- [ ] Table management with QR codes
-- [ ] Order management
-- [ ] Customer-facing interface
-- [ ] Payment integration
-- [ ] Real-time features
-
-## 🔐 Authentication Flow
-
-1. **Registration**: Users register as restaurant owners, automatically creating a store
-2. **Login**: Email/password authentication via Supabase Auth
-3. **Role-based Access**:
-   - Owners: Full admin access
-   - Staff: Limited admin access
-   - Customers: Order-only access
-
-## 💳 Payment Integration
-
-Savora integrates with Midtrans for payment processing, supporting:
-- QRIS
-- E-wallets (GoPay, OVO, DANA, ShopeePay)
-- Virtual Accounts (BCA, BNI, Mandiri)
-- Cash payments
-
-## 📱 Customer Ordering Flow
-
-1. Customer scans QR code at table
-2. Browse menu by categories
-3. Add items to cart
-4. Checkout and enter details
-5. Choose payment method
-6. Complete payment
-7. Track order status in real-time
-
-## 🔒 Security Features
-
-- Row Level Security (RLS) policies on all tables
-- Secure authentication with Supabase Auth
-- Protected API routes
-- Environment variable management
-- Input validation with Zod
-
-## 🚦 Getting Started for Development
-
-1. Read `SETUP.md` for detailed setup instructions
-2. Follow `guide.md` for implementation sequence
-3. Complete Phase 4-6 for full functionality
-4. Test thoroughly before deployment
-
-## 📝 License
-
-This project is created for Indonesian SMEs (UMKM).
-
-## 🤝 Contributing
-
-This is a complete application guide. Follow the implementation sequence in `guide.md` to build the full system.
-
-## 📧 Support
-
-For issues or questions, refer to the complete development guide in `guide.md`.
 
 ---
 
-Built with ❤️ for Indonesian SMEs (UMKM)
+## API Endpoints
+
+### Authentication
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| POST | `/api/auth/register` | Register user baru + buat store |
+| POST | `/api/auth/login` | Login dan dapatkan JWT token |
+| POST | `/api/auth/logout` | Logout dan hapus session |
+| GET | `/api/auth/me` | Get current user info |
+
+### AI Features
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| POST | `/api/ai/voice-order` | Parse voice input ke order items |
+| POST | `/api/ai/forecast` | Generate sales forecast |
+| POST | `/api/ai/insights` | Get AI business insights |
+| POST | `/api/ai/pricing` | Get smart pricing recommendations |
+| POST | `/api/customer/ai-recommend` | Get menu recommendations |
+
+### Admin APIs
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| GET/POST | `/api/admin/menu` | Menu CRUD |
+| GET/POST | `/api/admin/categories` | Category CRUD |
+| GET/POST | `/api/admin/tables` | Table management |
+| GET/PATCH | `/api/admin/orders` | Order management |
+| POST | `/api/admin/pos/orders` | Create POS order |
+
+---
+
+## Demo
+
+### Login Credentials (Development)
+
+```
+Email: admin@savora.id
+Password: Password123
+```
+
+### Customer Flow
+
+1. Buka `http://localhost:3000/{store-slug}/order`
+2. Browse menu dan tambah ke keranjang
+3. Klik tombol AI untuk rekomendasi
+4. Checkout dan pilih metode pembayaran
+
+### Admin Flow
+
+1. Login di `http://localhost:3000/login`
+2. Akses dashboard di `/admin/dashboard`
+3. Kelola menu, kategori, meja, dan pesanan
+4. Gunakan POS untuk transaksi kasir
+
+---
+
+## Screenshots
+
+<details>
+<summary>Lihat Screenshots</summary>
+
+### Landing Page
+Modern landing page dengan fitur highlight dan pricing
+
+### Admin Dashboard
+Dashboard dengan statistik real-time dan grafik penjualan
+
+### POS System
+Point of Sale dengan menu grouped by category
+
+### AI Chatbot
+Chatbot rekomendasi menu dengan visual menu cards
+
+### Customer Order
+Halaman pemesanan customer dengan tema kustomisasi
+
+</details>
+
+---
+
+## Roadmap
+
+- [x] Core Features (Menu, Order, Payment)
+- [x] AI Voice Ordering
+- [x] AI Recommendations
+- [x] Business Insights & Forecasting
+- [x] POS System
+- [x] Multi-tenant Architecture
+- [ ] Mobile App (React Native)
+- [ ] Kitchen Display System (KDS)
+- [ ] Inventory Management
+- [ ] Loyalty Program
+- [ ] Multi-language Support
+
+---
+
+## Contributing
+
+Contributions are welcome! Please read our contributing guidelines before submitting PRs.
+
+```bash
+# Fork the repo
+# Create your feature branch
+git checkout -b feature/amazing-feature
+
+# Commit your changes
+git commit -m 'Add some amazing feature'
+
+# Push to the branch
+git push origin feature/amazing-feature
+
+# Open a Pull Request
+```
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Support
+
+- **Documentation**: [SETUP.md](SETUP.md)
+- **Issues**: [GitHub Issues](https://github.com/mocharil/savora/issues)
+- **Email**: support@savora.id
+
+---
+
+<p align="center">
+  <strong>Built with ❤️ for Indonesian UMKM F&B</strong>
+</p>
+
+<p align="center">
+  <a href="https://savora.id">Website</a> •
+  <a href="https://github.com/mocharil/savora">GitHub</a>
+</p>

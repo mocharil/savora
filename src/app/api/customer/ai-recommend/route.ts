@@ -38,6 +38,7 @@ interface MenuItemForAI {
   discount_price: number | null
   category_name: string
   is_available: boolean
+  image_url: string | null
 }
 
 interface AIRecommendation {
@@ -98,6 +99,7 @@ export async function POST(request: NextRequest) {
           price,
           discount_price,
           is_available,
+          image_url,
           categories(name)
         `)
         .eq('store_id', storeId)
@@ -112,6 +114,7 @@ export async function POST(request: NextRequest) {
           discount_price: item.discount_price,
           category_name: (item.categories as any)?.name || 'Menu',
           is_available: item.is_available,
+          image_url: item.image_url,
         }))
       }
     }
@@ -124,10 +127,10 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Format menu list for AI context
+    // Format menu list for AI context - include ID for accurate recommendations
     const menuList = menuItems.map(item => {
       const price = item.discount_price || item.price
-      return `- ${item.name} (${item.category_name}) - Rp ${price.toLocaleString('id-ID')}${item.description ? `: ${item.description}` : ''}`
+      return `- [ID: ${item.id}] ${item.name} (${item.category_name}) - Rp ${price.toLocaleString('id-ID')}${item.description ? `: ${item.description}` : ''}`
     }).join('\n')
 
     // Format conversation history
@@ -140,7 +143,7 @@ export async function POST(request: NextRequest) {
     // Create the AI prompt
     const prompt = `${SYSTEM_PROMPT}
 
-DAFTAR MENU RESTORAN:
+DAFTAR MENU RESTORAN (dengan ID):
 ${menuList}
 
 ${historyText ? `RIWAYAT PERCAKAPAN:\n${historyText}\n` : ''}
@@ -148,21 +151,23 @@ PERTANYAAN PELANGGAN: ${message}
 
 Berikan respons dalam format JSON berikut:
 {
-  "message": "Pesan balasan untuk pelanggan (dalam bahasa Indonesia yang ramah)",
+  "message": "Pesan balasan untuk pelanggan (dalam bahasa Indonesia yang ramah, gunakan **bold** untuk menyebut nama menu)",
   "recommended_items": [
     {
-      "id": "ID menu yang direkomendasikan (dari daftar menu)",
-      "name": "Nama menu",
-      "reason": "Alasan singkat kenapa menu ini cocok"
+      "id": "ID menu PERSIS dari daftar (contoh: abc123-def456-...)",
+      "name": "Nama menu PERSIS dari daftar",
+      "reason": "Alasan singkat kenapa menu ini cocok (1 kalimat)"
     }
   ],
-  "is_food_related": true/false (apakah pertanyaan berhubungan dengan makanan)
+  "is_food_related": true/false
 }
 
-PENTING:
-- Jika pertanyaan TIDAK berhubungan dengan makanan/menu, set is_food_related ke false dan berikan pesan sopan untuk mengarahkan kembali ke topik makanan
-- recommended_items harus berisi ID yang valid dari daftar menu di atas
-- Maksimal 3 rekomendasi yang paling relevan`
+ATURAN WAJIB:
+1. recommended_items WAJIB diisi dengan menu yang relevan (minimal 1, maksimal 3)
+2. ID harus PERSIS sama dengan ID dalam daftar menu [ID: xxx]
+3. Nama harus PERSIS sama dengan nama dalam daftar menu
+4. JANGAN rekomendasikan menu jika ID tidak ada dalam daftar
+5. Jika pertanyaan tidak berhubungan dengan makanan, set is_food_related ke false dan recommended_items kosong []`
 
     const aiResponse = await generateJSON<AIRecommendation>(prompt)
 
@@ -180,6 +185,7 @@ PENTING:
         discount_price: menuItem.discount_price,
         description: menuItem.description,
         category: menuItem.category_name,
+        image_url: menuItem.image_url,
       }
     })
 
