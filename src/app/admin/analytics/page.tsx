@@ -21,6 +21,7 @@ import {
   CircleDollarSign
 } from 'lucide-react'
 import { AnalyticsPageClient } from './AnalyticsPageClient'
+import { AIAnalyticsPanel } from '@/components/admin/ai/AIAnalyticsPanel'
 
 // Helper to get date range
 function getDateRange(period: string) {
@@ -249,7 +250,7 @@ export default async function AnalyticsPage({
       </div>
 
       {/* KPI Cards - Unique Metrics Only */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div data-tour="analytics-kpi-cards" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Total Orders */}
         <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
@@ -308,7 +309,7 @@ export default async function AnalyticsPage({
       </div>
 
       {/* Payment Analytics */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div data-tour="analytics-payment" className="grid gap-4 md:grid-cols-2">
         {/* Paid */}
         <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
           <div className="flex items-center justify-between">
@@ -454,7 +455,7 @@ export default async function AnalyticsPage({
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Orders by Status - Pie Chart */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div data-tour="analytics-status-chart" className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
@@ -584,6 +585,11 @@ export default async function AnalyticsPage({
             )}
           </div>
         </div>
+      </div>
+
+      {/* AI Analytics Section */}
+      <div data-tour="analytics-ai-panel" className="mt-8">
+        <AIAnalyticsPanel />
       </div>
     </div>
   )

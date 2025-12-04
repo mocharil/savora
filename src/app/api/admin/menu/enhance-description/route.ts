@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromToken } from '@/lib/tenant-context'
-import { generateJSON } from '@/lib/gemini'
+import { generateJSON } from '@/lib/kolosal'
 
 type DescriptionStyle = 'professional' | 'friendly' | 'elegant' | 'casual' | 'minimal'
 

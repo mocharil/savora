@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromToken } from '@/lib/tenant-context'
-import { getVertexAI, getGeminiModel } from '@/lib/gemini'
+import { generateSingleImage } from '@/lib/gemini'
+import { generateContent } from '@/lib/kolosal'
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { name, category, description, customPrompt } = await request.json()
+    const { name, category, description, customPrompt, aspectRatio } = await request.json()
 
     if (!name) {
       return NextResponse.json(
@@ -32,71 +33,55 @@ export async function POST(request: NextRequest) {
       ? `${basePrompt}. Additional style: ${customPrompt}`
       : basePrompt
 
-    // Use Gemini to optimize the prompt for food photography
-    const geminiModel = getGeminiModel()
-    const promptOptimization = await geminiModel.generateContent(`
+    // Use Kolosal AI to optimize the prompt for food photography
+    const optimizedPrompt = await generateContent(`
 You are a professional food photographer prompt engineer.
 Create a detailed image generation prompt for this food item:
 
 Original prompt: ${finalPrompt}
 
-Create a single paragraph prompt (max 200 words) that includes:
+Create a single paragraph prompt (max 150 words) in English that includes:
 - Professional food photography styling
-- Appetizing presentation
-- Soft natural lighting
+- Appetizing presentation with steam or freshness indicators
+- Soft natural lighting from the side
 - Shallow depth of field
-- Clean plating on a suitable background
-- Indonesian restaurant aesthetic
+- Clean plating on a wooden table or ceramic plate
+- Warm, inviting Indonesian restaurant aesthetic
+- High resolution, 4K quality
 
-Output ONLY the prompt, nothing else. No explanations.
+Output ONLY the prompt, nothing else. No explanations or markdown.
 `)
 
-    const optimizedPrompt = promptOptimization.response.candidates?.[0]?.content?.parts?.[0]?.text || finalPrompt
-
-    // Try to use Imagen if available
+    // Generate image using Imagen 3
     try {
-      const vertexAI = getVertexAI()
-      const imagenModel = vertexAI.getGenerativeModel({
-        model: 'imagegeneration@006',
-      })
+      const imageResult = await generateSingleImage(
+        optimizedPrompt.trim(),
+        aspectRatio || '4:3'
+      )
 
-      const imageResult = await imagenModel.generateContent({
-        contents: [{
-          role: 'user',
-          parts: [{ text: `${optimizedPrompt}. High quality, 4K resolution, professional food photography.` }]
-        }],
+      return NextResponse.json({
+        success: true,
+        imageData: imageResult.imageBytes,
+        mimeType: imageResult.mimeType,
+        prompt: optimizedPrompt.trim(),
       })
-
-      // Check if we got an image response
-      const imageParts = imageResult.response.candidates?.[0]?.content?.parts
-      if (imageParts) {
-        for (const part of imageParts) {
-          if ('inlineData' in part && part.inlineData) {
-            return NextResponse.json({
-              success: true,
-              imageData: part.inlineData.data,
-              mimeType: part.inlineData.mimeType || 'image/png',
-              prompt: optimizedPrompt,
-            })
-          }
-        }
-      }
     } catch (imagenError: any) {
-      console.log('Imagen not available, returning prompt only:', imagenError.message)
-    }
+      console.error('Imagen generation error:', imagenError.message)
 
-    // Fallback: Return the optimized prompt for manual use
-    return NextResponse.json({
-      success: true,
-      imageData: null,
-      prompt: optimizedPrompt,
-      message: 'Image generation model not available. Use the optimized prompt with an external image generator.',
-      suggestedServices: [
-        'https://gemini.google.com (paste the prompt)',
-        'https://www.bing.com/images/create',
-        'Canva AI Image Generator'
-      ]
-    })
+      // Fallback: Return the optimized prompt for manual use
+      return NextResponse.json({
+        success: true,
+        imageData: null,
+        prompt: optimizedPrompt.trim(),
+        message: 'Image generation failed. Use the optimized prompt with an external image generator.',
+        error: imagenError.message,
+        suggestedServices: [
+          'https://gemini.google.com (paste the prompt)',
+          'https://www.bing.com/images/create',
+          'Canva AI Image Generator'
+        ]
+      })
+    }
 
   } catch (error: any) {
     console.error('Image generation error:', error)

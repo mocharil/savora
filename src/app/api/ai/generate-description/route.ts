@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateContent } from '@/lib/gemini'
+import { generateContent } from '@/lib/kolosal'
 
 export async function POST(request: NextRequest) {
   try {

@@ -5,7 +5,7 @@ import { getUserFromToken } from '@/lib/tenant-context'
 export async function GET(request: NextRequest) {
   try {
     // Get user from token
-    const user = await getUserFromToken(request)
+    const user = await getUserFromToken()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     // Filter by status if provided
     if (status) {
-      query = query.eq('status', status)
+      query = query.eq('status', status as any)
     }
 
     const { data: orders, error } = await query
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform data for response
-    const transformedOrders = orders?.map(order => ({
+    const transformedOrders = orders?.map((order: any) => ({
       id: order.id,
       order_number: order.order_number,
       status: order.status,

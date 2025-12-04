@@ -1160,12 +1160,12 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
                 {generatingImage ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Generating...
+                    Generating Image...
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4" />
-                    Generate Prompt
+                    Generate Image
                   </>
                 )}
               </button>

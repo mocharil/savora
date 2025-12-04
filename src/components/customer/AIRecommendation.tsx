@@ -18,6 +18,11 @@ import {
   ChefHat,
   Star,
   CreditCard,
+  Clock,
+  Package,
+  Utensils,
+  Wallet,
+  Search,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/stores/cart-store'
@@ -28,6 +33,8 @@ interface Message {
   role: 'user' | 'assistant'
   content: string
   recommendations?: RecommendedItem[]
+  orderStatus?: OrderStatus
+  intent?: string
 }
 
 interface RecommendedItem {
@@ -41,11 +48,19 @@ interface RecommendedItem {
   image_url?: string | null
 }
 
+interface OrderStatus {
+  order_number: string
+  status: string
+  status_message: string
+  items: Array<{ name: string; quantity: number }>
+}
+
 interface AIRecommendationProps {
   storeId: string
   outletId?: string
   storeSlug: string
   outletSlug?: string
+  tableId?: string
   theme?: {
     primaryColor?: string
   }
@@ -63,11 +78,37 @@ function parseMarkdownBold(text: string): React.ReactNode[] {
   })
 }
 
+// Get status color and icon
+function getStatusStyle(status: string) {
+  switch (status) {
+    case 'pending':
+      return { color: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: Clock, label: 'Menunggu' }
+    case 'confirmed':
+      return { color: 'bg-blue-100 text-blue-700 border-blue-200', icon: Check, label: 'Dikonfirmasi' }
+    case 'preparing':
+      return { color: 'bg-purple-100 text-purple-700 border-purple-200', icon: ChefHat, label: 'Dimasak' }
+    case 'ready':
+      return { color: 'bg-green-100 text-green-700 border-green-200', icon: Package, label: 'Siap' }
+    case 'completed':
+      return { color: 'bg-gray-100 text-gray-700 border-gray-200', icon: Check, label: 'Selesai' }
+    case 'cancelled':
+      return { color: 'bg-red-100 text-red-700 border-red-200', icon: X, label: 'Batal' }
+    default:
+      return { color: 'bg-gray-100 text-gray-700 border-gray-200', icon: Clock, label: status }
+  }
+}
+
 const QUICK_PROMPTS = [
-  { label: 'Rendah kalori', prompt: 'Saya cari makanan yang rendah kalori' },
-  { label: 'Pedas', prompt: 'Rekomendasikan menu yang pedas' },
-  { label: 'Vegetarian', prompt: 'Ada menu vegetarian apa?' },
-  { label: 'Best seller', prompt: 'Apa menu yang paling populer?' },
+  { label: 'Best Seller', prompt: 'Apa menu yang paling laris?', icon: Star },
+  { label: 'Budget 50rb', prompt: 'Rekomendasikan menu budget 50 ribu untuk 1 orang', icon: Wallet },
+  { label: 'Promo', prompt: 'Ada promo atau diskon apa hari ini?', icon: Sparkles },
+  { label: 'Cek Pesanan', prompt: 'Bagaimana status pesanan saya?', icon: Search },
+]
+
+const COMBO_PROMPTS = [
+  { label: 'Minuman', prompt: 'Minuman apa yang cocok untuk menemani makanan ini?' },
+  { label: 'Snack', prompt: 'Ada cemilan yang cocok sebagai pelengkap?' },
+  { label: 'Dessert', prompt: 'Dessert apa yang cocok untuk penutup?' },
 ]
 
 export function AIRecommendation({
@@ -75,6 +116,7 @@ export function AIRecommendation({
   outletId,
   storeSlug,
   outletSlug,
+  tableId,
   theme,
   onOpenChange,
 }: AIRecommendationProps) {
@@ -83,6 +125,7 @@ export function AIRecommendation({
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [lastIntent, setLastIntent] = useState<string>('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const { addItem, items, updateQuantity, removeItem, getTotalItems, getTotalAmount } = useCartStore()
@@ -114,7 +157,7 @@ export function AIRecommendation({
         {
           id: 'greeting',
           role: 'assistant',
-          content: 'Halo! Saya bisa membantu merekomendasikan menu yang cocok untuk kamu. Ceritakan preferensi makananmu, misalnya:\n\n• "Saya mau makanan gurih tapi rendah kalori"\n• "Rekomendasikan menu pedas"\n• "Ada makanan untuk vegetarian?"\n\nApa yang sedang kamu cari?',
+          content: 'Halo! Saya AI asisten yang siap membantu kamu. Aku bisa:\n\n🍽️ **Rekomendasi menu** sesuai selera\n💰 **Budget planner** untuk grup/acara\n🔍 **Cek status pesanan** kamu\n🍕 **Saran combo** makanan & minuman\n\nMau mulai dari mana?',
         },
       ])
     }
@@ -148,6 +191,7 @@ export function AIRecommendation({
           message: text,
           storeId,
           outletId,
+          tableId,
           conversationHistory,
         }),
       })
@@ -163,9 +207,12 @@ export function AIRecommendation({
         role: 'assistant',
         content: data.message,
         recommendations: data.recommended_items,
+        orderStatus: data.order_status,
+        intent: data.intent,
       }
 
       setMessages(prev => [...prev, assistantMessage])
+      setLastIntent(data.intent || '')
     } catch (error) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -190,9 +237,9 @@ export function AIRecommendation({
     const cartItem = items.find(i => i.menuItemId === menuItemId)
     if (cartItem) {
       if (cartItem.quantity <= 1) {
-        removeItem(cartItem.id) // Use cart item's id, not menuItemId
+        removeItem(cartItem.id)
       } else {
-        updateQuantity(cartItem.id, cartItem.quantity - 1) // Use cart item's id
+        updateQuantity(cartItem.id, cartItem.quantity - 1)
       }
     }
   }
@@ -200,7 +247,7 @@ export function AIRecommendation({
   const handleIncreaseQuantity = (item: RecommendedItem) => {
     const cartItem = items.find(i => i.menuItemId === item.id)
     if (cartItem) {
-      updateQuantity(cartItem.id, cartItem.quantity + 1) // Use cart item's id
+      updateQuantity(cartItem.id, cartItem.quantity + 1)
     } else {
       handleAddToCart(item)
     }
@@ -213,9 +260,18 @@ export function AIRecommendation({
     }
   }
 
+  // Determine which quick prompts to show
+  const getQuickPrompts = () => {
+    // If user just added items, show combo suggestions
+    if (lastIntent === 'recommendation' || lastIntent === 'budget_planner') {
+      return COMBO_PROMPTS.map(p => ({ ...p, icon: Utensils }))
+    }
+    return QUICK_PROMPTS
+  }
+
   return (
     <>
-      {/* Floating Button - positioned above cart button (bottom-24 = 96px, above cart's bottom-6 = 24px + 60px height) */}
+      {/* Floating Button */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
@@ -268,7 +324,7 @@ export function AIRecommendation({
                   </div>
                   <div className="text-white">
                     <h3 className="font-semibold">AI Food Assistant</h3>
-                    <p className="text-xs opacity-90">Rekomendasi menu personal</p>
+                    <p className="text-xs opacity-90">Menu • Budget • Pesanan • Combo</p>
                   </div>
                 </div>
                 <button
@@ -307,12 +363,85 @@ export function AIRecommendation({
                         <p className="text-sm whitespace-pre-wrap">{parseMarkdownBold(message.content)}</p>
                       </div>
 
-                      {/* Recommendations - Modern Menu Cards */}
+                      {/* Order Status Card */}
+                      {message.orderStatus && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-3 bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden"
+                        >
+                          <div className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <Package className="w-5 h-5" style={{ color: primaryColor }} />
+                                <span className="font-semibold text-gray-900">
+                                  #{message.orderStatus.order_number}
+                                </span>
+                              </div>
+                              {(() => {
+                                const statusStyle = getStatusStyle(message.orderStatus.status)
+                                const StatusIcon = statusStyle.icon
+                                return (
+                                  <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 border ${statusStyle.color}`}>
+                                    <StatusIcon className="w-3 h-3" />
+                                    {statusStyle.label}
+                                  </span>
+                                )
+                              })()}
+                            </div>
+
+                            <p className="text-sm text-gray-600 mb-3">
+                              {message.orderStatus.status_message}
+                            </p>
+
+                            <div className="bg-gray-50 rounded-xl p-3">
+                              <p className="text-xs text-gray-500 mb-2">Item pesanan:</p>
+                              <div className="space-y-1">
+                                {message.orderStatus.items.map((item, idx) => (
+                                  <div key={idx} className="flex justify-between text-sm">
+                                    <span className="text-gray-700">{item.name}</span>
+                                    <span className="text-gray-500">x{item.quantity}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Progress Bar for status */}
+                          <div className="px-4 pb-4">
+                            <div className="flex items-center gap-1">
+                              {['pending', 'confirmed', 'preparing', 'ready'].map((status, idx) => {
+                                const isActive = ['pending', 'confirmed', 'preparing', 'ready', 'completed']
+                                  .indexOf(message.orderStatus!.status) >= idx
+                                return (
+                                  <div
+                                    key={status}
+                                    className={`flex-1 h-1.5 rounded-full transition-colors ${
+                                      isActive ? '' : 'bg-gray-200'
+                                    }`}
+                                    style={isActive ? { backgroundColor: primaryColor } : {}}
+                                  />
+                                )
+                              })}
+                            </div>
+                            <div className="flex justify-between mt-1">
+                              <span className="text-[10px] text-gray-400">Dipesan</span>
+                              <span className="text-[10px] text-gray-400">Siap</span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* Menu Recommendations */}
                       {message.recommendations && message.recommendations.length > 0 && (
                         <div className="mt-3">
                           <div className="flex items-center gap-2 mb-2">
                             <Star className="w-4 h-4 text-yellow-500" />
-                            <span className="text-xs font-medium text-gray-600">Menu Rekomendasi</span>
+                            <span className="text-xs font-medium text-gray-600">
+                              {message.intent === 'budget_planner' ? 'Rekomendasi Sesuai Budget' :
+                               message.intent === 'combo_suggester' ? 'Rekomendasi Pelengkap' :
+                               'Menu Rekomendasi'}
+                            </span>
                           </div>
                           <div className="space-y-3">
                             {message.recommendations.map((item) => {
@@ -449,20 +578,24 @@ export function AIRecommendation({
               </div>
 
               {/* Quick Prompts */}
-              {messages.length <= 1 && (
+              {messages.length <= 2 && (
                 <div className="px-4 pb-2">
                   <p className="text-xs text-gray-500 mb-2">Coba tanya:</p>
                   <div className="flex flex-wrap gap-2">
-                    {QUICK_PROMPTS.map((prompt) => (
-                      <button
-                        key={prompt.label}
-                        onClick={() => handleSend(prompt.prompt)}
-                        disabled={isLoading}
-                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors disabled:opacity-50"
-                      >
-                        {prompt.label}
-                      </button>
-                    ))}
+                    {getQuickPrompts().map((prompt) => {
+                      const Icon = prompt.icon
+                      return (
+                        <button
+                          key={prompt.label}
+                          onClick={() => handleSend(prompt.prompt)}
+                          disabled={isLoading}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors disabled:opacity-50"
+                        >
+                          <Icon className="w-3 h-3" />
+                          {prompt.label}
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
               )}
@@ -508,7 +641,7 @@ export function AIRecommendation({
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Cari rekomendasi menu..."
+                    placeholder="Tanya menu, budget, atau cek pesanan..."
                     className="flex-1 px-4 py-3 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-opacity-50"
                     style={{ '--tw-ring-color': primaryColor } as React.CSSProperties}
                     disabled={isLoading}

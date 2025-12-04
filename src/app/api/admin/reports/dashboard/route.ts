@@ -4,7 +4,7 @@ import { getUserFromToken } from '@/lib/tenant-context'
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getUserFromToken(request)
+    const user = await getUserFromToken()
     if (!user || !user.storeId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     const unpaidOrders = todayOrders?.filter(o => o.payment_status === 'unpaid').length || 0
 
     // Get recent orders with table info
-    const recentOrders = todayOrders?.slice(0, 20).map(order => ({
+    const recentOrders = todayOrders?.slice(0, 20).map((order: any) => ({
       order_number: order.order_number,
       status: order.status,
       table_number: order.table?.table_number || null,

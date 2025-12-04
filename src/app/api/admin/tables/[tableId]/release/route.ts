@@ -8,7 +8,7 @@ export async function POST(
   { params }: { params: Promise<{ tableId: string }> }
 ) {
   try {
-    const user = await getUserFromToken(request)
+    const user = await getUserFromToken()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

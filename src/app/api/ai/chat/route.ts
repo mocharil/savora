@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateContent, generateJSON } from '@/lib/gemini'
+import { generateContent } from '@/lib/kolosal'
 import { createClient } from '@supabase/supabase-js'
 import { getUserFromToken } from '@/lib/tenant-context'
 
@@ -102,11 +102,9 @@ User message: ${message}`
 User message: ${message}`
     }
 
-    const fullPrompt = `${systemPrompt}
-
-${prompt}`
-
-    const response = await generateContent(fullPrompt)
+    const response = await generateContent(prompt, {
+      systemPrompt,
+    })
 
     return NextResponse.json({
       success: true,

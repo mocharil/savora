@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { FTUEProgressCard } from '@/components/admin/ftue'
 import { DashboardPageClient } from './DashboardPageClient'
+import { DailySummaryCard } from '@/components/admin/DailySummaryCard'
 
 type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled'
 
@@ -129,6 +130,9 @@ export default async function DashboardPage() {
 
       {/* Page Header */}
       <DashboardPageClient />
+
+      {/* AI Daily Summary */}
+      <DailySummaryCard />
 
       {/* Executive Summary Hero */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 via-orange-600 to-amber-600 p-6 md:p-8" data-tour="dashboard-stats">

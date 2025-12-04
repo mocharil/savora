@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { User } from '@supabase/supabase-js'
 import { Profile } from '@/types/database'
 import {
@@ -11,12 +11,54 @@ import {
   ChevronRight,
   ShoppingBag,
   Inbox,
+  X,
+  UtensilsCrossed,
+  FolderOpen,
+  QrCode,
+  Loader2,
+  ArrowRight,
 } from 'lucide-react'
 import { HelpCenter } from './tour'
 import { formatDistanceToNow } from 'date-fns'
 import { id } from 'date-fns/locale'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import BlockLoader from '@/components/ui/block-loader'
+import { formatCurrency } from '@/lib/utils'
+
+interface SearchResult {
+  menu: Array<{
+    id: string
+    name: string
+    price: number
+    image_url: string | null
+    is_available: boolean
+    category: string
+    type: 'menu'
+  }>
+  orders: Array<{
+    id: string
+    order_number: string
+    customer_name: string | null
+    status: string
+    total: number
+    created_at: string
+    type: 'order'
+  }>
+  categories: Array<{
+    id: string
+    name: string
+    description: string | null
+    type: 'category'
+  }>
+  tables: Array<{
+    id: string
+    table_number: string
+    status: string
+    capacity: number
+    type: 'table'
+  }>
+}
 
 interface Order {
   id: string
@@ -37,7 +79,12 @@ interface AdminHeaderProps {
 }
 
 export function AdminHeader({ user, profile, pageTitle, pageDescription }: AdminHeaderProps) {
-  const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const router = useRouter()
+  const [showSearchModal, setShowSearchModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResult | null>(null)
+  const [searchLoading, setSearchLoading] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [showNotifications, setShowNotifications] = useState(false)
   const [notifications, setNotifications] = useState<Order[]>([])
   const [loading, setLoading] = useState(false)
@@ -64,6 +111,78 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
     const interval = setInterval(fetchNotifications, 30000)
     return () => clearInterval(interval)
   }, [])
+
+  // Keyboard shortcut for search (Cmd+K or Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setShowSearchModal(true)
+      }
+      if (e.key === 'Escape') {
+        setShowSearchModal(false)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  // Focus search input when modal opens
+  useEffect(() => {
+    if (showSearchModal && searchInputRef.current) {
+      searchInputRef.current.focus()
+    }
+  }, [showSearchModal])
+
+  // Search with debounce
+  useEffect(() => {
+    if (!searchQuery || searchQuery.length < 2) {
+      setSearchResults(null)
+      return
+    }
+
+    const timer = setTimeout(async () => {
+      setSearchLoading(true)
+      try {
+        const response = await fetch(`/api/admin/search?q=${encodeURIComponent(searchQuery)}`)
+        if (response.ok) {
+          const data = await response.json()
+          setSearchResults(data)
+        }
+      } catch (error) {
+        console.error('Search error:', error)
+      } finally {
+        setSearchLoading(false)
+      }
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  const handleSearchSelect = (type: string, id: string) => {
+    setShowSearchModal(false)
+    setSearchQuery('')
+    setSearchResults(null)
+
+    switch (type) {
+      case 'menu':
+        router.push(`/admin/menu?edit=${id}`)
+        break
+      case 'order':
+        router.push(`/admin/orders?id=${id}`)
+        break
+      case 'category':
+        router.push(`/admin/categories?edit=${id}`)
+        break
+      case 'table':
+        router.push(`/admin/tables?edit=${id}`)
+        break
+    }
+  }
+
+  const totalResults = searchResults
+    ? searchResults.menu.length + searchResults.orders.length + searchResults.categories.length + searchResults.tables.length
+    : 0
 
   const unreadCount = notifications.filter(n => !n.is_read).length
 
@@ -109,26 +228,17 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
 
       {/* Right Section - Search, Notifications */}
       <div className="flex items-center gap-3">
-        {/* Search Bar */}
-        <div
-          className={`hidden md:flex items-center gap-2 h-10 px-4 rounded-lg transition-all duration-200 ${
-            isSearchFocused
-              ? 'bg-white border-2 border-orange-500 shadow-sm w-80'
-              : 'bg-[#F3F4F6] border-2 border-transparent w-64'
-          }`}
+        {/* Search Button */}
+        <button
+          onClick={() => setShowSearchModal(true)}
+          className="hidden md:flex items-center gap-2 h-10 px-4 rounded-lg bg-[#F3F4F6] hover:bg-[#E5E7EB] transition-colors w-64"
         >
-          <Search className={`w-4 h-4 ${isSearchFocused ? 'text-orange-500' : 'text-[#9CA3AF]'}`} />
-          <input
-            type="text"
-            placeholder="Cari..."
-            className="flex-1 bg-transparent text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none"
-            onFocus={() => setIsSearchFocused(true)}
-            onBlur={() => setIsSearchFocused(false)}
-          />
+          <Search className="w-4 h-4 text-[#9CA3AF]" />
+          <span className="flex-1 text-sm text-[#9CA3AF] text-left">Cari...</span>
           <kbd className="hidden lg:flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-[#9CA3AF] bg-white rounded border border-[#E5E7EB]">
             <span>⌘</span>K
           </kbd>
-        </div>
+        </button>
 
         {/* Help Center */}
         <HelpCenter triggerVariant="icon" className="text-[#6B7280] hover:bg-[#F3F4F6] h-10 w-10" />
@@ -257,6 +367,187 @@ export function AdminHeader({ user, profile, pageTitle, pageDescription }: Admin
           )}
         </div>
       </div>
+
+      {/* Search Modal */}
+      {showSearchModal && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50 z-50"
+            onClick={() => setShowSearchModal(false)}
+          />
+
+          {/* Modal */}
+          <div className="fixed inset-x-4 top-20 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-[600px] z-50">
+            <div className="bg-white rounded-2xl shadow-2xl border border-[#E5E7EB] overflow-hidden">
+              {/* Search Input */}
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-[#E5E7EB]">
+                <Search className="w-5 h-5 text-[#9CA3AF]" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Cari menu, pesanan, kategori, atau meja..."
+                  className="flex-1 text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none"
+                />
+                {searchLoading && <Loader2 className="w-4 h-4 animate-spin text-orange-500" />}
+                <button
+                  onClick={() => setShowSearchModal(false)}
+                  className="p-1 hover:bg-[#F3F4F6] rounded"
+                >
+                  <X className="w-4 h-4 text-[#6B7280]" />
+                </button>
+              </div>
+
+              {/* Search Results */}
+              <div className="max-h-[60vh] overflow-y-auto">
+                {!searchQuery || searchQuery.length < 2 ? (
+                  <div className="px-4 py-8 text-center">
+                    <p className="text-sm text-[#6B7280]">Ketik minimal 2 karakter untuk mencari</p>
+                    <div className="flex flex-wrap justify-center gap-2 mt-4">
+                      <span className="px-3 py-1 bg-[#F3F4F6] rounded-full text-xs text-[#6B7280]">Menu</span>
+                      <span className="px-3 py-1 bg-[#F3F4F6] rounded-full text-xs text-[#6B7280]">Pesanan</span>
+                      <span className="px-3 py-1 bg-[#F3F4F6] rounded-full text-xs text-[#6B7280]">Kategori</span>
+                      <span className="px-3 py-1 bg-[#F3F4F6] rounded-full text-xs text-[#6B7280]">Meja</span>
+                    </div>
+                  </div>
+                ) : searchResults && totalResults === 0 ? (
+                  <div className="px-4 py-8 text-center">
+                    <p className="text-sm text-[#6B7280]">Tidak ada hasil untuk "{searchQuery}"</p>
+                  </div>
+                ) : searchResults ? (
+                  <div className="py-2">
+                    {/* Menu Results */}
+                    {searchResults.menu.length > 0 && (
+                      <div>
+                        <div className="px-4 py-2 text-xs font-semibold text-[#6B7280] uppercase tracking-wider bg-[#F9FAFB]">
+                          Menu ({searchResults.menu.length})
+                        </div>
+                        {searchResults.menu.map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={() => handleSearchSelect('menu', item.id)}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#F3F4F6] transition-colors text-left"
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+                              <UtensilsCrossed className="w-5 h-5 text-orange-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-[#111827] truncate">{item.name}</p>
+                              <p className="text-xs text-[#6B7280]">{item.category} • {formatCurrency(item.price)}</p>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${item.is_available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                              {item.is_available ? 'Tersedia' : 'Habis'}
+                            </span>
+                            <ArrowRight className="w-4 h-4 text-[#9CA3AF]" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Order Results */}
+                    {searchResults.orders.length > 0 && (
+                      <div>
+                        <div className="px-4 py-2 text-xs font-semibold text-[#6B7280] uppercase tracking-wider bg-[#F9FAFB]">
+                          Pesanan ({searchResults.orders.length})
+                        </div>
+                        {searchResults.orders.map((order) => (
+                          <button
+                            key={order.id}
+                            onClick={() => handleSearchSelect('order', order.id)}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#F3F4F6] transition-colors text-left"
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                              <ShoppingBag className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-[#111827] truncate">
+                                #{order.order_number}
+                                {order.customer_name && ` - ${order.customer_name}`}
+                              </p>
+                              <p className="text-xs text-[#6B7280]">{formatCurrency(order.total)}</p>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${getStatusColor(order.status)}`}>
+                              {getStatusLabel(order.status)}
+                            </span>
+                            <ArrowRight className="w-4 h-4 text-[#9CA3AF]" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Category Results */}
+                    {searchResults.categories.length > 0 && (
+                      <div>
+                        <div className="px-4 py-2 text-xs font-semibold text-[#6B7280] uppercase tracking-wider bg-[#F9FAFB]">
+                          Kategori ({searchResults.categories.length})
+                        </div>
+                        {searchResults.categories.map((cat) => (
+                          <button
+                            key={cat.id}
+                            onClick={() => handleSearchSelect('category', cat.id)}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#F3F4F6] transition-colors text-left"
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+                              <FolderOpen className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-[#111827] truncate">{cat.name}</p>
+                              {cat.description && (
+                                <p className="text-xs text-[#6B7280] truncate">{cat.description}</p>
+                              )}
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-[#9CA3AF]" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Table Results */}
+                    {searchResults.tables.length > 0 && (
+                      <div>
+                        <div className="px-4 py-2 text-xs font-semibold text-[#6B7280] uppercase tracking-wider bg-[#F9FAFB]">
+                          Meja ({searchResults.tables.length})
+                        </div>
+                        {searchResults.tables.map((table) => (
+                          <button
+                            key={table.id}
+                            onClick={() => handleSearchSelect('table', table.id)}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#F3F4F6] transition-colors text-left"
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                              <QrCode className="w-5 h-5 text-green-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-[#111827] truncate">Meja {table.table_number}</p>
+                              <p className="text-xs text-[#6B7280]">Kapasitas: {table.capacity} orang</p>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                              table.status === 'available' ? 'bg-green-100 text-green-700' :
+                              table.status === 'occupied' ? 'bg-red-100 text-red-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {table.status === 'available' ? 'Kosong' : table.status === 'occupied' ? 'Terisi' : 'Reservasi'}
+                            </span>
+                            <ArrowRight className="w-4 h-4 text-[#9CA3AF]" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Footer */}
+              <div className="px-4 py-2 border-t border-[#E5E7EB] bg-[#F9FAFB] flex items-center justify-between text-xs text-[#6B7280]">
+                <span>Tekan <kbd className="px-1.5 py-0.5 bg-white rounded border border-[#E5E7EB] font-mono">ESC</kbd> untuk menutup</span>
+                <span>Powered by Savora</span>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </header>
   )
 }

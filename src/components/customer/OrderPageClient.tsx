@@ -82,7 +82,7 @@ export function OrderPageClient({
           phone: store.phone,
           logo_url: store.logo_url,
           banner_url: store.banner_url,
-          operational_hours: store.operational_hours,
+          operational_hours: store.operational_hours ?? undefined,
         }}
       />
 
@@ -131,6 +131,7 @@ export function OrderPageClient({
       <AIRecommendation
         storeId={store.id}
         storeSlug={storeSlug}
+        tableId={tableData?.id}
         theme={{ primaryColor: themeSettings.primary_color }}
         onOpenChange={setIsAIChatOpen}
       />

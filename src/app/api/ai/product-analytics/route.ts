@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { generateJSON } from '@/lib/gemini'
+import { generateJSON } from '@/lib/kolosal'
 import { getUserFromToken } from '@/lib/tenant-context'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!

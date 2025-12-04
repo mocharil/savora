@@ -13,7 +13,7 @@ function generateOrderNumber(): string {
 export async function POST(request: NextRequest) {
   try {
     // Get user from token
-    const user = await getUserFromToken(request)
+    const user = await getUserFromToken()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

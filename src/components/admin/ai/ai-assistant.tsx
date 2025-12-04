@@ -244,7 +244,7 @@ export function AIAssistant() {
   const renderChat = () => (
     <div className="flex flex-col h-[600px]">
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div data-tour="ai-chat-messages" className="flex-1 overflow-y-auto p-4 space-y-4">
         {conversation.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-violet-100 to-purple-100 rounded-full flex items-center justify-center">
@@ -259,7 +259,7 @@ export function AIAssistant() {
             </p>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto">
+            <div data-tour="ai-quick-actions" className="grid grid-cols-2 gap-3 max-w-lg mx-auto">
               {quickActions.map((action) => (
                 <button
                   key={action.id}
@@ -324,7 +324,7 @@ export function AIAssistant() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t p-4">
+      <div data-tour="ai-chat-input" className="border-t p-4">
         <div className="flex gap-2">
           <input
             type="text"

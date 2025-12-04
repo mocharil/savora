@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateContent } from '@/lib/gemini'
+import { generateContent } from '@/lib/kolosal'
+import { generateSingleImage } from '@/lib/gemini'
 
 export async function POST(request: NextRequest) {
   try {
-    const { menuName, description, style, cuisineType } = await request.json()
+    const { menuName, description, style, cuisineType, generateImage } = await request.json()
 
     if (!menuName) {
       return NextResponse.json(
@@ -52,10 +53,37 @@ Generate a detailed prompt that describes:
 Output ONLY the image prompt, nothing else. The prompt should be in English and be 50-100 words.`
 
     const imagePrompt = await generateContent(prompt)
+    const cleanedPrompt = imagePrompt.trim()
 
+    // If generateImage flag is true, generate actual image using Imagen 3
+    if (generateImage) {
+      try {
+        const imageResult = await generateSingleImage(cleanedPrompt, '4:3')
+
+        return NextResponse.json({
+          success: true,
+          imagePrompt: cleanedPrompt,
+          imageData: imageResult.imageBytes,
+          mimeType: imageResult.mimeType,
+          message: 'Image generated successfully.',
+        })
+      } catch (imagenError: any) {
+        console.error('Imagen generation error:', imagenError.message)
+        // Fall back to returning just the prompt
+        return NextResponse.json({
+          success: true,
+          imagePrompt: cleanedPrompt,
+          imageData: null,
+          message: 'Image generation failed. Use the prompt with an external image generator.',
+          error: imagenError.message,
+        })
+      }
+    }
+
+    // Return just the prompt if generateImage is not requested
     return NextResponse.json({
       success: true,
-      imagePrompt: imagePrompt.trim(),
+      imagePrompt: cleanedPrompt,
       message: 'Image prompt generated successfully. Use this prompt with an image generation service.',
     })
   } catch (error: any) {
