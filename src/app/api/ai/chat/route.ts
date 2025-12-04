@@ -1,34 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateContent, generateJSON } from '@/lib/gemini'
 import { createClient } from '@supabase/supabase-js'
-import { jwtVerify } from 'jose'
+import { getUserFromToken } from '@/lib/tenant-context'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const jwtSecret = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'your-super-secret-jwt-key-min-32-chars!'
-)
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-const BYPASS_AUTH = true
-const DUMMY_STORE_ID = '22222222-2222-2222-2222-222222222222'
-
-async function getUserFromToken(request: NextRequest) {
-  if (BYPASS_AUTH) {
-    return { storeId: DUMMY_STORE_ID }
-  }
-
-  const token = request.cookies.get('auth_token')?.value
-  if (!token) return null
-
-  try {
-    const { payload } = await jwtVerify(token, jwtSecret)
-    return payload as { userId: string; email: string; role: string; storeId: string }
-  } catch {
-    return null
-  }
-}
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 async function getStoreContext(storeId: string) {
   // Fetch store info
@@ -72,7 +49,7 @@ async function getStoreContext(storeId: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await getUserFromToken(request)
+    const user = await getUserFromToken()
     if (!user?.storeId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
