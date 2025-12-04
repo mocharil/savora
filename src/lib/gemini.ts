@@ -3,13 +3,13 @@ import fs from 'fs'
 import path from 'path'
 import os from 'os'
 
-// Project ID and location
-const projectId = 'paper-ds-production'
-const location = 'us-central1'
+// Project configuration from environment
+const projectId = process.env.GEMINI_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT || ''
+const location = process.env.GEMINI_LOCATION || 'us-central1'
 
 let vertexAI: VertexAI | null = null
 
-function setupCredentials(): boolean {
+export function setupCredentials(): boolean {
   try {
     // Option 1: Check for GEMINI_CREDENTIALS env var (for production/deployment)
     const geminiCredentials = process.env.GEMINI_CREDENTIALS
@@ -36,8 +36,25 @@ function setupCredentials(): boolean {
   }
 }
 
-// Setup credentials and initialize Vertex AI
-if (setupCredentials()) {
+// Get or initialize Vertex AI instance
+export function getVertexAI(): VertexAI {
+  if (!vertexAI) {
+    if (!setupCredentials()) {
+      throw new Error('AI credentials not configured')
+    }
+    if (!projectId) {
+      throw new Error('GEMINI_PROJECT_ID environment variable not set')
+    }
+    vertexAI = new VertexAI({
+      project: projectId,
+      location: location,
+    })
+  }
+  return vertexAI
+}
+
+// Initialize on module load if credentials available
+if (setupCredentials() && projectId) {
   try {
     vertexAI = new VertexAI({
       project: projectId,

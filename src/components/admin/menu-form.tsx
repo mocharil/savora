@@ -21,7 +21,12 @@ import {
   DollarSign,
   FileText,
   Layers,
-  Plus
+  Plus,
+  Sparkles,
+  Wand2,
+  RefreshCw,
+  Copy,
+  ExternalLink
 } from 'lucide-react'
 import type { MenuItem, Category } from '@/types/database'
 
@@ -50,6 +55,31 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
   const [newCategoryName, setNewCategoryName] = useState('')
   const [creatingCategory, setCreatingCategory] = useState(false)
   const [categoryError, setCategoryError] = useState('')
+
+  // AI Enhancement states
+  const [enhancingDescription, setEnhancingDescription] = useState(false)
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false)
+  const [descriptionStyles, setDescriptionStyles] = useState<{
+    style: string
+    label: string
+    description: string
+  }[] | null>(null)
+
+  // AI Image generation states
+  const [showImageAIModal, setShowImageAIModal] = useState(false)
+  const [generatingImage, setGeneratingImage] = useState(false)
+  const [imagePrompt, setImagePrompt] = useState('')
+  const [generatedPrompt, setGeneratedPrompt] = useState('')
+
+  // AI Image enhancement states
+  const [showImageEnhanceModal, setShowImageEnhanceModal] = useState(false)
+  const [analyzingImage, setAnalyzingImage] = useState(false)
+  const [imageAnalysis, setImageAnalysis] = useState<{
+    qualityScore: number
+    issues: string[]
+    suggestions: string[]
+    enhancementPrompt: string
+  } | null>(null)
 
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
@@ -215,6 +245,174 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
     ? Math.round(((formData.price - formData.discount_price) / formData.price) * 100)
     : 0
 
+  // AI Description Enhancement
+  const handleEnhanceDescription = async () => {
+    if (!formData.name || !formData.description) return
+
+    setEnhancingDescription(true)
+    setError('')
+
+    try {
+      const selectedCategory = categories.find(c => c.id === formData.category_id)
+      const response = await fetch('/api/admin/menu/enhance-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          category: selectedCategory?.name || '',
+          description: formData.description,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Gagal enhance description')
+      }
+
+      setDescriptionStyles(result.styles || [])
+      setShowDescriptionModal(true)
+    } catch (err: any) {
+      setError('AI Error: ' + err.message)
+    } finally {
+      setEnhancingDescription(false)
+    }
+  }
+
+  const applyEnhancedDescription = (description: string) => {
+    setFormData({ ...formData, description })
+    setShowDescriptionModal(false)
+    setDescriptionStyles(null)
+  }
+
+  // Style icons/colors mapping
+  const getStyleIcon = (style: string) => {
+    switch (style) {
+      case 'professional': return { icon: '💼', color: 'bg-slate-100 border-slate-300 text-slate-700' }
+      case 'friendly': return { icon: '😊', color: 'bg-amber-50 border-amber-200 text-amber-700' }
+      case 'elegant': return { icon: '✨', color: 'bg-purple-50 border-purple-200 text-purple-700' }
+      case 'casual': return { icon: '😎', color: 'bg-blue-50 border-blue-200 text-blue-700' }
+      case 'minimal': return { icon: '📝', color: 'bg-gray-50 border-gray-200 text-gray-700' }
+      default: return { icon: '📄', color: 'bg-gray-50 border-gray-200 text-gray-700' }
+    }
+  }
+
+  // AI Image Generation
+  const handleGenerateImage = async () => {
+    if (!formData.name) return
+
+    setGeneratingImage(true)
+    setError('')
+
+    try {
+      const selectedCategory = categories.find(c => c.id === formData.category_id)
+      const response = await fetch('/api/admin/menu/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          category: selectedCategory?.name || '',
+          description: formData.description,
+          customPrompt: imagePrompt,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Gagal generate image')
+      }
+
+      setGeneratedPrompt(result.prompt)
+
+      if (result.imageData) {
+        // Image was generated - convert to data URL
+        const dataUrl = `data:${result.mimeType};base64,${result.imageData}`
+        setFormData({ ...formData, image_url: dataUrl })
+        setShowImageAIModal(false)
+      }
+    } catch (err: any) {
+      setError('AI Error: ' + err.message)
+    } finally {
+      setGeneratingImage(false)
+    }
+  }
+
+  const copyPromptToClipboard = async () => {
+    if (generatedPrompt) {
+      await navigator.clipboard.writeText(generatedPrompt)
+    }
+  }
+
+  // AI Image Enhancement (analyze existing image)
+  const handleAnalyzeImage = async () => {
+    if (!formData.image_url) return
+
+    setAnalyzingImage(true)
+    setError('')
+
+    try {
+      // Convert image URL to base64
+      let imageBase64 = ''
+      let mimeType = 'image/jpeg'
+
+      if (formData.image_url.startsWith('data:')) {
+        // Already base64
+        const parts = formData.image_url.split(',')
+        imageBase64 = parts[1]
+        mimeType = parts[0].split(':')[1].split(';')[0]
+      } else {
+        // Fetch and convert
+        const imgResponse = await fetch(formData.image_url)
+        const blob = await imgResponse.blob()
+        mimeType = blob.type
+        const reader = new FileReader()
+        imageBase64 = await new Promise((resolve) => {
+          reader.onload = () => {
+            const result = reader.result as string
+            resolve(result.split(',')[1])
+          }
+          reader.readAsDataURL(blob)
+        })
+      }
+
+      const response = await fetch('/api/admin/menu/enhance-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageBase64,
+          mimeType,
+          name: formData.name,
+          enhanceType: 'analyze',
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Gagal menganalisis gambar')
+      }
+
+      setImageAnalysis({
+        qualityScore: result.analysis.qualityScore,
+        issues: result.analysis.issues,
+        suggestions: result.analysis.suggestions,
+        enhancementPrompt: result.enhancementPrompt,
+      })
+      setShowImageEnhanceModal(true)
+    } catch (err: any) {
+      setError('AI Error: ' + err.message)
+    } finally {
+      setAnalyzingImage(false)
+    }
+  }
+
+  const copyEnhancementPrompt = async () => {
+    if (imageAnalysis?.enhancementPrompt) {
+      await navigator.clipboard.writeText(imageAnalysis.enhancementPrompt)
+    }
+  }
+
   // Handle creating new category
   const handleCreateCategory = async () => {
     if (!newCategoryName.trim()) {
@@ -373,9 +571,31 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
 
               {/* Description */}
               <div className="space-y-2">
-                <label htmlFor="description" className="block text-sm font-medium text-[#374151]">
-                  Deskripsi
-                </label>
+                <div className="flex items-center justify-between">
+                  <label htmlFor="description" className="block text-sm font-medium text-[#374151]">
+                    Deskripsi
+                  </label>
+                  {formData.name && formData.description && (
+                    <button
+                      type="button"
+                      onClick={handleEnhanceDescription}
+                      disabled={enhancingDescription}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      {enhancingDescription ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Enhancing...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5" />
+                          AI Enhance
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
                 <textarea
                   id="description"
                   value={formData.description}
@@ -384,6 +604,11 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
                   rows={3}
                   className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all resize-none"
                 />
+                {!formData.description && (
+                  <p className="text-xs text-[#9CA3AF]">
+                    Isi deskripsi untuk mengaktifkan AI Enhancement
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -472,7 +697,7 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
                 Foto Menu
               </h2>
             </div>
-            <div className="p-6">
+            <div className="p-6 space-y-4">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -482,45 +707,80 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
               />
 
               {formData.image_url ? (
-                <div className="relative aspect-square rounded-lg overflow-hidden bg-[#F3F4F6]">
-                  <Image
-                    src={formData.image_url}
-                    alt="Menu preview"
-                    fill
-                    className="object-cover"
-                  />
+                <div className="space-y-3">
+                  <div className="relative aspect-square rounded-lg overflow-hidden bg-[#F3F4F6]">
+                    <Image
+                      src={formData.image_url}
+                      alt="Menu preview"
+                      fill
+                      className="object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-[#EF4444] hover:bg-white transition-colors shadow-sm"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {/* AI Enhance existing image button */}
                   <button
                     type="button"
-                    onClick={handleRemoveImage}
-                    className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-[#EF4444] hover:bg-white transition-colors shadow-sm"
+                    onClick={handleAnalyzeImage}
+                    disabled={analyzingImage}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors disabled:opacity-50"
                   >
-                    <X className="w-4 h-4" />
+                    {analyzingImage ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Menganalisis...
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="w-4 h-4" />
+                        AI Analisis & Tips
+                      </>
+                    )}
                   </button>
                 </div>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="w-full aspect-square rounded-lg border-2 border-dashed border-[#E5E7EB] hover:border-orange-500 bg-[#F9FAFB] hover:bg-orange-500/5 transition-all flex flex-col items-center justify-center gap-3"
-                >
-                  {uploading ? (
-                    <>
-                      <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
-                      <span className="text-sm text-[#6B7280]">Mengupload...</span>
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
-                        <Upload className="w-6 h-6 text-orange-500" />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm font-medium text-[#374151]">Upload Gambar</p>
-                        <p className="text-xs text-[#9CA3AF] mt-1">PNG, JPG maksimal 5MB</p>
-                      </div>
-                    </>
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="w-full aspect-square rounded-lg border-2 border-dashed border-[#E5E7EB] hover:border-orange-500 bg-[#F9FAFB] hover:bg-orange-500/5 transition-all flex flex-col items-center justify-center gap-3"
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+                        <span className="text-sm text-[#6B7280]">Mengupload...</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
+                          <Upload className="w-6 h-6 text-orange-500" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-medium text-[#374151]">Upload Gambar</p>
+                          <p className="text-xs text-[#9CA3AF] mt-1">PNG, JPG maksimal 5MB</p>
+                        </div>
+                      </>
+                    )}
+                  </button>
+
+                  {/* AI Generate Image button - only show if name is filled */}
+                  {formData.name && (
+                    <button
+                      type="button"
+                      onClick={() => setShowImageAIModal(true)}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Generate dengan AI
+                    </button>
                   )}
-                </button>
+                </div>
               )}
             </div>
           </div>
@@ -738,6 +998,295 @@ export function MenuForm({ storeId, categories: initialCategories, initialData }
                     Tambah
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Description Enhancement Modal */}
+      {showDescriptionModal && descriptionStyles && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-[#111827]">Pilih Gaya Penulisan</h3>
+                <p className="text-sm text-[#6B7280]">5 gaya berbeda untuk deskripsi menu Anda</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              {descriptionStyles.map((item) => {
+                const styleInfo = getStyleIcon(item.style)
+                return (
+                  <div
+                    key={item.style}
+                    className={`p-4 rounded-lg border cursor-pointer hover:shadow-md transition-all ${styleInfo.color}`}
+                    onClick={() => applyEnhancedDescription(item.description)}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-lg">{styleInfo.icon}</span>
+                      <span className="text-sm font-semibold">{item.label}</span>
+                    </div>
+                    <p className="text-sm">{item.description}</p>
+                  </div>
+                )
+              })}
+
+              {/* Keep original */}
+              <div
+                className="p-4 rounded-lg border border-dashed border-[#E5E7EB] bg-[#F9FAFB] cursor-pointer hover:border-[#9CA3AF] transition-colors"
+                onClick={() => setShowDescriptionModal(false)}
+              >
+                <p className="text-sm text-[#6B7280] text-center">Tetap gunakan deskripsi asli</p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowDescriptionModal(false)
+                setDescriptionStyles(null)
+              }}
+              className="w-full h-10 px-4 rounded-lg text-sm font-medium text-[#374151] bg-white border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* AI Image Generation Modal */}
+      {showImageAIModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-[#111827]">Generate Gambar dengan AI</h3>
+                <p className="text-sm text-[#6B7280]">Buat gambar profesional untuk menu Anda</p>
+              </div>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="p-4 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB]">
+                <p className="text-xs text-[#6B7280] mb-1">Menu yang akan di-generate:</p>
+                <p className="text-sm font-medium text-[#111827]">{formData.name}</p>
+                {formData.description && (
+                  <p className="text-xs text-[#6B7280] mt-1">{formData.description}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-[#374151]">
+                  Custom Prompt (opsional)
+                </label>
+                <textarea
+                  value={imagePrompt}
+                  onChange={(e) => setImagePrompt(e.target.value)}
+                  placeholder="Contoh: tampilan dari atas, dengan garnish daun mint, latar belakang kayu rustic..."
+                  rows={2}
+                  className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all resize-none"
+                />
+                <p className="text-xs text-[#9CA3AF]">
+                  Tambahkan instruksi khusus untuk gaya foto yang diinginkan
+                </p>
+              </div>
+
+              {generatedPrompt && (
+                <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-purple-600">Optimized Prompt</span>
+                    <button
+                      type="button"
+                      onClick={copyPromptToClipboard}
+                      className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700"
+                    >
+                      <Copy className="w-3 h-3" />
+                      Salin
+                    </button>
+                  </div>
+                  <p className="text-xs text-[#374151]">{generatedPrompt}</p>
+                  <div className="mt-3 pt-3 border-t border-purple-200">
+                    <p className="text-xs text-[#6B7280] mb-2">Gunakan prompt ini di:</p>
+                    <div className="flex flex-wrap gap-2">
+                      <a
+                        href="https://gemini.google.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 px-2 py-1 text-xs text-purple-600 bg-white rounded border border-purple-200 hover:bg-purple-50"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        Gemini
+                      </a>
+                      <a
+                        href="https://www.bing.com/images/create"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 px-2 py-1 text-xs text-purple-600 bg-white rounded border border-purple-200 hover:bg-purple-50"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        Bing Image Creator
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowImageAIModal(false)
+                  setImagePrompt('')
+                  setGeneratedPrompt('')
+                }}
+                className="flex-1 h-10 px-4 rounded-lg text-sm font-medium text-[#374151] bg-white border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors"
+              >
+                Tutup
+              </button>
+              <button
+                type="button"
+                onClick={handleGenerateImage}
+                disabled={generatingImage}
+                className="flex-1 h-10 px-4 rounded-lg text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {generatingImage ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    Generate Prompt
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Image Enhancement Modal */}
+      {showImageEnhanceModal && imageAnalysis && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                <Wand2 className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-[#111827]">Analisis Foto AI</h3>
+                <p className="text-sm text-[#6B7280]">Tips untuk meningkatkan kualitas foto</p>
+              </div>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              {/* Quality Score */}
+              <div className="p-4 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-[#374151]">Skor Kualitas</span>
+                  <span className={`text-lg font-bold ${
+                    imageAnalysis.qualityScore >= 7 ? 'text-green-600' :
+                    imageAnalysis.qualityScore >= 5 ? 'text-yellow-600' : 'text-red-600'
+                  }`}>
+                    {imageAnalysis.qualityScore}/10
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-[#E5E7EB] rounded-full overflow-hidden">
+                  <div
+                    className={`h-full transition-all ${
+                      imageAnalysis.qualityScore >= 7 ? 'bg-green-500' :
+                      imageAnalysis.qualityScore >= 5 ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}
+                    style={{ width: `${imageAnalysis.qualityScore * 10}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Issues */}
+              {imageAnalysis.issues.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-[#374151]">Masalah Terdeteksi</p>
+                  <div className="space-y-2">
+                    {imageAnalysis.issues.map((issue, index) => (
+                      <div key={index} className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-100">
+                        <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-red-700">{issue}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Suggestions */}
+              {imageAnalysis.suggestions.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-[#374151]">Saran Perbaikan</p>
+                  <div className="space-y-2">
+                    {imageAnalysis.suggestions.map((suggestion, index) => (
+                      <div key={index} className="flex items-start gap-2 p-3 rounded-lg bg-green-50 border border-green-100">
+                        <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-green-700">{suggestion}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Enhancement Prompt */}
+              {imageAnalysis.enhancementPrompt && (
+                <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-purple-600">Prompt untuk Regenerasi</span>
+                    <button
+                      type="button"
+                      onClick={copyEnhancementPrompt}
+                      className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700"
+                    >
+                      <Copy className="w-3 h-3" />
+                      Salin
+                    </button>
+                  </div>
+                  <p className="text-xs text-[#374151]">{imageAnalysis.enhancementPrompt}</p>
+                  <p className="text-xs text-[#6B7280] mt-2">
+                    Gunakan prompt ini di AI image generator untuk membuat foto yang lebih baik
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowImageEnhanceModal(false)
+                  setImageAnalysis(null)
+                }}
+                className="flex-1 h-10 px-4 rounded-lg text-sm font-medium text-[#374151] bg-white border border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors"
+              >
+                Tutup
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowImageEnhanceModal(false)
+                  setShowImageAIModal(true)
+                  if (imageAnalysis?.enhancementPrompt) {
+                    setImagePrompt(imageAnalysis.enhancementPrompt)
+                  }
+                }}
+                className="flex-1 h-10 px-4 rounded-lg text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Regenerate
               </button>
             </div>
           </div>
