@@ -33,9 +33,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Log received items for debugging
-    console.log('Received items:', JSON.stringify(items, null, 2))
-
     // Validate that all items have menuItemId
     const invalidItems = items.filter(item => !item.menuItemId)
     if (invalidItems.length > 0) {
@@ -54,8 +51,6 @@ export async function POST(request: NextRequest) {
 
     // Generate order number
     const orderNumber = generateOrderNumber()
-
-    console.log('Creating order:', { storeId, orderNumber, subtotal, total, itemCount: items.length })
 
     // Create order
     const { data: order, error: orderError } = await supabase
@@ -80,8 +75,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('Order created:', order.id)
-
     // Create order items
     const orderItems = items.map((item) => ({
       order_id: order.id,
@@ -105,8 +98,6 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
-
-    console.log('Order items created')
 
     // Create payment record
     const { error: paymentError } = await supabase
@@ -133,12 +124,8 @@ export async function POST(request: NextRequest) {
       if (tableError) {
         console.error('Table status update error:', tableError)
         // Non-critical, don't rollback
-      } else {
-        console.log('Table status updated to occupied')
       }
     }
-
-    console.log('Order completed successfully:', order.id)
 
     return NextResponse.json({
       success: true,

@@ -132,8 +132,6 @@ export async function GET(request: NextRequest) {
       console.error('Error fetching orders:', ordersError)
     }
 
-    console.log(`[DailySummary] Target date: ${targetDate}, Orders found: ${orders?.length || 0}`)
-
     // Calculate core metrics
     const totalOrders = orders?.length || 0
     const completedOrders = orders?.filter((o: any) => o.status === 'completed').length || 0

@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { getUserFromToken } from '@/lib/tenant-context'
 
 const allowedFields = [
-  'name', 'description', 'address', 'phone',
+  'name', 'description', 'address', 'phone', 'website',
   'logo_url', 'banner_url',
   'tax_percentage', 'service_charge_percentage',
   'operational_hours', 'is_active',
@@ -56,8 +56,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('Updating store:', user.storeId, updateData)
-
     const supabase = createAdminClient()
 
     const { error } = await supabase
@@ -73,7 +71,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('Store updated successfully')
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error('Store update API error:', error)

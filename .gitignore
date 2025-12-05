@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -40,12 +41,16 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Google Cloud credentials
+# Google Cloud credentials - these contain private keys, NEVER commit
+gemini-credentials.json
+skilled-compass.json
+*-credentials.json
+*.credentials.json
+
+# Generic JSON files (exclude specific project files)
 *.json
 !package.json
 !package-lock.json
 !tsconfig.json
 !components.json
 !landing_page.json
-skilled-compass.json
-gemini-credentials.json

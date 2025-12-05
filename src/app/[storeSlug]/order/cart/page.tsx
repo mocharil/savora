@@ -29,8 +29,6 @@ export default function CartPage() {
 
   useEffect(() => {
     setMounted(true)
-    // Debug: log cart items
-    console.log('Cart items:', JSON.stringify(items, null, 2))
   }, [items])
 
   const totalAmount = getTotalAmount()
@@ -39,11 +37,6 @@ export default function CartPage() {
   // Check for invalid items (missing menuItemId)
   const invalidItems = items.filter(item => !item.menuItemId)
   const hasInvalidItems = invalidItems.length > 0
-
-  // Debug: log invalid items
-  if (hasInvalidItems) {
-    console.log('Invalid items found:', invalidItems)
-  }
 
   if (!mounted) {
     return (

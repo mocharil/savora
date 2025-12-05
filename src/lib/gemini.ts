@@ -194,8 +194,6 @@ export async function generateImage(
     },
   }
 
-  console.log(`[Imagen] Generating ${numberOfImages} image(s) with prompt: "${prompt.substring(0, 100)}..."`)
-
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -221,8 +219,6 @@ export async function generateImage(
     imageBytes: prediction.bytesBase64Encoded,
     mimeType: prediction.mimeType || 'image/png',
   }))
-
-  console.log(`[Imagen] Successfully generated ${images.length} image(s)`)
 
   return {
     images,

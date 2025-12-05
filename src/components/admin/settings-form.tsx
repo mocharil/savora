@@ -52,6 +52,29 @@ const dayNames: Record<string, string> = {
   sunday: 'Minggu',
 }
 
+// Generate time options for dropdown
+const generateTimeOptions = () => {
+  const options: string[] = []
+  for (let hour = 0; hour < 24; hour++) {
+    for (let minute = 0; minute < 60; minute += 30) {
+      const h = hour.toString().padStart(2, '0')
+      const m = minute.toString().padStart(2, '0')
+      options.push(`${h}:${m}`)
+    }
+  }
+  return options
+}
+
+const timeOptions = generateTimeOptions()
+
+const formatTimeDisplay = (time: string) => {
+  const [hour, minute] = time.split(':')
+  const h = parseInt(hour, 10)
+  const period = h >= 12 ? 'PM' : 'AM'
+  const displayHour = h === 0 ? 12 : h > 12 ? h - 12 : h
+  return `${displayHour}:${minute} ${period}`
+}
+
 export function SettingsForm({ store }: SettingsFormProps) {
   const router = useRouter()
   const supabase = createClient()
@@ -77,7 +100,7 @@ export function SettingsForm({ store }: SettingsFormProps) {
     description: store?.description || '',
     address: store?.address || '',
     phone: store?.phone || '',
-    website: '',
+    website: store?.website || '',
     logo_url: store?.logo_url || '',
     banner_url: store?.banner_url || '',
     tax_percentage: store?.tax_percentage || 10,
@@ -117,15 +140,12 @@ export function SettingsForm({ store }: SettingsFormProps) {
       uploadFormData.append('bucket', 'store-assets')
       uploadFormData.append('path', fileName)
 
-      console.log('Uploading file:', { type, fileName, fileSize: file.size })
-
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: uploadFormData
       })
 
       const result = await response.json()
-      console.log('Upload response:', result)
 
       if (!response.ok) {
         throw new Error(result.error || 'Upload gagal')
@@ -152,7 +172,6 @@ export function SettingsForm({ store }: SettingsFormProps) {
         console.error('Auto-save error:', updateResult.error)
         setError('Gambar terupload tapi gagal menyimpan. Silakan klik Simpan Perubahan.')
       } else {
-        console.log('Auto-saved', fieldName, 'to database')
         setSuccess(true)
         router.refresh()
         setTimeout(() => setSuccess(false), 3000)
@@ -184,6 +203,7 @@ export function SettingsForm({ store }: SettingsFormProps) {
             description: formData.description,
             address: formData.address,
             phone: formData.phone,
+            website: formData.website,
             logo_url: formData.logo_url,
             banner_url: formData.banner_url,
             tax_percentage: Number(formData.tax_percentage),
@@ -287,10 +307,10 @@ export function SettingsForm({ store }: SettingsFormProps) {
         </div>
       )}
 
-      {/* Bento Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Bento Grid Layout - Improved Symmetry */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Profil Toko - Spans 2 columns */}
-        <div data-tour="settings-store-info" className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div data-tour="settings-store-info" className="md:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-orange-50 to-red-50">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
@@ -455,8 +475,8 @@ export function SettingsForm({ store }: SettingsFormProps) {
           </div>
         </div>
 
-        {/* Jam Operasional */}
-        <div data-tour="settings-operation" className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        {/* Jam Operasional - Spans 2 columns */}
+        <div data-tour="settings-operation" className="md:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-teal-50">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
@@ -472,55 +492,111 @@ export function SettingsForm({ store }: SettingsFormProps) {
           <div className="p-4">
             <div className="space-y-2">
               {Object.entries(formData.operational_hours).map(([day, hours]) => (
-                <div key={day} className={`flex items-center gap-3 p-2 rounded-lg ${hours.isOpen ? 'bg-white' : 'bg-red-50'}`}>
-                  <span className={`w-16 text-xs font-semibold ${hours.isOpen ? 'text-gray-700' : 'text-red-500'}`}>
-                    {dayNames[day]}
-                  </span>
+                <div
+                  key={day}
+                  className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
+                    hours.isOpen
+                      ? 'bg-gradient-to-r from-emerald-50/50 to-teal-50/50 border border-emerald-100'
+                      : 'bg-red-50/50 border border-red-100'
+                  }`}
+                >
+                  {/* Day Name */}
+                  <div className="w-20 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => updateOperationalHours(day, 'isOpen', !hours.isOpen)}
+                      className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${
+                        hours.isOpen
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-white border-2 border-gray-300 text-transparent hover:border-emerald-400'
+                      }`}
+                    >
+                      <Check className="w-3 h-3" />
+                    </button>
+                    <span className={`text-sm font-medium ${hours.isOpen ? 'text-gray-700' : 'text-gray-400'}`}>
+                      {dayNames[day]}
+                    </span>
+                  </div>
+
                   {hours.isOpen ? (
-                    <>
-                      <div className="flex-1 flex items-center gap-2">
-                        <input
-                          type="time"
+                    <div className="flex-1 flex items-center gap-2">
+                      {/* Open Time Dropdown */}
+                      <div className="relative">
+                        <select
                           value={hours.open}
                           onChange={(e) => updateOperationalHours(day, 'open', e.target.value)}
-                          className="h-8 px-2 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-700 outline-none focus:border-emerald-500"
-                        />
-                        <span className="text-gray-400 text-xs">-</span>
-                        <input
-                          type="time"
+                          className="appearance-none h-9 pl-3 pr-8 bg-white border border-emerald-200 rounded-lg text-sm text-gray-700 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer hover:border-emerald-300 transition-colors"
+                        >
+                          {timeOptions.map((time) => (
+                            <option key={`open-${day}-${time}`} value={time}>
+                              {formatTimeDisplay(time)}
+                            </option>
+                          ))}
+                        </select>
+                        <Clock className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400 pointer-events-none" />
+                      </div>
+
+                      <span className="text-gray-400 text-sm font-medium">sampai</span>
+
+                      {/* Close Time Dropdown */}
+                      <div className="relative">
+                        <select
                           value={hours.close}
                           onChange={(e) => updateOperationalHours(day, 'close', e.target.value)}
-                          className="h-8 px-2 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-700 outline-none focus:border-emerald-500"
-                        />
+                          className="appearance-none h-9 pl-3 pr-8 bg-white border border-emerald-200 rounded-lg text-sm text-gray-700 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer hover:border-emerald-300 transition-colors"
+                        >
+                          {timeOptions.map((time) => (
+                            <option key={`close-${day}-${time}`} value={time}>
+                              {formatTimeDisplay(time)}
+                            </option>
+                          ))}
+                        </select>
+                        <Clock className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400 pointer-events-none" />
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => updateOperationalHours(day, 'isOpen', false)}
-                        className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </>
+                    </div>
                   ) : (
-                    <div className="flex-1 flex items-center justify-between">
-                      <span className="text-xs text-red-500 font-medium">Tutup</span>
-                      <button
-                        type="button"
-                        onClick={() => updateOperationalHours(day, 'isOpen', true)}
-                        className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
-                      >
-                        Buka
-                      </button>
+                    <div className="flex-1 flex items-center">
+                      <span className="text-sm text-red-400 font-medium">Tutup</span>
                     </div>
                   )}
                 </div>
               ))}
             </div>
+
+            {/* Quick Actions */}
+            <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const newHours = { ...formData.operational_hours }
+                  Object.keys(newHours).forEach(day => {
+                    newHours[day] = { ...newHours[day], isOpen: true }
+                  })
+                  setFormData({ ...formData, operational_hours: newHours })
+                }}
+                className="text-xs px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg font-medium hover:bg-emerald-200 transition-colors"
+              >
+                Buka Semua
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const newHours = { ...formData.operational_hours }
+                  Object.keys(newHours).forEach(day => {
+                    newHours[day] = { open: '09:00', close: '21:00', isOpen: true }
+                  })
+                  setFormData({ ...formData, operational_hours: newHours })
+                }}
+                className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+              >
+                Reset ke Default
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Pajak & Biaya Layanan */}
-        <div data-tour="settings-payment" className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        {/* Pajak & Biaya Layanan - Spans 2 columns */}
+        <div data-tour="settings-payment" className="md:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
@@ -598,8 +674,8 @@ export function SettingsForm({ store }: SettingsFormProps) {
           </div>
         </div>
 
-        {/* Status Toko */}
-        <div data-tour="settings-status" className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        {/* Status Toko - Spans 2 columns */}
+        <div data-tour="settings-status" className="md:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
@@ -651,8 +727,8 @@ export function SettingsForm({ store }: SettingsFormProps) {
           </div>
         </div>
 
-        {/* Design Settings - Customer Theme */}
-        <div data-tour="settings-design" className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        {/* Design Settings - Customer Theme - Full width */}
+        <div data-tour="settings-design" className="md:col-span-2 lg:col-span-4 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-violet-50 to-purple-50">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

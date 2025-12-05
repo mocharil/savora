@@ -159,8 +159,6 @@ export async function PUT(
           is_primary: o.is_primary || false,
         }))
 
-        console.log('Inserting outlet assignments:', outletAssignments)
-
         const { data: insertedData, error: assignError } = await supabase
           .from('user_outlets')
           .insert(outletAssignments)
@@ -173,7 +171,6 @@ export async function PUT(
           }, { status: 500 })
         }
 
-        console.log('Inserted outlet assignments:', insertedData)
       }
     }
 

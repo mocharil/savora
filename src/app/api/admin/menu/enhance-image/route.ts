@@ -107,7 +107,7 @@ Output HANYA valid JSON tanpa markdown.`,
           }
         }
       } catch (imagenError: any) {
-        console.log('Imagen enhancement not available:', imagenError.message)
+        // Imagen enhancement not available, continue without enhanced image
       }
     }
 

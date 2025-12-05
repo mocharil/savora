@@ -57,8 +57,6 @@ export async function GET(request: NextRequest) {
       console.error('Error fetching outlet assignments:', assignError)
     }
 
-    console.log('Outlet assignments fetched:', outletAssignments)
-
     // Map assignments to users
     const usersWithOutlets = users?.map(u => ({
       ...u,

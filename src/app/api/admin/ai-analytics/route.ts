@@ -52,7 +52,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Cache expired or force refresh - generate new analysis
-    console.log(`[AI Analytics] Generating fresh analysis for store ${user.storeId}`)
 
     // Fetch store data
     const { data: store } = await supabase
