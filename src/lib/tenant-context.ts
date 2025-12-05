@@ -155,15 +155,12 @@ export async function getUserFromToken(): Promise<{
   try {
     const cookieStore = await cookies()
     const token = cookieStore.get('auth_token')?.value
-    console.log('[getUserFromToken] Token exists:', !!token)
 
     if (!token) {
-      console.log('[getUserFromToken] No token found')
       return null
     }
 
     const { payload } = await jwtVerify(token, jwtSecret)
-    console.log('[getUserFromToken] Token verified, storeId:', payload.storeId)
     return {
       userId: payload.userId as string,
       email: payload.email as string,

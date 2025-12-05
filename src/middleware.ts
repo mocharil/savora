@@ -47,26 +47,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Onboarding routes - require auth
-  if (pathname.startsWith('/onboarding')) {
-    const token = request.cookies.get('auth_token')?.value
-
-    if (!token) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
-
-    try {
-      await jwtVerify(token, jwtSecret)
-      return NextResponse.next()
-    } catch {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
-  }
-
   // API routes that need auth
   if (pathname.startsWith('/api/')) {
     // Skip auth for public API routes
@@ -120,11 +100,8 @@ export async function middleware(request: NextRequest) {
   // Admin routes - require auth
   if (pathname.startsWith('/admin')) {
     const token = request.cookies.get('auth_token')?.value
-    console.log('[Middleware] Admin route:', pathname)
-    console.log('[Middleware] Token exists:', !!token)
 
     if (!token) {
-      console.log('[Middleware] No token, redirecting to login')
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       url.searchParams.set('redirect', pathname)
@@ -133,13 +110,11 @@ export async function middleware(request: NextRequest) {
 
     try {
       const { payload } = await jwtVerify(token, jwtSecret)
-      console.log('[Middleware] Token verified, role:', payload.role)
 
       // Check if user has valid admin role
       // Support both old roles (owner, staff) and new roles (tenant_admin, outlet_admin, kitchen_staff, waiter, cashier)
       const validAdminRoles = ['owner', 'staff', 'tenant_admin', 'outlet_admin', 'kitchen_staff', 'waiter', 'cashier']
       if (!validAdminRoles.includes(payload.role as string)) {
-        console.log('[Middleware] Invalid role, redirecting to home')
         return NextResponse.redirect(new URL('/', request.url))
       }
 
@@ -158,7 +133,6 @@ export async function middleware(request: NextRequest) {
       return response
     } catch (err) {
       // Invalid token - redirect to login
-      console.log('[Middleware] Token verification failed:', err)
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       url.searchParams.set('redirect', pathname)
@@ -173,7 +147,6 @@ export const config = {
   matcher: [
     '/admin/:path*',
     '/api/:path*',
-    '/onboarding/:path*',
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

@@ -52,11 +52,6 @@ const dayNames: Record<string, string> = {
   sunday: 'Minggu',
 }
 
-const formatTimeToAMPM = (time24: string): string => {
-  const [hours, minutes] = time24.split(':').map(Number)
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
-}
-
 export function SettingsForm({ store }: SettingsFormProps) {
   const router = useRouter()
   const supabase = createClient()

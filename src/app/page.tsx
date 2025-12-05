@@ -233,13 +233,25 @@ export default function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50/50 via-white to-white relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        {/* Grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+        {/* Floating orbs */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-orange-200/30 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-40 right-20 w-96 h-96 bg-red-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-40 left-1/4 w-80 h-80 bg-violet-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/2 right-10 w-64 h-64 bg-cyan-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+      </div>
+
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/savora_logo.png" alt="Savora" width={140} height={40} className="h-8 lg:h-10 w-auto" />
+              <Image src="/savora_logo.png" alt="Savora" width={48} height={48} className="h-10 lg:h-12 w-auto" />
+              <span className="text-xl lg:text-2xl font-bold text-gray-900">Savora</span>
             </Link>
             <div className="hidden md:flex items-center gap-8">
               <a href="#ai-features" className="text-sm font-medium text-gray-600 hover:text-orange-500 transition">Fitur AI</a>
@@ -251,7 +263,7 @@ export default function LandingPage() {
               <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition px-4 py-2">Masuk</Link>
               <Link href="/register" className="text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-5 py-2.5 rounded-full transition shadow-lg shadow-orange-500/25">Coba Gratis</Link>
             </div>
-            <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button className="md:hidden p-2 text-gray-700" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
@@ -308,12 +320,12 @@ export default function LandingPage() {
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-500">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full">
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <span>Powered by Llama 4 Maverick</span>
+                <span>Powered by kolosal.ai</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full">
+              {/* <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full">
                 <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                 <span>Google Imagen 3</span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -809,8 +821,9 @@ export default function LandingPage() {
       <footer className="bg-gray-900 text-white py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-8">
-            <div className="flex items-center gap-3">
-              <Image src="/savora_logo.png" alt="Savora" width={120} height={36} className="h-8 w-auto brightness-0 invert" />
+            <div className="flex items-center gap-2">
+              <Image src="/savora_logo.png" alt="Savora" width={40} height={40} className="h-10 w-auto" />
+              <span className="text-xl font-bold text-white">Savora</span>
             </div>
             <div className="flex items-center gap-8 text-sm text-gray-400">
               <a href="#ai-features" className="hover:text-white transition">Fitur AI</a>

@@ -63,28 +63,19 @@ export default async function AdminLayout({
     .eq('id', user.store_id)
     .single()
 
-  // Check if onboarding is completed
-  const storeSettings = (store?.settings as Record<string, unknown>) || {}
-  const onboardingCompleted = storeSettings.onboardingCompleted === true
-
-  // Check if user has any outlets (another way to determine if they completed setup)
-  const { count: outletCount } = await supabase
-    .from('outlets')
-    .select('*', { count: 'exact', head: true })
-    .eq('store_id', user.store_id)
-    .eq('is_active', true)
-
-  // If onboarding not completed and no outlets, redirect to onboarding
-  if (!onboardingCompleted && (!outletCount || outletCount === 0)) {
-    redirect('/onboarding')
-  }
-
   // Get pending order count
   const { count: pendingOrderCount } = await supabase
     .from('orders')
     .select('*', { count: 'exact', head: true })
     .eq('store_id', user.store_id)
     .eq('status', 'pending')
+
+  // Get outlet count for FTUE
+  const { count: outletCount } = await supabase
+    .from('outlets')
+    .select('*', { count: 'exact', head: true })
+    .eq('store_id', user.store_id)
+    .eq('is_active', true)
 
   // Get FTUE status
   const { count: menuCount } = await supabase

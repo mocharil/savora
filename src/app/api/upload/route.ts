@@ -31,8 +31,6 @@ export async function POST(request: NextRequest) {
     const bucket = formData.get('bucket') as string
     const path = formData.get('path') as string
 
-    console.log('Upload request:', { bucket, path, fileType: file?.type, fileSize: file?.size })
-
     if (!file || !bucket || !path) {
       return NextResponse.json(
         { error: 'Missing required fields: file, bucket, path' },
@@ -85,14 +83,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('Upload successful:', data)
-
     // Get public URL
     const { data: { publicUrl } } = supabaseAdmin.storage
       .from(bucket)
       .getPublicUrl(path)
-
-    console.log('Public URL:', publicUrl)
 
     return NextResponse.json({
       success: true,
