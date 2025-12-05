@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Search,
   Pencil,
@@ -10,8 +11,20 @@ import {
   ToggleRight,
   ToggleLeft,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Trash2
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 interface Category {
   id: string
@@ -28,9 +41,31 @@ interface CategoryFiltersProps {
 const ITEMS_PER_PAGE = 10
 
 export function CategoryFilters({ categories }: CategoryFiltersProps) {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [currentPage, setCurrentPage] = useState(1)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  // Handle delete category
+  const handleDelete = async (id: string) => {
+    setDeletingId(id)
+    try {
+      const res = await fetch(`/api/admin/categories/${id}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        router.refresh()
+      } else {
+        const data = await res.json()
+        console.error('Failed to delete category:', data.error)
+      }
+    } catch (error) {
+      console.error('Error deleting category:', error)
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   // Filter categories
   const filteredCategories = useMemo(() => {
@@ -205,14 +240,55 @@ export function CategoryFilters({ categories }: CategoryFiltersProps) {
                   category.is_active ? 'bg-[#10B981]' : 'bg-amber-400'
                 }`} />
 
-                {/* Edit Button */}
-                <Link
-                  href={`/admin/categories/${category.id}/edit`}
-                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[#374151] bg-[#F3F4F6] rounded-lg hover:bg-[#E5E7EB] transition-colors"
-                >
-                  <Pencil className="w-3.5 h-3.5" />
-                  Edit
-                </Link>
+                {/* Actions */}
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/admin/categories/${category.id}/edit`}
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[#374151] bg-[#F3F4F6] rounded-lg hover:bg-[#E5E7EB] transition-colors"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                    Edit
+                  </Link>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className="flex items-center justify-center w-9 h-9 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors"
+                        disabled={deletingId === category.id}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="max-w-md">
+                      <AlertDialogHeader>
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 border border-red-100">
+                            <Trash2 className="h-6 w-6 text-red-500" />
+                          </div>
+                          <div>
+                            <AlertDialogTitle className="text-lg">Hapus Kategori?</AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm">
+                              Kategori "{category.name}" akan dihapus.
+                              {(category.menu_items?.[0]?.count || 0) > 0 && (
+                                <span className="block mt-1 text-amber-600 font-medium">
+                                  Kategori ini memiliki {category.menu_items?.[0]?.count} menu terkait.
+                                </span>
+                              )}
+                            </AlertDialogDescription>
+                          </div>
+                        </div>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter className="mt-4">
+                        <AlertDialogCancel className="rounded-xl">Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(category.id)}
+                          className="rounded-xl bg-red-500 hover:bg-red-600 text-white"
+                        >
+                          Ya, Hapus
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
             ))}
           </div>

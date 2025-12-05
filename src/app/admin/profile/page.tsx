@@ -43,7 +43,7 @@ export default async function ProfilePage() {
   // Get full user data
   const { data: user, error } = await supabase
     .from('users')
-    .select('id, email, full_name, phone, role, created_at')
+    .select('id, email, full_name, role, created_at')
     .eq('id', tokenUser.userId)
     .single()
 

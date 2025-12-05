@@ -221,6 +221,7 @@ export function DailySummaryCard() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl border border-orange-200 overflow-hidden"
+      data-tour="dashboard-daily-summary"
     >
       {/* Header */}
       <div

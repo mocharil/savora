@@ -8,12 +8,14 @@ interface MenuAvailabilityToggleProps {
   menuId: string
   initialAvailability: boolean
   menuName: string
+  variant?: 'absolute' | 'inline'
 }
 
 export function MenuAvailabilityToggle({
   menuId,
   initialAvailability,
-  menuName
+  menuName,
+  variant = 'absolute'
 }: MenuAvailabilityToggleProps) {
   const router = useRouter()
   const [isAvailable, setIsAvailable] = useState(initialAvailability)
@@ -44,6 +46,30 @@ export function MenuAvailabilityToggle({
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (variant === 'inline') {
+    return (
+      <button
+        onClick={handleToggle}
+        disabled={isLoading}
+        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors disabled:opacity-50 ${
+          isAvailable
+            ? 'bg-[#10B981]/10 text-[#10B981] hover:bg-[#10B981]/20'
+            : 'bg-[#EF4444]/10 text-[#EF4444] hover:bg-[#EF4444]/20'
+        }`}
+        title={isAvailable ? 'Klik untuk tidak tersediakan' : 'Klik untuk tersediakan'}
+      >
+        {isLoading ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        ) : isAvailable ? (
+          <ToggleRight className="w-3.5 h-3.5" />
+        ) : (
+          <ToggleLeft className="w-3.5 h-3.5" />
+        )}
+        {isAvailable ? 'Tersedia' : 'Tidak Tersedia'}
+      </button>
+    )
   }
 
   return (

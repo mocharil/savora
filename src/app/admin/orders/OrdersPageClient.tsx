@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { formatCurrency } from '@/lib/utils'
 import { PageTourButton } from '@/components/admin/tour'
 import {
@@ -112,6 +113,7 @@ interface OrdersPageClientProps {
 const ITEMS_PER_PAGE = 10
 
 export function OrdersPageClient({ orders, statusCounts }: OrdersPageClientProps) {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -433,7 +435,8 @@ export function OrdersPageClient({ orders, statusCounts }: OrdersPageClientProps
                 return (
                   <tr
                     key={order.id}
-                    className={`hover:bg-gray-50 transition-colors ${isPending ? 'bg-amber-50/50' : ''}`}
+                    onClick={() => router.push(`/admin/orders/${order.id}`)}
+                    className={`hover:bg-orange-50 cursor-pointer transition-colors ${isPending ? 'bg-amber-50/50' : ''}`}
                   >
                     {/* Order Number & Time */}
                     <td className="px-4 py-3">

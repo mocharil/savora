@@ -2,8 +2,7 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { getUserFromToken } from '@/lib/tenant-context'
 import { redirect } from 'next/navigation'
-import { MenuPageClient } from './MenuPageClient'
-import { MenuFilters } from '@/components/admin/menu-filters'
+import { MenuPageWrapper } from './MenuPageWrapper'
 
 export default async function MenuPage() {
   const supabase = createAdminClient()
@@ -34,15 +33,10 @@ export default async function MenuPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <MenuPageClient />
-
-      {/* Filters and Menu Grid */}
-      <MenuFilters
-        categories={categories || []}
-        menuItems={menuItems || []}
-      />
-    </div>
+    <MenuPageWrapper
+      categories={categories || []}
+      menuItems={menuItems || []}
+      storeId={storeId}
+    />
   )
 }

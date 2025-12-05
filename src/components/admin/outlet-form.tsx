@@ -173,22 +173,23 @@ export function OutletForm({ storeId, initialData }: OutletFormProps) {
 
   return (
     <div className="max-w-3xl mx-auto">
+      {/* Back Button */}
+      <Link
+        href="/admin/outlets"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 group mb-6"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        <span className="text-sm font-medium">Kembali</span>
+      </Link>
+
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Link
-          href="/admin/outlets"
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {isEditing ? 'Edit Outlet' : 'Tambah Outlet Baru'}
-          </h1>
-          <p className="text-gray-500 mt-1">
-            {isEditing ? 'Perbarui informasi outlet' : 'Tambah cabang baru untuk restoran Anda'}
-          </p>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">
+          {isEditing ? 'Edit Outlet' : 'Tambah Outlet Baru'}
+        </h1>
+        <p className="text-gray-500 mt-1">
+          {isEditing ? 'Perbarui informasi outlet' : 'Tambah cabang baru untuk restoran Anda'}
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

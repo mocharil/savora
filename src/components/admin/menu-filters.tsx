@@ -14,8 +14,23 @@ import {
   ChevronDown,
   Check,
   X,
-  SlidersHorizontal
+  SlidersHorizontal,
+  LayoutGrid,
+  List,
+  Trash2
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { useRouter } from 'next/navigation'
 
 interface Category {
   id: string
@@ -116,11 +131,35 @@ function Dropdown({
   )
 }
 
+type ViewMode = 'grid' | 'list'
+
 export function MenuFilters({ categories, menuItems }: MenuFiltersProps) {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('')
   const [sortBy, setSortBy] = useState<SortOption>('newest')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  // Handle delete menu item
+  const handleDelete = async (id: string) => {
+    setDeletingId(id)
+    try {
+      const res = await fetch(`/api/admin/menu/${id}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        router.refresh()
+      } else {
+        console.error('Failed to delete menu item')
+      }
+    } catch (error) {
+      console.error('Error deleting menu item:', error)
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   // Category options
   const categoryOptions = [
@@ -254,106 +293,308 @@ export function MenuFilters({ categories, menuItems }: MenuFiltersProps) {
           </button>
         )}
 
+        {/* View Toggle */}
+        <div className="flex items-center gap-1 p-1 bg-white rounded-lg border border-[#E5E7EB]">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`p-2 rounded-md transition-all ${
+              viewMode === 'grid'
+                ? 'bg-orange-500 text-white shadow-sm'
+                : 'text-[#6B7280] hover:bg-gray-100'
+            }`}
+            title="Tampilan Grid"
+          >
+            <LayoutGrid className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`p-2 rounded-md transition-all ${
+              viewMode === 'list'
+                ? 'bg-orange-500 text-white shadow-sm'
+                : 'text-[#6B7280] hover:bg-gray-100'
+            }`}
+            title="Tampilan List"
+          >
+            <List className="w-4 h-4" />
+          </button>
+        </div>
+
         {/* Results count */}
         <div className="ml-auto text-sm text-[#6B7280]">
           {filteredItems.length} dari {menuItems.length} menu
         </div>
       </div>
 
-      {/* Menu Grid */}
+      {/* Menu Display */}
       {filteredItems.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" data-tour="menu-grid">
-          {filteredItems.map((item) => (
-            <div
-              key={item.id}
-              className={`bg-white rounded-xl border overflow-hidden hover:shadow-admin-md transition-all group ${
-                item.is_available ? 'border-[#E5E7EB]' : 'border-red-200 bg-red-50/30'
-              }`}
-            >
-              {/* Image */}
-              <div className="relative aspect-[4/3] bg-[#F3F4F6]">
-                {item.image_url ? (
-                  <Image
-                    src={item.image_url}
-                    alt={item.name}
-                    fill
-                    className={`object-cover ${!item.is_available ? 'grayscale opacity-60' : ''}`}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <UtensilsCrossed className="w-12 h-12 text-[#D1D5DB]" />
-                  </div>
-                )}
+        viewMode === 'grid' ? (
+          /* Grid View */
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" data-tour="menu-grid">
+            {filteredItems.map((item) => (
+              <div
+                key={item.id}
+                className={`bg-white rounded-xl border overflow-hidden hover:shadow-admin-md transition-all group ${
+                  item.is_available ? 'border-[#E5E7EB]' : 'border-red-200 bg-red-50/30'
+                }`}
+              >
+                {/* Image */}
+                <div className="relative aspect-[4/3] bg-[#F3F4F6]">
+                  {item.image_url ? (
+                    <Image
+                      src={item.image_url}
+                      alt={item.name}
+                      fill
+                      className={`object-cover ${!item.is_available ? 'grayscale opacity-60' : ''}`}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <UtensilsCrossed className="w-12 h-12 text-[#D1D5DB]" />
+                    </div>
+                  )}
 
-                {/* Unavailable Overlay */}
-                {!item.is_available && (
-                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                    <span className="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg shadow-lg">
-                      TIDAK TERSEDIA
+                  {/* Unavailable Overlay */}
+                  {!item.is_available && (
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                      <span className="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg shadow-lg">
+                        TIDAK TERSEDIA
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Category Badge */}
+                  {item.category?.name && (
+                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-white text-[#374151] text-xs font-medium rounded-md shadow-sm">
+                      {item.category.name}
                     </span>
-                  </div>
-                )}
+                  )}
 
-                {/* Category Badge */}
-                {item.category?.name && (
-                  <span className="absolute top-3 left-3 px-2.5 py-1 bg-white text-[#374151] text-xs font-medium rounded-md shadow-sm">
-                    {item.category.name}
-                  </span>
-                )}
+                  {/* Availability Toggle */}
+                  <MenuAvailabilityToggle
+                    menuId={item.id}
+                    initialAvailability={item.is_available}
+                    menuName={item.name}
+                  />
 
-                {/* Availability Toggle */}
-                <MenuAvailabilityToggle
-                  menuId={item.id}
-                  initialAvailability={item.is_available}
-                  menuName={item.name}
-                />
+                  {/* Featured Badge */}
+                  {item.is_featured && (
+                    <span className="absolute bottom-3 left-3 flex items-center gap-1 px-2.5 py-1 bg-[#F59E0B] text-white text-xs font-medium rounded-md">
+                      <Star className="w-3 h-3 fill-current" />
+                      Unggulan
+                    </span>
+                  )}
+                </div>
 
-                {/* Featured Badge */}
-                {item.is_featured && (
-                  <span className="absolute bottom-3 left-3 flex items-center gap-1 px-2.5 py-1 bg-[#F59E0B] text-white text-xs font-medium rounded-md">
-                    <Star className="w-3 h-3 fill-current" />
-                    Unggulan
-                  </span>
-                )}
-              </div>
-
-              {/* Content */}
-              <div className="p-4">
-                <h3 className="font-semibold text-[#111827] line-clamp-1">{item.name}</h3>
-                {item.description && (
-                  <p className="text-sm text-[#6B7280] line-clamp-2 mt-1">
-                    {item.description}
-                  </p>
-                )}
-
-                {/* Price Row */}
-                <div className="flex items-end justify-between mt-4">
-                  <div>
-                    <p className="text-lg font-bold text-orange-500">
-                      {formatCurrency(item.discount_price || item.price)}
+                {/* Content */}
+                <div className="p-4">
+                  <h3 className="font-semibold text-[#111827] line-clamp-1">{item.name}</h3>
+                  {item.description && (
+                    <p className="text-sm text-[#6B7280] line-clamp-2 mt-1">
+                      {item.description}
                     </p>
-                    {item.discount_price && (
-                      <p className="text-sm text-[#9CA3AF] line-through">
-                        {formatCurrency(item.price)}
-                      </p>
-                    )}
-                  </div>
+                  )}
 
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/admin/menu/${item.id}/edit`}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-[#F3F4F6] text-[#374151] text-sm font-medium rounded-lg hover:bg-[#E5E7EB] transition-colors"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                      Edit
-                    </Link>
+                  {/* Price Row */}
+                  <div className="flex items-end justify-between mt-4">
+                    <div>
+                      <p className="text-lg font-bold text-orange-500">
+                        {formatCurrency(item.discount_price || item.price)}
+                      </p>
+                      {item.discount_price && (
+                        <p className="text-sm text-[#9CA3AF] line-through">
+                          {formatCurrency(item.price)}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/admin/menu/${item.id}/edit`}
+                        className="flex items-center gap-1.5 px-3 py-2 bg-[#F3F4F6] text-[#374151] text-sm font-medium rounded-lg hover:bg-[#E5E7EB] transition-colors"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        Edit
+                      </Link>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button
+                            className="flex items-center justify-center w-9 h-9 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors"
+                            disabled={deletingId === item.id}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="max-w-md">
+                          <AlertDialogHeader>
+                            <div className="flex items-center gap-4">
+                              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 border border-red-100">
+                                <Trash2 className="h-6 w-6 text-red-500" />
+                              </div>
+                              <div>
+                                <AlertDialogTitle className="text-lg">Hapus Menu?</AlertDialogTitle>
+                                <AlertDialogDescription className="text-sm">
+                                  Menu "{item.name}" akan dihapus permanen.
+                                </AlertDialogDescription>
+                              </div>
+                            </div>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="mt-4">
+                            <AlertDialogCancel className="rounded-xl">Batal</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(item.id)}
+                              className="rounded-xl bg-red-500 hover:bg-red-600 text-white"
+                            >
+                              Ya, Hapus
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          /* List View */
+          <div className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden" data-tour="menu-list">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Menu</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Kategori</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Harga</th>
+                  <th className="text-center px-6 py-4 text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Status</th>
+                  <th className="text-right px-6 py-4 text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#F3F4F6]">
+                {filteredItems.map((item) => (
+                  <tr
+                    key={item.id}
+                    className={`hover:bg-orange-50/50 transition-colors ${
+                      !item.is_available ? 'bg-red-50/30' : ''
+                    }`}
+                  >
+                    {/* Menu Info */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-[#F3F4F6] flex-shrink-0">
+                          {item.image_url ? (
+                            <Image
+                              src={item.image_url}
+                              alt={item.name}
+                              fill
+                              className={`object-cover ${!item.is_available ? 'grayscale opacity-60' : ''}`}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <UtensilsCrossed className="w-6 h-6 text-[#D1D5DB]" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium text-[#111827] truncate">{item.name}</h3>
+                            {item.is_featured && (
+                              <span className="flex items-center gap-1 px-2 py-0.5 bg-[#F59E0B]/10 text-[#F59E0B] text-xs font-medium rounded-full">
+                                <Star className="w-3 h-3 fill-current" />
+                                Unggulan
+                              </span>
+                            )}
+                          </div>
+                          {item.description && (
+                            <p className="text-sm text-[#6B7280] truncate mt-0.5 max-w-[300px]">
+                              {item.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Kategori */}
+                    <td className="px-6 py-4">
+                      <span className="px-2.5 py-1 bg-[#F3F4F6] text-[#374151] text-sm font-medium rounded-md">
+                        {item.category?.name || '-'}
+                      </span>
+                    </td>
+
+                    {/* Harga */}
+                    <td className="px-6 py-4">
+                      <div>
+                        <p className="font-semibold text-orange-500">
+                          {formatCurrency(item.discount_price || item.price)}
+                        </p>
+                        {item.discount_price && (
+                          <p className="text-xs text-[#9CA3AF] line-through">
+                            {formatCurrency(item.price)}
+                          </p>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Status */}
+                    <td className="px-6 py-4 text-center">
+                      <MenuAvailabilityToggle
+                        menuId={item.id}
+                        initialAvailability={item.is_available}
+                        menuName={item.name}
+                        variant="inline"
+                      />
+                    </td>
+
+                    {/* Aksi */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/admin/menu/${item.id}/edit`}
+                          className="flex items-center gap-1.5 px-3 py-2 bg-[#F3F4F6] text-[#374151] text-sm font-medium rounded-lg hover:bg-[#E5E7EB] transition-colors"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          Edit
+                        </Link>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button
+                              className="flex items-center justify-center w-9 h-9 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors"
+                              disabled={deletingId === item.id}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="max-w-md">
+                            <AlertDialogHeader>
+                              <div className="flex items-center gap-4">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 border border-red-100">
+                                  <Trash2 className="h-6 w-6 text-red-500" />
+                                </div>
+                                <div>
+                                  <AlertDialogTitle className="text-lg">Hapus Menu?</AlertDialogTitle>
+                                  <AlertDialogDescription className="text-sm">
+                                    Menu "{item.name}" akan dihapus permanen.
+                                  </AlertDialogDescription>
+                                </div>
+                              </div>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="mt-4">
+                              <AlertDialogCancel className="rounded-xl">Batal</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(item.id)}
+                                className="rounded-xl bg-red-500 hover:bg-red-600 text-white"
+                              >
+                                Ya, Hapus
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
       ) : (
         <div className="bg-white rounded-xl border border-[#E5E7EB] p-16 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F3F4F6] flex items-center justify-center">

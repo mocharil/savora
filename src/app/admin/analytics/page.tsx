@@ -1,4 +1,5 @@
 // @ts-nocheck
+import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/server'
 import { formatCurrency } from '@/lib/utils'
 import { getUserFromToken } from '@/lib/tenant-context'
@@ -108,18 +109,18 @@ export default async function AnalyticsPage({
   const { data: orderItems } = completedOrderIds.length > 0
     ? await supabase
         .from('order_items')
-        .select(`quantity, unit_price, subtotal, menu_item:menu_items(id, name)`)
+        .select(`quantity, unit_price, subtotal, menu_item:menu_items(id, name, image_url)`)
         .in('order_id', completedOrderIds)
     : { data: [] }
 
   // Aggregate top items
-  const itemSales: Record<string, { name: string; quantity: number; revenue: number }> = {}
+  const itemSales: Record<string, { name: string; quantity: number; revenue: number; image_url: string | null }> = {}
   let totalItemsSold = 0
   orderItems?.forEach(item => {
     const menuItem = item.menu_item as any
     if (menuItem) {
       if (!itemSales[menuItem.id]) {
-        itemSales[menuItem.id] = { name: menuItem.name, quantity: 0, revenue: 0 }
+        itemSales[menuItem.id] = { name: menuItem.name, quantity: 0, revenue: 0, image_url: menuItem.image_url }
       }
       itemSales[menuItem.id].quantity += item.quantity
       itemSales[menuItem.id].revenue += item.subtotal || (item.unit_price * item.quantity)
@@ -466,8 +467,8 @@ export default async function AnalyticsPage({
           </div>
           <div className="p-6">
             <div className="flex items-center justify-center mb-6">
-              <div className="relative w-28 h-28">
-                <svg className="w-28 h-28 transform -rotate-90">
+              <div className="relative w-44 h-44">
+                <svg className="w-44 h-44 transform -rotate-90" viewBox="0 0 180 180">
                   {(() => {
                     const statuses = [
                       { key: 'completed', color: '#10B981', count: ordersByStatus.completed },
@@ -477,7 +478,8 @@ export default async function AnalyticsPage({
                       { key: 'cancelled', color: '#EF4444', count: ordersByStatus.cancelled },
                     ]
                     let offset = 0
-                    const circumference = 2 * Math.PI * 50
+                    const radius = 70
+                    const circumference = 2 * Math.PI * radius
 
                     return statuses.map((status) => {
                       const percentage = totalOrders > 0 ? (status.count / totalOrders) * 100 : 0
@@ -490,25 +492,26 @@ export default async function AnalyticsPage({
                       return (
                         <circle
                           key={status.key}
-                          cx="56" cy="56" r="50"
+                          cx="90" cy="90" r={radius}
                           stroke={status.color}
-                          strokeWidth="12"
+                          strokeWidth="20"
                           fill="none"
                           strokeDasharray={strokeDasharray}
                           strokeDashoffset={strokeDashoffset}
+                          className="transition-all duration-500"
                         />
                       )
                     })
                   })()}
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-xl font-bold text-gray-900">{totalOrders}</span>
-                  <span className="text-[10px] text-gray-500">Total</span>
+                  <span className="text-3xl font-bold text-gray-900">{totalOrders}</span>
+                  <span className="text-sm text-gray-500">Total Pesanan</span>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-3">
               {[
                 { label: 'Selesai', color: 'bg-green-500', count: ordersByStatus.completed },
                 { label: 'Diproses', color: 'bg-purple-500', count: ordersByStatus.preparing },
@@ -516,10 +519,10 @@ export default async function AnalyticsPage({
                 { label: 'Pending', color: 'bg-amber-500', count: ordersByStatus.pending },
                 { label: 'Batal', color: 'bg-red-500', count: ordersByStatus.cancelled },
               ].map((item) => (
-                <div key={item.label} className="flex items-center gap-2 text-sm">
-                  <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
-                  <span className="text-gray-600 flex-1">{item.label}</span>
-                  <span className="font-semibold text-gray-900">{item.count}</span>
+                <div key={item.label} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50">
+                  <div className={`w-3 h-3 rounded-full ${item.color}`} />
+                  <span className="text-sm text-gray-600 flex-1">{item.label}</span>
+                  <span className="text-sm font-bold text-gray-900">{item.count}</span>
                 </div>
               ))}
             </div>
@@ -538,38 +541,70 @@ export default async function AnalyticsPage({
           </div>
           <div className="p-6">
             {topItems.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {topItems.map((item, index) => {
                   const maxQty = topItems[0]?.quantity || 1
                   const barWidth = (item.quantity / maxQty) * 100
 
                   return (
-                    <div key={index} className="space-y-1.5">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
-                          index === 0 ? 'bg-gradient-to-br from-amber-400 to-yellow-500 text-white' :
-                          index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-white' :
-                          index === 2 ? 'bg-gradient-to-br from-orange-400 to-amber-600 text-white' :
-                          'bg-gray-100 text-gray-500'
-                        }`}>
-                          {index < 3 ? <Flame className="w-3.5 h-3.5" /> : index + 1}
-                        </div>
-                        <span className="flex-1 text-sm font-medium text-gray-900 truncate">{item.name}</span>
-                        <div className="text-right text-xs">
-                          <span className="font-bold text-gray-900">{item.quantity}</span>
-                          <span className="text-gray-400 ml-1">terjual</span>
-                        </div>
+                    <div key={index} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                      {/* Rank Badge */}
+                      <div className={`relative flex-shrink-0 ${index < 3 ? 'w-14 h-14' : 'w-12 h-12'}`}>
+                        {item.image_url ? (
+                          <div className="relative w-full h-full rounded-xl overflow-hidden shadow-md">
+                            <Image
+                              src={item.image_url}
+                              alt={item.name}
+                              fill
+                              className="object-cover"
+                            />
+                            {/* Rank overlay */}
+                            <div className={`absolute -top-1 -left-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-md ${
+                              index === 0 ? 'bg-gradient-to-br from-amber-400 to-yellow-500 text-white' :
+                              index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-white' :
+                              index === 2 ? 'bg-gradient-to-br from-orange-400 to-amber-600 text-white' :
+                              'bg-white text-gray-600 border border-gray-200'
+                            }`}>
+                              {index + 1}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className={`w-full h-full rounded-xl flex items-center justify-center text-sm font-bold ${
+                            index === 0 ? 'bg-gradient-to-br from-amber-400 to-yellow-500 text-white' :
+                            index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-white' :
+                            index === 2 ? 'bg-gradient-to-br from-orange-400 to-amber-600 text-white' :
+                            'bg-gray-200 text-gray-500'
+                          }`}>
+                            {index < 3 ? <Flame className="w-5 h-5" /> : index + 1}
+                          </div>
+                        )}
                       </div>
-                      <div className="h-1 bg-gray-100 rounded-full overflow-hidden ml-10">
-                        <div
-                          className={`h-full rounded-full ${
-                            index === 0 ? 'bg-gradient-to-r from-amber-400 to-yellow-500' :
-                            index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400' :
-                            index === 2 ? 'bg-gradient-to-r from-orange-400 to-amber-600' :
-                            'bg-gray-300'
-                          }`}
-                          style={{ width: `${barWidth}%` }}
-                        />
+
+                      {/* Item Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-gray-900 truncate">{item.name}</span>
+                          <div className="flex-shrink-0 text-right">
+                            <span className="text-lg font-bold text-gray-900">{item.quantity}</span>
+                            <span className="text-xs text-gray-400 ml-1">terjual</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                index === 0 ? 'bg-gradient-to-r from-amber-400 to-yellow-500' :
+                                index === 1 ? 'bg-gradient-to-r from-gray-400 to-gray-500' :
+                                index === 2 ? 'bg-gradient-to-r from-orange-400 to-amber-500' :
+                                'bg-gray-400'
+                              }`}
+                              style={{ width: `${barWidth}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-green-600 font-medium flex-shrink-0">
+                            {formatCurrency(item.revenue)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   )

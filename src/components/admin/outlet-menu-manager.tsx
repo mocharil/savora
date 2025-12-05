@@ -237,19 +237,20 @@ export function OutletMenuManager({ outlet, categories }: OutletMenuManagerProps
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
+      {/* Back Button */}
+      <Link
+        href="/admin/outlets"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 group mb-6"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        <span className="text-sm font-medium">Kembali</span>
+      </Link>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/admin/outlets"
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold">Kelola Menu Outlet</h1>
-            <p className="text-gray-500">{outlet.name}</p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold">Kelola Menu Outlet</h1>
+          <p className="text-gray-500">{outlet.name}</p>
         </div>
         <Button variant="outline" onClick={fetchMenuItems}>
           <RefreshCw className="w-4 h-4 mr-2" />

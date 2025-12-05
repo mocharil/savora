@@ -41,6 +41,17 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 // Menu item type
 interface MenuItem {
@@ -183,7 +194,7 @@ export function AdminSidebar({
         {/* Logo Section with Collapse Toggle */}
         <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
           <div className="flex items-center gap-3" data-tour="sidebar-logo">
-            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full overflow-hidden bg-white">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full overflow-hidden">
               <Image
                 src="/savora_logo.png"
                 alt="Savora"
@@ -305,39 +316,27 @@ export function AdminSidebar({
           })}
         </nav>
 
-        {/* Bottom Section - User Profile */}
+        {/* Bottom Section - User Profile & Logout Side by Side */}
         <div className="border-t border-white/10 p-3" data-tour="sidebar-profile">
-          {!isMounted ? (
-            // SSR placeholder to prevent hydration mismatch
-            <div className={cn(
-              "flex items-center gap-3 rounded-lg p-2",
-              isCollapsed && "justify-center"
-            )}>
-              <div className="h-9 w-9 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center text-white text-sm font-medium">
-                {getInitials(userName)}
-              </div>
-              {!isCollapsed && (
-                <div className="flex-1 text-left overflow-hidden">
-                  <p className="text-sm font-medium text-white truncate">{userName}</p>
-                  <p className="text-xs text-white/60">{getRoleLabel(userRole)}</p>
-                </div>
-              )}
-            </div>
-          ) : isCollapsed ? (
-            // Collapsed: Show only avatar with dropdown
-            <DropdownMenu>
+          <div className={cn(
+            "flex items-center gap-2",
+            isCollapsed ? "flex-col" : "flex-row"
+          )}>
+            {/* Profile Link */}
+            {isCollapsed ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex w-full items-center justify-center rounded-lg p-2 hover:bg-white/10 transition-colors">
-                      <Avatar className="h-9 w-9">
-                        <AvatarImage src={userAvatar || undefined} alt={userName} />
-                        <AvatarFallback className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-medium">
-                          {getInitials(userName)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </button>
-                  </DropdownMenuTrigger>
+                  <Link
+                    href="/admin/profile"
+                    className="flex items-center justify-center rounded-xl p-2 hover:bg-white/10 transition-all duration-200"
+                  >
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src={userAvatar || undefined} alt={userName} />
+                      <AvatarFallback className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-medium">
+                        {getInitials(userName)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
                 </TooltipTrigger>
                 <TooltipContent side="right" sideOffset={10}>
                   <div className="text-sm">
@@ -346,81 +345,66 @@ export function AdminSidebar({
                   </div>
                 </TooltipContent>
               </Tooltip>
-              <DropdownMenuContent side="right" align="end" className="w-56 mb-2">
-                <div className="px-3 py-2">
-                  <p className="text-sm font-medium">{userName}</p>
-                  <p className="text-xs text-muted-foreground">{userEmail}</p>
+            ) : (
+              <Link
+                href="/admin/profile"
+                className="flex-1 flex items-center gap-3 rounded-xl p-2 hover:bg-white/10 transition-all duration-200"
+              >
+                <Avatar className="h-9 w-9">
+                  <AvatarImage src={userAvatar || undefined} alt={userName} />
+                  <AvatarFallback className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-medium">
+                    {getInitials(userName)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 text-left overflow-hidden">
+                  <p className="text-sm font-medium text-white truncate">{userName}</p>
+                  <p className="text-xs text-white/60">{getRoleLabel(userRole)}</p>
                 </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/admin/profile" className="flex items-center gap-2 cursor-pointer">
-                    <UserIcon className="w-4 h-4" />
-                    <span>Profil</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/admin/settings" className="flex items-center gap-2 cursor-pointer">
-                    <Settings className="w-4 h-4" />
-                    <span>Pengaturan</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="flex items-center gap-2 cursor-pointer text-[#EF4444] focus:text-[#EF4444] focus:bg-[#FEF2F2]"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Keluar</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            // Expanded: Show full profile with dropdown
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex w-full items-center gap-3 rounded-lg p-2 hover:bg-white/10 transition-colors">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src={userAvatar || undefined} alt={userName} />
-                    <AvatarFallback className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-medium">
-                      {getInitials(userName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 text-left overflow-hidden">
-                    <p className="text-sm font-medium text-white truncate">{userName}</p>
-                    <p className="text-xs text-white/60">{getRoleLabel(userRole)}</p>
+              </Link>
+            )}
+
+            {/* Logout Button with Confirmation */}
+            <AlertDialog>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      className="group flex items-center justify-center h-[52px] w-[52px] rounded-xl bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/20 hover:from-red-500/20 hover:to-orange-500/20 hover:border-red-500/40 hover:shadow-lg hover:shadow-red-500/10 transition-all duration-300"
+                    >
+                      <LogOut className="w-5 h-5 text-red-400 group-hover:text-red-300 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-300" />
+                    </button>
+                  </AlertDialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="right" sideOffset={10}>
+                  <span className="text-sm">Keluar dari akun</span>
+                </TooltipContent>
+              </Tooltip>
+              <AlertDialogContent className="max-w-md">
+                <AlertDialogHeader>
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/20">
+                      <LogOut className="h-6 w-6 text-red-500" />
+                    </div>
+                    <div>
+                      <AlertDialogTitle className="text-lg">Keluar dari Akun?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-sm">
+                        Anda akan keluar dari dashboard Savora.
+                      </AlertDialogDescription>
+                    </div>
                   </div>
-                  <MoreVertical className="h-4 w-4 text-white/60" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent side="top" align="start" className="w-56 mb-2">
-                <div className="px-3 py-2">
-                  <p className="text-sm font-medium">{userName}</p>
-                  <p className="text-xs text-muted-foreground">{userEmail}</p>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/admin/profile" className="flex items-center gap-2 cursor-pointer">
-                    <UserIcon className="w-4 h-4" />
-                    <span>Profil</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/admin/settings" className="flex items-center gap-2 cursor-pointer">
-                    <Settings className="w-4 h-4" />
-                    <span>Pengaturan</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="flex items-center gap-2 cursor-pointer text-[#EF4444] focus:text-[#EF4444] focus:bg-[#FEF2F2]"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Keluar</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+                </AlertDialogHeader>
+                <AlertDialogFooter className="mt-4">
+                  <AlertDialogCancel className="rounded-xl">Batal</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleSignOut}
+                    className="rounded-xl bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white"
+                  >
+                    Ya, Keluar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
 
           {/* Powered by Savora */}
           {!isCollapsed && (

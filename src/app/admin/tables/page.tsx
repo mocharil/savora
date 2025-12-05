@@ -11,11 +11,31 @@ import {
   Users,
   CheckCircle,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Download,
+  Printer,
+  Copy,
+  CheckCheck,
+  Link as LinkIcon,
+  X,
+  Pencil,
+  Trash2
 } from 'lucide-react'
 import { PageTourButton } from '@/components/admin/tour'
 import { ShimmerButton } from '@/components/ui/shimmer-button'
 import { TableStatus } from '@/types/database'
+import { QRCodeDisplay } from '@/components/admin/qrcode-display'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 type TableWithStore = {
   id: string
@@ -79,6 +99,7 @@ export default function TablesPage() {
   const supabase = createClient()
   const router = useRouter()
   const [tables, setTables] = useState<TableWithStore[]>([])
+  const [storeName, setStoreName] = useState<string>('')
   const [storeSlug, setStoreSlug] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -87,6 +108,9 @@ export default function TablesPage() {
   const [releasingTable, setReleasingTable] = useState<string | null>(null)
   const [releaseError, setReleaseError] = useState<{ message: string; hasUnpaidOrders?: boolean } | null>(null)
   const [releaseSuccess, setReleaseSuccess] = useState<string | null>(null)
+  const [qrModalTable, setQrModalTable] = useState<TableWithStore | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchData() {
@@ -104,14 +128,17 @@ export default function TablesPage() {
         return
       }
 
-      // Get store data for slug
+      // Get store data for slug and name
       const { data: store } = await supabase
         .from('stores')
-        .select('slug')
+        .select('slug, name')
         .eq('id', storeId)
         .single()
 
-      if (store) setStoreSlug(store.slug)
+      if (store) {
+        setStoreSlug(store.slug)
+        setStoreName(store.name)
+      }
 
       const { data } = await supabase
         .from('tables')
@@ -174,6 +201,56 @@ export default function TablesPage() {
       setReleaseError({ message: 'Terjadi kesalahan. Silakan coba lagi.' })
     } finally {
       setReleasingTable(null)
+    }
+  }
+
+  // Build order URL
+  const getOrderUrl = (table: TableWithStore) => {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+    return `${baseUrl}/${storeSlug}/order?table=${table.qr_code}`
+  }
+
+  // Handle copy link
+  const handleCopyLink = async (table: TableWithStore) => {
+    const url = getOrderUrl(table)
+    await navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  // Handle print
+  const handlePrint = () => {
+    window.print()
+  }
+
+  // Handle download
+  const handleDownload = (table: TableWithStore) => {
+    const canvas = document.querySelector('#qr-modal-canvas canvas')
+    if (canvas) {
+      const url = (canvas as HTMLCanvasElement).toDataURL('image/png')
+      const link = document.createElement('a')
+      link.download = `qr-meja-${table.table_number}.png`
+      link.href = url
+      link.click()
+    }
+  }
+
+  // Handle delete table
+  const handleDelete = async (id: string) => {
+    setDeletingId(id)
+    try {
+      const res = await fetch(`/api/admin/tables/${id}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        setTables(prev => prev.filter(t => t.id !== id))
+      } else {
+        console.error('Failed to delete table')
+      }
+    } catch (error) {
+      console.error('Error deleting table:', error)
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -378,9 +455,11 @@ export default function TablesPage() {
                     )}
 
                     {/* View QR Code Button */}
-                    <Link
-                      href={`/admin/tables/${table.id}/qr`}
-                      onClick={(e) => e.stopPropagation()}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setQrModalTable(table)
+                      }}
                       data-tour="tables-qr-download"
                       className={`flex items-center justify-center gap-2 w-full h-11 rounded-xl text-sm font-semibold transition-all ${
                         isSelected
@@ -390,7 +469,54 @@ export default function TablesPage() {
                     >
                       <QrCode className="w-4 h-4" />
                       Lihat QR Code
-                    </Link>
+                    </button>
+
+                    {/* Edit and Delete Buttons */}
+                    <div className="flex gap-2 mt-2">
+                      <Link
+                        href={`/admin/tables/${table.id}/edit`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-lg text-sm font-medium bg-[#F3F4F6] text-[#374151] hover:bg-[#E5E7EB] transition-colors"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        Edit
+                      </Link>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center justify-center w-9 h-9 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors"
+                            disabled={deletingId === table.id}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="max-w-md">
+                          <AlertDialogHeader>
+                            <div className="flex items-center gap-4">
+                              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 border border-red-100">
+                                <Trash2 className="h-6 w-6 text-red-500" />
+                              </div>
+                              <div>
+                                <AlertDialogTitle className="text-lg">Hapus Meja?</AlertDialogTitle>
+                                <AlertDialogDescription className="text-sm">
+                                  Meja {table.table_number} akan dihapus permanen.
+                                </AlertDialogDescription>
+                              </div>
+                            </div>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="mt-4">
+                            <AlertDialogCancel className="rounded-xl">Batal</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(table.id)}
+                              className="rounded-xl bg-red-500 hover:bg-red-600 text-white"
+                            >
+                              Ya, Hapus
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -423,6 +549,112 @@ export default function TablesPage() {
           )}
         </div>
       )}
+
+      {/* QR Code Modal */}
+      {qrModalTable && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setQrModalTable(null)}
+          />
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden animate-in zoom-in-95 fade-in duration-200">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">QR Code - Meja {qrModalTable.table_number}</h2>
+                <p className="text-sm text-gray-500">Scan untuk memesan langsung</p>
+              </div>
+              <button
+                onClick={() => setQrModalTable(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* QR Code Content */}
+            <div className="p-6">
+              <div id="qr-modal-canvas" className="print-area flex flex-col items-center gap-4 p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                <div className="p-3 bg-white rounded-xl shadow-lg">
+                  <QRCodeDisplay value={getOrderUrl(qrModalTable)} size={200} />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-lg font-bold text-gray-900">{storeName}</h3>
+                  <span className="inline-block mt-1 px-3 py-1 bg-orange-500/10 text-orange-500 font-semibold rounded-full text-sm">
+                    Meja {qrModalTable.table_number}
+                  </span>
+                </div>
+              </div>
+
+              {/* Link Section */}
+              <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+                  <LinkIcon className="w-3 h-3" />
+                  Link Pemesanan
+                </div>
+                <code className="text-xs text-gray-700 break-all">{getOrderUrl(qrModalTable)}</code>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-3 gap-2 mt-4">
+                <button
+                  onClick={() => handleCopyLink(qrModalTable)}
+                  className="flex items-center justify-center gap-2 h-10 px-4 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                >
+                  {copied ? (
+                    <>
+                      <CheckCheck className="w-4 h-4 text-emerald-500" />
+                      <span className="text-emerald-600">Tersalin</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      Salin
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center justify-center gap-2 h-10 px-4 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print
+                </button>
+                <button
+                  onClick={() => handleDownload(qrModalTable)}
+                  className="flex items-center justify-center gap-2 h-10 px-4 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Print Styles */}
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .print-area, .print-area * {
+            visibility: visible;
+          }
+          .print-area {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border: none !important;
+            background: white !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }

@@ -11,6 +11,31 @@ const nextConfig: NextConfig = {
         hostname: 'gruraqhvvilafhkfauqp.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'source.unsplash.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'foodish-api.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'foodish-api.herokuapp.com',
+        pathname: '/**',
+      },
     ],
   },
 };

@@ -20,7 +20,7 @@ export default async function EditTablePage({
 
   const storeId = user.storeId
 
-  const [tableResult, outletsResult] = await Promise.all([
+  const [tableResult, outletsResult, storeResult] = await Promise.all([
     supabase
       .from('tables')
       .select('*')
@@ -32,12 +32,25 @@ export default async function EditTablePage({
       .select('id, name, slug')
       .eq('store_id', storeId)
       .eq('is_active', true)
-      .order('name')
+      .order('name'),
+    supabase
+      .from('stores')
+      .select('slug, name')
+      .eq('id', storeId)
+      .single()
   ])
 
   if (!tableResult.data) {
     notFound()
   }
 
-  return <TableForm storeId={storeId} outlets={outletsResult.data || []} initialData={tableResult.data} />
+  return (
+    <TableForm
+      storeId={storeId}
+      storeSlug={storeResult.data?.slug || ''}
+      storeName={storeResult.data?.name || ''}
+      outlets={outletsResult.data || []}
+      initialData={tableResult.data}
+    />
+  )
 }

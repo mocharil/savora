@@ -213,6 +213,12 @@ export const TOUR_DASHBOARD_PAGE: TourConfig = {
       position: 'bottom',
     },
     {
+      target: '[data-tour="dashboard-daily-summary"]',
+      title: 'Ringkasan Kemarin (AI)',
+      description: 'Ringkasan performa kemarin yang dianalisis oleh AI. Lihat total revenue, jumlah pesanan, item terjual, menu terlaris, jam ramai, serta insight dan rekomendasi untuk hari ini. Klik tombol refresh untuk memperbarui analisis.',
+      position: 'bottom',
+    },
+    {
       target: '[data-tour="dashboard-status-cards"]',
       title: 'Status Pesanan Real-time',
       description: 'Empat kartu ini menunjukkan jumlah pesanan berdasarkan status: Perlu Dikonfirmasi (kuning), Sedang Diproses (ungu), Siap Diantar (hijau), dan Selesai Hari Ini. Indikator berkedip menandakan ada pesanan yang perlu diperhatikan.',

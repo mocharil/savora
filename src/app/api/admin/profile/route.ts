@@ -1,8 +1,19 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import { getUserFromToken } from '@/lib/tenant-context'
 import bcrypt from 'bcryptjs'
+
+// Create Supabase client with service role for accessing users table
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY &&
+  process.env.SUPABASE_SERVICE_ROLE_KEY !== 'your_service_role_key'
+    ? process.env.SUPABASE_SERVICE_ROLE_KEY
+    : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+function getSupabase() {
+  return createClient(supabaseUrl, supabaseKey)
+}
 
 export async function GET() {
   try {
@@ -11,20 +22,22 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabase = createAdminClient()
+    const supabase = getSupabase()
 
     const { data, error } = await supabase
       .from('users')
-      .select('id, email, full_name, phone, role, created_at')
+      .select('id, email, full_name, role, created_at')
       .eq('id', user.userId)
       .single()
 
     if (error) {
+      console.error('Profile GET error:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ user: data })
   } catch (error: any) {
+    console.error('Profile GET exception:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
@@ -37,19 +50,15 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { full_name, phone, current_password, new_password } = body
+    const { full_name, current_password, new_password } = body
 
-    const supabase = createAdminClient()
+    const supabase = getSupabase()
 
     // Build update object
     const updateData: Record<string, any> = {}
 
     if (full_name !== undefined) {
       updateData.full_name = full_name
-    }
-
-    if (phone !== undefined) {
-      updateData.phone = phone
     }
 
     // Handle password change
@@ -61,14 +70,22 @@ export async function PUT(request: NextRequest) {
         )
       }
 
-      // Get current user with password
+      // Get current user with password_hash
       const { data: currentUser, error: userError } = await supabase
         .from('users')
-        .select('password_hash, password')
+        .select('id, password_hash')
         .eq('id', user.userId)
         .single()
 
-      if (userError || !currentUser) {
+      if (userError) {
+        console.error('User lookup error:', userError)
+        return NextResponse.json(
+          { error: `Database error: ${userError.message}` },
+          { status: 500 }
+        )
+      }
+
+      if (!currentUser) {
         return NextResponse.json(
           { error: 'User tidak ditemukan' },
           { status: 404 }
@@ -76,8 +93,14 @@ export async function PUT(request: NextRequest) {
       }
 
       // Verify current password
-      const passwordField = currentUser.password_hash || currentUser.password
-      const isValidPassword = await bcrypt.compare(current_password, passwordField)
+      if (!currentUser.password_hash) {
+        return NextResponse.json(
+          { error: 'Password belum diatur untuk akun ini' },
+          { status: 400 }
+        )
+      }
+
+      const isValidPassword = await bcrypt.compare(current_password, currentUser.password_hash)
 
       if (!isValidPassword) {
         return NextResponse.json(
@@ -104,10 +127,11 @@ export async function PUT(request: NextRequest) {
       .from('users')
       .update(updateData)
       .eq('id', user.userId)
-      .select('id, email, full_name, phone, role')
+      .select('id, email, full_name, role')
       .single()
 
     if (error) {
+      console.error('Profile update error:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -117,6 +141,7 @@ export async function PUT(request: NextRequest) {
       user: data
     })
   } catch (error: any) {
+    console.error('Profile PUT exception:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
