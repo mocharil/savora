@@ -353,7 +353,7 @@ export function AdminSidebar({
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/settings" className="flex items-center gap-2 cursor-pointer">
+                  <Link href="/admin/profile" className="flex items-center gap-2 cursor-pointer">
                     <UserIcon className="w-4 h-4" />
                     <span>Profil</span>
                   </Link>
@@ -399,7 +399,7 @@ export function AdminSidebar({
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/settings" className="flex items-center gap-2 cursor-pointer">
+                  <Link href="/admin/profile" className="flex items-center gap-2 cursor-pointer">
                     <UserIcon className="w-4 h-4" />
                     <span>Profil</span>
                   </Link>
