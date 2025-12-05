@@ -5,7 +5,7 @@ import path from 'path'
 import os from 'os'
 
 // Project configuration from environment
-const projectId = process.env.GEMINI_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT || ''
+const projectId = process.env.GEMINI_PROJECT_ID || ''
 const location = process.env.GEMINI_LOCATION || 'us-central1'
 
 let vertexAI: VertexAI | null = null

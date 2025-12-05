@@ -84,5 +84,5 @@ export async function generateJSON<T>(
  * Check if AI service is available
  */
 export function isAIEnabled(): boolean {
-  return !!process.env.GOOGLE_APPLICATION_CREDENTIALS
+  return !!process.env.GEMINI_CREDENTIALS || !!process.env.GEMINI_PROJECT_ID
 }
