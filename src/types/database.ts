@@ -24,6 +24,7 @@ export interface Database {
           description: string | null
           address: string | null
           phone: string | null
+          website: string | null
           logo_url: string | null
           banner_url: string | null
           tax_percentage: number
@@ -42,6 +43,7 @@ export interface Database {
           description?: string | null
           address?: string | null
           phone?: string | null
+          website?: string | null
           logo_url?: string | null
           banner_url?: string | null
           tax_percentage?: number
@@ -60,6 +62,7 @@ export interface Database {
           description?: string | null
           address?: string | null
           phone?: string | null
+          website?: string | null
           logo_url?: string | null
           banner_url?: string | null
           tax_percentage?: number
