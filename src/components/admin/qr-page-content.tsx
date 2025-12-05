@@ -11,7 +11,7 @@ import {
   Link as LinkIcon,
   MapPin
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { QRCodeDisplay } from '@/components/admin/qrcode-display'
 
 interface QRPageContentProps {
@@ -25,11 +25,18 @@ interface QRPageContentProps {
     name: string
     slug: string
   }
-  orderUrl: string
+  orderPath: string
 }
 
-export function QRPageContent({ table, store, orderUrl }: QRPageContentProps) {
+export function QRPageContent({ table, store, orderPath }: QRPageContentProps) {
   const [copied, setCopied] = useState(false)
+  const [orderUrl, setOrderUrl] = useState('')
+
+  // Build full URL client-side using current domain
+  useEffect(() => {
+    const baseUrl = window.location.origin
+    setOrderUrl(`${baseUrl}${orderPath}`)
+  }, [orderPath])
 
   const handlePrint = () => {
     window.print()
@@ -101,7 +108,11 @@ export function QRPageContent({ table, store, orderUrl }: QRPageContentProps) {
               {/* Print Area */}
               <div className="print-area flex flex-col items-center gap-6 p-8 bg-[#F9FAFB] rounded-xl border-2 border-dashed border-[#E5E7EB]">
                 <div className="p-4 bg-white rounded-xl shadow-admin-md">
-                  <QRCodeDisplay value={orderUrl} size={280} />
+                  {orderUrl ? (
+                    <QRCodeDisplay value={orderUrl} size={280} />
+                  ) : (
+                    <div className="w-[280px] h-[280px] bg-gray-100 animate-pulse rounded-lg" />
+                  )}
                 </div>
                 <div className="text-center">
                   <h3 className="text-xl font-bold text-[#111827]">{store.name}</h3>
@@ -136,11 +147,16 @@ export function QRPageContent({ table, store, orderUrl }: QRPageContentProps) {
               </div>
               <div className="p-6 space-y-4">
                 <div className="p-3 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB]">
-                  <code className="text-xs text-[#374151] break-all">{orderUrl}</code>
+                  {orderUrl ? (
+                    <code className="text-xs text-[#374151] break-all">{orderUrl}</code>
+                  ) : (
+                    <div className="h-4 bg-gray-200 animate-pulse rounded" />
+                  )}
                 </div>
                 <button
                   onClick={handleCopyLink}
-                  className="w-full flex items-center justify-center gap-2 h-10 px-4 bg-[#F3F4F6] text-[#374151] rounded-lg text-sm font-medium hover:bg-[#E5E7EB] transition-colors"
+                  disabled={!orderUrl}
+                  className="w-full flex items-center justify-center gap-2 h-10 px-4 bg-[#F3F4F6] text-[#374151] rounded-lg text-sm font-medium hover:bg-[#E5E7EB] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {copied ? (
                     <>

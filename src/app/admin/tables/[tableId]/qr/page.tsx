@@ -41,9 +41,8 @@ export default async function TableQRPage({
   const table = tableResult.data
   const store = storeResult.data
 
-  // Build order URL (store-only, no outlet)
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  const orderUrl = `${baseUrl}/${store.slug}/order?table=${table.qr_code}`
+  // Pass path only, base URL will be determined client-side
+  const orderPath = `/${store.slug}/order?table=${table.qr_code}`
 
-  return <QRPageContent table={table} store={store} orderUrl={orderUrl} />
+  return <QRPageContent table={table} store={store} orderPath={orderPath} />
 }
