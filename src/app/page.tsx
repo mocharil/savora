@@ -33,7 +33,10 @@ import {
   Bot,
   PieChart,
   ArrowUpRight,
-  Quote
+  Quote,
+  UtensilsCrossed,
+  BookOpen,
+  Calculator
 } from 'lucide-react'
 import { Compare } from '@/components/ui/compare'
 import { Highlighter } from '@/components/ui/highlighter'
@@ -55,6 +58,10 @@ export default function LandingPage() {
   // AI Chat animation states
   const [chatMessages, setChatMessages] = useState<number[]>([])
   const [isTypingChat, setIsTypingChat] = useState(false)
+
+  // AI Menu Creator animation states
+  const [menuCreatorStep, setMenuCreatorStep] = useState(0)
+  const [generatedDish, setGeneratedDish] = useState<{ name: string; price: string; ingredients: string[] } | null>(null)
 
   const voiceExamples = [
     {
@@ -111,14 +118,42 @@ export default function LandingPage() {
   // Auto rotate features
   useEffect(() => {
     const timer = setInterval(() => {
-      setActiveFeature(prev => (prev + 1) % 4)
+      setActiveFeature(prev => (prev + 1) % 5)
     }, 6000)
     return () => clearInterval(timer)
   }, [])
 
-  // Daily Insights animation
+  // AI Menu Creator animation
   useEffect(() => {
     if (activeFeature !== 2) return
+
+    setMenuCreatorStep(0)
+    setGeneratedDish(null)
+
+    // Step 1: Input animation
+    const step1Timer = setTimeout(() => setMenuCreatorStep(1), 500)
+    // Step 2: Generating
+    const step2Timer = setTimeout(() => setMenuCreatorStep(2), 1500)
+    // Step 3: Show result
+    const step3Timer = setTimeout(() => {
+      setMenuCreatorStep(3)
+      setGeneratedDish({
+        name: 'Nasi Goreng Seafood Spesial',
+        price: 'Rp 35.000',
+        ingredients: ['Nasi', 'Udang', 'Cumi', 'Telur', 'Sayuran']
+      })
+    }, 3000)
+
+    return () => {
+      clearTimeout(step1Timer)
+      clearTimeout(step2Timer)
+      clearTimeout(step3Timer)
+    }
+  }, [activeFeature])
+
+  // Daily Insights animation
+  useEffect(() => {
+    if (activeFeature !== 3) return
 
     const fullText = 'Kemarin penjualan naik 23% dibanding hari sebelumnya. Nasi Goreng Spesial adalah menu terlaris dengan 45 porsi. Jam ramai terjadi pukul 12:00-13:00.'
     let index = 0
@@ -144,7 +179,7 @@ export default function LandingPage() {
 
   // AI Chat animation
   useEffect(() => {
-    if (activeFeature !== 3) return
+    if (activeFeature !== 4) return
 
     setChatMessages([])
     setIsTypingChat(false)
@@ -185,6 +220,14 @@ export default function LandingPage() {
       bgGradient: 'from-violet-50 to-purple-50',
     },
     {
+      icon: ChefHat,
+      title: 'AI Menu Creator',
+      subtitle: 'Kreasi menu dengan AI',
+      description: 'Input bahan yang tersedia, AI buatkan resep lengkap dengan estimasi harga, komposisi, dan cara pembuatan.',
+      gradient: 'from-amber-500 to-orange-500',
+      bgGradient: 'from-amber-50 to-orange-50',
+    },
+    {
       icon: Brain,
       title: 'Daily AI Insights',
       subtitle: 'Analisis bisnis harian',
@@ -206,9 +249,9 @@ export default function LandingPage() {
     { icon: LineChart, title: 'Sales Forecasting', description: 'Prediksi penjualan 14 hari ke depan' },
     { icon: Target, title: 'Smart Pricing', description: 'Rekomendasi harga optimal berbasis data' },
     { icon: Wand2, title: 'Menu Enhancement', description: 'AI tulis deskripsi menu yang menjual' },
-    { icon: ChefHat, title: 'Menu Creator', description: 'Ide menu baru dari bahan yang tersedia' },
     { icon: Bot, title: 'AI Recommendation', description: 'Rekomendasi menu personal untuk pelanggan' },
-    { icon: PieChart, title: 'Product Analytics', description: 'Analisis performa setiap menu item' }
+    { icon: PieChart, title: 'Product Analytics', description: 'Analisis performa setiap menu item' },
+    { icon: Calculator, title: 'Cost Calculator', description: 'Hitung HPP dan margin otomatis' }
   ]
 
   const steps = [
@@ -291,18 +334,18 @@ export default function LandingPage() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-100 to-purple-100 border border-violet-200 rounded-full text-sm text-violet-700 font-medium mb-8 animate-pulse">
-              <Sparkles className="w-4 h-4" />
-              NEW: AI Image Generator &amp; Daily Insights
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200 rounded-full text-sm text-amber-700 font-medium mb-8 animate-pulse">
+              <ChefHat className="w-4 h-4" />
+              NEW: AI Menu Creator - Buat resep dari bahan yang ada!
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.1] tracking-tight mb-6">
               Platform Restoran dengan{' '}
               <Highlighter action="circle" color="#f97316" strokeWidth={2} animationDuration={800} isView>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-violet-600">6 Fitur AI</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-violet-600">7 Fitur AI</span>
               </Highlighter>
             </h1>
             <p className="text-lg lg:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Voice ordering, AI image generator, daily insights, smart pricing, dan lebih banyak lagi.
+              Voice ordering, AI menu creator, image generator, daily insights, dan lebih banyak lagi.
               <Highlighter action="underline" color="#f97316" strokeWidth={2} animationDuration={1000} isView>
                 <span className="font-semibold text-gray-900"> Satu-satunya platform restoran AI-powered di Indonesia.</span>
               </Highlighter>
@@ -337,7 +380,7 @@ export default function LandingPage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 text-sm font-semibold rounded-full mb-4">
               <Brain className="w-4 h-4" />
-              6 FITUR AI UNGGULAN
+              7 FITUR AI UNGGULAN
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
               <Highlighter action="underline" color="#f97316" strokeWidth={3} animationDuration={1000} isView>
@@ -470,8 +513,93 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* Daily Insights Demo */}
+                {/* AI Menu Creator Demo */}
                 {activeFeature === 2 && (
+                  <div className="p-6 h-full flex flex-col">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${menuCreatorStep < 3 ? 'bg-gradient-to-br from-amber-500 to-orange-500 animate-pulse' : 'bg-gradient-to-br from-emerald-500 to-green-500'}`}>
+                        <ChefHat className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">AI Menu Creator</p>
+                        <p className={`text-xs transition-colors duration-300 ${menuCreatorStep < 3 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                          {menuCreatorStep === 0 && 'Siap menerima input...'}
+                          {menuCreatorStep === 1 && 'Input bahan...'}
+                          {menuCreatorStep === 2 && 'Generating resep...'}
+                          {menuCreatorStep === 3 && '✓ Menu berhasil dibuat'}
+                        </p>
+                      </div>
+                      {menuCreatorStep === 2 && (
+                        <div className="ml-auto flex items-center gap-1">
+                          <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
+                          <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                          <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                        </div>
+                      )}
+                      {menuCreatorStep === 3 && (
+                        <div className="ml-auto">
+                          <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center">
+                            <CheckCircle className="w-4 h-4 text-emerald-500" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      {/* Input Section */}
+                      <div className={`rounded-xl p-3 border transition-all duration-300 ${menuCreatorStep >= 1 ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
+                        <p className="text-xs text-gray-500 mb-2">Bahan tersedia:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {['🍚 Nasi', '🦐 Udang', '🦑 Cumi', '🥚 Telur', '🥬 Sayuran'].map((item, idx) => (
+                            <span
+                              key={idx}
+                              className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 ${menuCreatorStep >= 1 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-400'}`}
+                              style={{ transitionDelay: `${idx * 100}ms` }}
+                            >
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Result Section */}
+                      {generatedDish && (
+                        <div className="rounded-xl p-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Sparkles className="w-4 h-4 text-emerald-600" />
+                            <p className="text-xs text-emerald-700 font-semibold">Menu Hasil AI:</p>
+                          </div>
+                          <h4 className="font-bold text-gray-900 mb-1">{generatedDish.name}</h4>
+                          <div className="flex items-center gap-3 text-xs text-gray-600 mb-2">
+                            <span className="flex items-center gap-1">
+                              <DollarSign className="w-3 h-3" />
+                              {generatedDish.price}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              20 menit
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {generatedDish.ingredients.map((ing, idx) => (
+                              <span key={idx} className="px-2 py-0.5 bg-white rounded text-xs text-gray-600 border border-gray-100">
+                                {ing}
+                              </span>
+                            ))}
+                          </div>
+                          <div className="mt-2 pt-2 border-t border-emerald-100">
+                            <p className="text-xs text-emerald-700 flex items-center gap-1">
+                              <BookOpen className="w-3 h-3" />
+                              Resep lengkap & HPP tersedia
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Daily Insights Demo */}
+                {activeFeature === 3 && (
                   <div className="p-8 h-full flex flex-col">
                     <div className="flex items-center gap-3 mb-6">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isAnalyzing ? 'bg-gradient-to-br from-blue-500 to-cyan-500 animate-pulse' : 'bg-gradient-to-br from-emerald-500 to-green-500'}`}>
@@ -524,7 +652,7 @@ export default function LandingPage() {
                 )}
 
                 {/* AI Chat Demo */}
-                {activeFeature === 3 && (
+                {activeFeature === 4 && (
                   <div className="p-8 h-full flex flex-col">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
@@ -730,7 +858,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 text-center">
             {[
-              { value: '6', unit: '', label: 'Fitur AI', icon: Brain },
+              { value: '7', unit: '', label: 'Fitur AI', icon: Brain },
               { value: '5', unit: ' menit', label: 'Setup time', icon: Clock },
               { value: '100', unit: '%', label: 'Gratis', icon: DollarSign },
               { value: '24/7', unit: '', label: 'AI Ready', icon: Bot }
@@ -799,7 +927,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm text-white font-medium mb-8">
             <Sparkles className="w-4 h-4" />
-            6 Fitur AI • Gratis untuk UMKM
+            7 Fitur AI • Gratis untuk UMKM
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
             Siap{' '}
@@ -808,7 +936,7 @@ export default function LandingPage() {
             </Highlighter>{' '}
             dengan AI?
           </h2>
-          <p className="text-lg lg:text-xl text-white/90 mb-10 max-w-2xl mx-auto">Voice ordering, image generator, daily insights, dan lebih banyak lagi. Mulai gratis hari ini, tanpa kartu kredit.</p>
+          <p className="text-lg lg:text-xl text-white/90 mb-10 max-w-2xl mx-auto">Voice ordering, AI menu creator, image generator, daily insights, dan lebih banyak lagi. Mulai gratis hari ini, tanpa kartu kredit.</p>
           <Link href="/register" className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-white text-gray-900 text-lg font-semibold rounded-full hover:bg-gray-100 transition-all shadow-2xl hover:-translate-y-1">
             Mulai Gratis Sekarang
             <ArrowRight className="w-5 h-5" />
