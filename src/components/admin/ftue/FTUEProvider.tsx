@@ -9,6 +9,7 @@ export interface FTUEStep {
   href: string
   isCompleted: boolean
   checkPath: string // API path to check completion
+  isOptional?: boolean // Optional steps can be skipped
 }
 
 interface FTUEContextType {
@@ -16,7 +17,10 @@ interface FTUEContextType {
   currentStep: FTUEStep | null
   completedCount: number
   totalCount: number
+  requiredCount: number
+  requiredCompletedCount: number
   isAllCompleted: boolean
+  isRequiredCompleted: boolean
   isFTUEDismissed: boolean
   refreshSteps: () => Promise<void>
   dismissFTUE: () => void
@@ -43,9 +47,17 @@ const DEFAULT_STEPS: FTUEStep[] = [
     checkPath: '/api/admin/ftue/check-outlets',
   },
   {
+    id: 'categories',
+    title: 'Buat Kategori Menu',
+    description: 'Kelompokkan menu dalam kategori',
+    href: '/admin/menu?tab=categories',
+    isCompleted: false,
+    checkPath: '/api/admin/ftue/check-categories',
+  },
+  {
     id: 'menu',
     title: 'Tambahkan Menu',
-    description: 'Buat menu dan kategori produk',
+    description: 'Buat produk yang akan dijual',
     href: '/admin/menu',
     isCompleted: false,
     checkPath: '/api/admin/ftue/check-menu',
@@ -65,6 +77,7 @@ const DEFAULT_STEPS: FTUEStep[] = [
     href: '/admin/users',
     isCompleted: false,
     checkPath: '/api/admin/ftue/check-users',
+    isOptional: true,
   },
 ]
 
@@ -72,6 +85,7 @@ interface FTUEProviderProps {
   children: ReactNode
   initialData?: {
     hasOutlet: boolean
+    hasCategories: boolean
     hasMenu: boolean
     hasTables: boolean
     hasUsers: boolean
@@ -85,6 +99,7 @@ export function FTUEProvider({ children, initialData }: FTUEProviderProps) {
         ...step,
         isCompleted:
           (step.id === 'outlet' && initialData.hasOutlet) ||
+          (step.id === 'categories' && initialData.hasCategories) ||
           (step.id === 'menu' && initialData.hasMenu) ||
           (step.id === 'tables' && initialData.hasTables) ||
           (step.id === 'users' && initialData.hasUsers),
@@ -112,6 +127,7 @@ export function FTUEProvider({ children, initialData }: FTUEProviderProps) {
             ...step,
             isCompleted:
               (step.id === 'outlet' && data.hasOutlet) ||
+              (step.id === 'categories' && data.hasCategories) ||
               (step.id === 'menu' && data.hasMenu) ||
               (step.id === 'tables' && data.hasTables) ||
               (step.id === 'users' && data.hasUsers),
@@ -135,7 +151,11 @@ export function FTUEProvider({ children, initialData }: FTUEProviderProps) {
 
   const completedCount = steps.filter(s => s.isCompleted).length
   const totalCount = steps.length
+  const requiredSteps = steps.filter(s => !s.isOptional)
+  const requiredCount = requiredSteps.length
+  const requiredCompletedCount = requiredSteps.filter(s => s.isCompleted).length
   const isAllCompleted = completedCount === totalCount
+  const isRequiredCompleted = requiredCompletedCount === requiredCount
   const currentStep = steps.find(s => !s.isCompleted) || null
 
   return (
@@ -145,7 +165,10 @@ export function FTUEProvider({ children, initialData }: FTUEProviderProps) {
         currentStep,
         completedCount,
         totalCount,
+        requiredCount,
+        requiredCompletedCount,
         isAllCompleted,
+        isRequiredCompleted,
         isFTUEDismissed,
         refreshSteps,
         dismissFTUE,

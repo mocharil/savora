@@ -515,82 +515,135 @@ export default function LandingPage() {
 
                 {/* AI Menu Creator Demo */}
                 {activeFeature === 2 && (
-                  <div className="p-6 h-full flex flex-col">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${menuCreatorStep < 3 ? 'bg-gradient-to-br from-amber-500 to-orange-500 animate-pulse' : 'bg-gradient-to-br from-emerald-500 to-green-500'}`}>
-                        <ChefHat className="w-5 h-5 text-white" />
+                  <div className="p-5 h-full flex flex-col relative overflow-hidden">
+                    {/* Background decoration */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-200/30 to-orange-200/30 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-200/30 to-green-200/30 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+
+                    {/* Header */}
+                    <div className="flex items-center gap-3 mb-3 relative z-10">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 shadow-lg ${menuCreatorStep < 3 ? 'bg-gradient-to-br from-amber-500 to-orange-500 shadow-amber-500/30' : 'bg-gradient-to-br from-emerald-500 to-green-500 shadow-emerald-500/30'}`}>
+                        <ChefHat className={`w-5 h-5 text-white transition-transform duration-300 ${menuCreatorStep === 2 ? 'animate-bounce' : ''}`} />
                       </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">AI Menu Creator</p>
-                        <p className={`text-xs transition-colors duration-300 ${menuCreatorStep < 3 ? 'text-amber-500' : 'text-emerald-500'}`}>
-                          {menuCreatorStep === 0 && 'Siap menerima input...'}
-                          {menuCreatorStep === 1 && 'Input bahan...'}
-                          {menuCreatorStep === 2 && 'Generating resep...'}
-                          {menuCreatorStep === 3 && '✓ Menu berhasil dibuat'}
-                        </p>
-                      </div>
-                      {menuCreatorStep === 2 && (
-                        <div className="ml-auto flex items-center gap-1">
-                          <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
-                          <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                          <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900 text-sm">AI Menu Creator</p>
+                        <div className="flex items-center gap-2">
+                          <p className={`text-xs transition-colors duration-300 ${menuCreatorStep < 3 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                            {menuCreatorStep === 0 && 'Siap menerima input...'}
+                            {menuCreatorStep === 1 && 'Menganalisis bahan...'}
+                            {menuCreatorStep === 2 && 'AI sedang berkreasi...'}
+                            {menuCreatorStep === 3 && '✓ Menu berhasil dibuat!'}
+                          </p>
+                          {menuCreatorStep === 2 && (
+                            <div className="flex items-center gap-0.5">
+                              {[0, 1, 2].map(i => (
+                                <div key={i} className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
                       {menuCreatorStep === 3 && (
-                        <div className="ml-auto">
-                          <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <CheckCircle className="w-4 h-4 text-emerald-500" />
-                          </div>
+                        <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center animate-in zoom-in duration-300">
+                          <CheckCircle className="w-4 h-4 text-emerald-500" />
                         </div>
                       )}
                     </div>
-                    <div className="flex-1 space-y-3">
-                      {/* Input Section */}
-                      <div className={`rounded-xl p-3 border transition-all duration-300 ${menuCreatorStep >= 1 ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
-                        <p className="text-xs text-gray-500 mb-2">Bahan tersedia:</p>
+
+                    {/* Progress Bar */}
+                    <div className="h-1 bg-gray-100 rounded-full mb-3 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-700 ease-out ${menuCreatorStep === 3 ? 'bg-gradient-to-r from-emerald-500 to-green-500' : 'bg-gradient-to-r from-amber-500 to-orange-500'}`}
+                        style={{ width: `${(menuCreatorStep / 3) * 100}%` }}
+                      />
+                    </div>
+
+                    <div className="flex-1 space-y-2.5 relative z-10">
+                      {/* Input Ingredients */}
+                      <div className={`rounded-xl p-3 border transition-all duration-500 ${menuCreatorStep >= 1 ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 shadow-sm' : 'bg-gray-50 border-gray-200'}`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className={`w-5 h-5 rounded-md flex items-center justify-center text-xs ${menuCreatorStep >= 1 ? 'bg-amber-500 text-white' : 'bg-gray-200 text-gray-500'}`}>1</div>
+                          <p className="text-xs font-medium text-gray-700">Input Bahan</p>
+                        </div>
                         <div className="flex flex-wrap gap-1.5">
-                          {['🍚 Nasi', '🦐 Udang', '🦑 Cumi', '🥚 Telur', '🥬 Sayuran'].map((item, idx) => (
+                          {[
+                            { emoji: '🍚', name: 'Nasi' },
+                            { emoji: '🦐', name: 'Udang' },
+                            { emoji: '🦑', name: 'Cumi' },
+                            { emoji: '🥚', name: 'Telur' },
+                            { emoji: '🥬', name: 'Sayur' }
+                          ].map((item, idx) => (
                             <span
                               key={idx}
-                              className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 ${menuCreatorStep >= 1 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-400'}`}
-                              style={{ transitionDelay: `${idx * 100}ms` }}
+                              className={`px-2 py-1 rounded-lg text-xs font-medium transition-all duration-300 transform ${menuCreatorStep >= 1 ? 'bg-white text-amber-700 shadow-sm border border-amber-100 scale-100' : 'bg-gray-100 text-gray-400 scale-95'}`}
+                              style={{ transitionDelay: `${idx * 80}ms` }}
                             >
-                              {item}
+                              {item.emoji} {item.name}
                             </span>
                           ))}
                         </div>
                       </div>
 
+                      {/* AI Processing Visual */}
+                      {menuCreatorStep >= 2 && menuCreatorStep < 3 && (
+                        <div className="rounded-xl p-3 bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-5 h-5 rounded-md bg-violet-500 text-white flex items-center justify-center text-xs">2</div>
+                            <p className="text-xs font-medium text-gray-700">AI Processing</p>
+                            <Brain className="w-3.5 h-3.5 text-violet-500 animate-pulse ml-auto" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2 text-xs text-violet-600">
+                              <div className="w-1 h-1 rounded-full bg-violet-400" />
+                              <span>Menganalisis kombinasi rasa...</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-violet-600">
+                              <div className="w-1 h-1 rounded-full bg-violet-400" />
+                              <span>Menghitung estimasi HPP...</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-violet-600">
+                              <div className="w-1 h-1 rounded-full bg-violet-400" />
+                              <span>Menyusun langkah pembuatan...</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Result Section */}
                       {generatedDish && (
-                        <div className="rounded-xl p-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Sparkles className="w-4 h-4 text-emerald-600" />
-                            <p className="text-xs text-emerald-700 font-semibold">Menu Hasil AI:</p>
+                        <div className="rounded-xl overflow-hidden bg-white border border-emerald-200 shadow-lg shadow-emerald-100/50 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                          {/* Result Header */}
+                          <div className="bg-gradient-to-r from-emerald-500 to-green-500 px-3 py-2">
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="w-4 h-4 text-white" />
+                              <p className="text-xs text-white font-semibold">Menu Hasil AI</p>
+                              <span className="ml-auto text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full">Baru</span>
+                            </div>
                           </div>
-                          <h4 className="font-bold text-gray-900 mb-1">{generatedDish.name}</h4>
-                          <div className="flex items-center gap-3 text-xs text-gray-600 mb-2">
-                            <span className="flex items-center gap-1">
-                              <DollarSign className="w-3 h-3" />
-                              {generatedDish.price}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              20 menit
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {generatedDish.ingredients.map((ing, idx) => (
-                              <span key={idx} className="px-2 py-0.5 bg-white rounded text-xs text-gray-600 border border-gray-100">
-                                {ing}
-                              </span>
-                            ))}
-                          </div>
-                          <div className="mt-2 pt-2 border-t border-emerald-100">
-                            <p className="text-xs text-emerald-700 flex items-center gap-1">
-                              <BookOpen className="w-3 h-3" />
-                              Resep lengkap & HPP tersedia
-                            </p>
+                          {/* Result Content */}
+                          <div className="p-3">
+                            <h4 className="font-bold text-gray-900 text-sm mb-2">{generatedDish.name}</h4>
+                            <div className="grid grid-cols-3 gap-2 mb-2">
+                              <div className="text-center p-1.5 bg-gray-50 rounded-lg">
+                                <DollarSign className="w-3.5 h-3.5 text-emerald-500 mx-auto mb-0.5" />
+                                <p className="text-[10px] text-gray-500">Harga</p>
+                                <p className="text-xs font-semibold text-gray-900">{generatedDish.price}</p>
+                              </div>
+                              <div className="text-center p-1.5 bg-gray-50 rounded-lg">
+                                <Clock className="w-3.5 h-3.5 text-amber-500 mx-auto mb-0.5" />
+                                <p className="text-[10px] text-gray-500">Waktu</p>
+                                <p className="text-xs font-semibold text-gray-900">20 mnt</p>
+                              </div>
+                              <div className="text-center p-1.5 bg-gray-50 rounded-lg">
+                                <Target className="w-3.5 h-3.5 text-violet-500 mx-auto mb-0.5" />
+                                <p className="text-[10px] text-gray-500">Margin</p>
+                                <p className="text-xs font-semibold text-emerald-600">65%</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 pt-2 border-t border-gray-100">
+                              <BookOpen className="w-3 h-3 text-emerald-500" />
+                              <p className="text-[10px] text-emerald-600 font-medium">Resep lengkap • 8 langkah • HPP Rp12.250</p>
+                            </div>
                           </div>
                         </div>
                       )}

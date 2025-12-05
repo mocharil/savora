@@ -520,3 +520,21 @@ export function getPageTourId(pathname: string): string | null {
   if (pathname.includes('/admin/settings')) return 'tour_settings_page'
   return null
 }
+
+// Get target page path from tour ID
+export function getTourTargetPath(tourId: string): string | null {
+  const tourPathMap: Record<string, string> = {
+    'tour_dashboard_page': '/admin/dashboard',
+    'tour_pos_page': '/admin/pos',
+    'tour_orders_page': '/admin/orders',
+    'tour_menu_page': '/admin/menu',
+    'tour_categories_page': '/admin/categories',
+    'tour_tables_page': '/admin/tables',
+    'tour_outlets_page': '/admin/outlets',
+    'tour_users_page': '/admin/users',
+    'tour_analytics_page': '/admin/analytics',
+    'tour_ai_page': '/admin/ai',
+    'tour_settings_page': '/admin/settings',
+  }
+  return tourPathMap[tourId] || null
+}

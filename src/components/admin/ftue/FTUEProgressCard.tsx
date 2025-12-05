@@ -13,10 +13,13 @@ import {
   UtensilsCrossed,
   QrCode,
   Users,
+  FolderOpen,
+  Star,
 } from 'lucide-react'
 
 const stepIcons: Record<string, typeof Building2> = {
   outlet: Building2,
+  categories: FolderOpen,
   menu: UtensilsCrossed,
   tables: QrCode,
   users: Users,
@@ -169,8 +172,14 @@ export function FTUEProgressCard() {
                     </span>
                   )}
 
+                  {!step.isCompleted && step.isOptional && (
+                    <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-medium">
+                      Opsional
+                    </span>
+                  )}
+
                   {!step.isCompleted && (
-                    <ChevronRight className={`h-4 w-4 ml-auto ${
+                    <ChevronRight className={`h-4 w-4 ${step.isOptional ? '' : 'ml-auto'} ${
                       isActive ? 'text-orange-400' : 'text-gray-300'
                     }`} />
                   )}

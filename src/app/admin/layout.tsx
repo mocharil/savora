@@ -78,6 +78,11 @@ export default async function AdminLayout({
     .eq('is_active', true)
 
   // Get FTUE status
+  const { count: categoryCount } = await supabase
+    .from('categories')
+    .select('*', { count: 'exact', head: true })
+    .eq('store_id', user.store_id)
+
   const { count: menuCount } = await supabase
     .from('menu_items')
     .select('*', { count: 'exact', head: true })
@@ -97,6 +102,7 @@ export default async function AdminLayout({
 
   const ftueData = {
     hasOutlet: (outletCount || 0) > 0,
+    hasCategories: (categoryCount || 0) > 0,
     hasMenu: (menuCount || 0) > 0,
     hasTables: (tableCount || 0) > 0,
     hasUsers: (userCount || 0) > 0,

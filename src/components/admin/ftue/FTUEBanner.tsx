@@ -12,10 +12,11 @@ import {
   QrCode,
   Users,
   Plus,
+  FolderOpen,
 } from 'lucide-react'
 
 interface FTUEBannerProps {
-  stepId: 'outlet' | 'menu' | 'tables' | 'users'
+  stepId: 'outlet' | 'categories' | 'menu' | 'tables' | 'users'
   emptyState?: boolean
   ctaLabel?: string
   ctaHref?: string
@@ -31,10 +32,19 @@ const stepConfig = {
     ctaLabel: 'Tambah Outlet',
     ctaHref: '/admin/outlets/create',
   },
+  categories: {
+    icon: FolderOpen,
+    title: 'Buat Kategori Menu',
+    description: 'Kategori membantu mengelompokkan menu Anda. Contoh: Makanan, Minuman, Dessert.',
+    emptyTitle: 'Belum ada kategori',
+    emptyDescription: 'Buat kategori dulu sebelum menambahkan menu.',
+    ctaLabel: 'Tambah Kategori',
+    ctaHref: '/admin/menu?tab=categories',
+  },
   menu: {
     icon: UtensilsCrossed,
     title: 'Tambahkan Menu Pertama',
-    description: 'Menu adalah produk yang akan ditampilkan ke pelanggan. Buat kategori dan menu item.',
+    description: 'Menu adalah produk yang akan ditampilkan ke pelanggan.',
     emptyTitle: 'Belum ada menu',
     emptyDescription: 'Tambahkan menu agar pelanggan bisa melihat dan memesan produk Anda.',
     ctaLabel: 'Tambah Menu',

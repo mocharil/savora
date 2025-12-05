@@ -8,7 +8,8 @@ import {
   useEffect,
   ReactNode,
 } from 'react'
-import { TourConfig, TourStep, getTourById, ALL_TOURS } from './tour-config'
+import { usePathname } from 'next/navigation'
+import { TourConfig, TourStep, getTourById, ALL_TOURS, getTourTargetPath } from './tour-config'
 
 interface TourState {
   isActive: boolean
@@ -27,6 +28,7 @@ interface TourContextType {
   totalSteps: number
   completedTours: string[]
   hasCompletedFTUE: boolean
+  pendingTour: string | null
 
   // Actions
   startTour: (tourId: string) => void
@@ -37,6 +39,7 @@ interface TourContextType {
   resetFTUE: () => void
   markTourSeen: (tourId: string) => void
   hasTourBeenSeen: (tourId: string) => boolean
+  setPendingTour: (tourId: string | null) => void
 }
 
 const TourContext = createContext<TourContextType | null>(null)
@@ -82,6 +85,7 @@ interface TourProviderProps {
 }
 
 export function TourProvider({ children, autoStartFTUE = true }: TourProviderProps) {
+  const pathname = usePathname()
   const [state, setState] = useState<TourState>({
     isActive: false,
     currentTour: null,
@@ -91,6 +95,7 @@ export function TourProvider({ children, autoStartFTUE = true }: TourProviderPro
   })
   const [hasCompletedFTUE, setHasCompletedFTUE] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [pendingTour, setPendingTourState] = useState<string | null>(null)
 
   // Load stored state on mount
   useEffect(() => {
@@ -114,6 +119,38 @@ export function TourProvider({ children, autoStartFTUE = true }: TourProviderPro
       return () => clearTimeout(timer)
     }
   }, [isInitialized, autoStartFTUE, hasCompletedFTUE, state.isActive])
+
+  // Handle pending tour after navigation
+  useEffect(() => {
+    if (!pendingTour || !isInitialized) return
+
+    const targetPath = getTourTargetPath(pendingTour)
+    const tourIdToStart = pendingTour // Capture the tour ID before clearing
+
+    // Check if we're on the correct page
+    if (!targetPath || !pathname.includes(targetPath)) return
+
+    // Start the tour after a small delay to let the page render
+    const timer = setTimeout(() => {
+      const tour = getTourById(tourIdToStart)
+      if (tour) {
+        // Clear pending and start tour in one batch
+        setPendingTourState(null)
+        setState(prev => ({
+          ...prev,
+          isActive: true,
+          currentTour: tour,
+          currentStepIndex: 0,
+        }))
+      }
+    }, 800)
+
+    return () => clearTimeout(timer)
+  }, [pathname, pendingTour, isInitialized])
+
+  const setPendingTour = useCallback((tourId: string | null) => {
+    setPendingTourState(tourId)
+  }, [])
 
   const startTour = useCallback((tourId: string) => {
     const tour = getTourById(tourId)
@@ -275,6 +312,7 @@ export function TourProvider({ children, autoStartFTUE = true }: TourProviderPro
         totalSteps,
         completedTours: state.completedTours,
         hasCompletedFTUE,
+        pendingTour,
         startTour,
         nextStep,
         prevStep,
@@ -283,6 +321,7 @@ export function TourProvider({ children, autoStartFTUE = true }: TourProviderPro
         resetFTUE,
         markTourSeen,
         hasTourBeenSeen,
+        setPendingTour,
       }}
     >
       {children}

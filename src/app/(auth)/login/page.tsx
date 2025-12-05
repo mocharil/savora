@@ -73,7 +73,7 @@ function LoginForm() {
             <Image
               src="/savora_logo.png"
               alt="Savora"
-              width={200}
+              width={80}
               height={60}
               className="mx-auto mb-6"
             />
@@ -126,10 +126,12 @@ function LoginForm() {
           {/* Back Button */}
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 mb-8 group"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 hover:border-orange-200 hover:text-orange-600 transition-all duration-300 mb-8 group shadow-sm hover:shadow-md"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-sm font-medium">Kembali</span>
+            <div className="w-6 h-6 rounded-full bg-gray-100 group-hover:bg-orange-100 flex items-center justify-center transition-colors duration-300">
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform duration-300" />
+            </div>
+            <span className="text-sm font-medium">Kembali ke Beranda</span>
           </Link>
 
           {/* Card */}

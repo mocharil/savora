@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { useTour } from './TourProvider'
-import { ALL_TOURS, TourConfig } from './tour-config'
+import { ALL_TOURS, TourConfig, getTourTargetPath } from './tour-config'
 import {
   HelpCircle,
   PlayCircle,
@@ -12,6 +13,7 @@ import {
   GraduationCap,
   FileText,
   X,
+  ExternalLink,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -30,19 +32,34 @@ interface HelpCenterProps {
 
 export function HelpCenter({ triggerVariant = 'both', className }: HelpCenterProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
   const {
     startTour,
     completedTours,
     hasCompletedFTUE,
     resetFTUE,
     isActive,
+    setPendingTour,
   } = useTour()
 
   const handleStartTour = (tourId: string) => {
+    const targetPath = getTourTargetPath(tourId)
+
     setIsOpen(false)
-    setTimeout(() => {
-      startTour(tourId)
-    }, 300) // Wait for dialog close animation
+
+    // Check if we need to navigate to a different page first
+    if (targetPath && !pathname.includes(targetPath)) {
+      // Store the tour ID to start after navigation
+      setPendingTour(tourId)
+      // Navigate to the target page
+      router.push(targetPath)
+    } else {
+      // Already on the correct page, start tour immediately
+      setTimeout(() => {
+        startTour(tourId)
+      }, 300) // Wait for dialog close animation
+    }
   }
 
   const handleResetFTUE = () => {
