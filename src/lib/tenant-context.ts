@@ -5,9 +5,12 @@ import { jwtVerify } from 'jose'
 import type { TenantContext } from '@/types/database'
 import type { Outlet } from '@/types/outlet'
 
-const jwtSecret = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'your-super-secret-jwt-key-min-32-chars!'
-)
+// JWT Secret - required environment variable
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+  console.error('CRITICAL: JWT_SECRET environment variable is not set')
+}
+const jwtSecret = new TextEncoder().encode(JWT_SECRET || '')
 
 export interface CustomerTenantContext {
   storeId: string

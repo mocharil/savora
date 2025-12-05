@@ -8,9 +8,12 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY &&
   process.env.SUPABASE_SERVICE_ROLE_KEY !== 'your_service_role_key'
     ? process.env.SUPABASE_SERVICE_ROLE_KEY
     : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const jwtSecret = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'your-super-secret-jwt-key-min-32-chars!'
-)
+// JWT Secret - required environment variable
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+  console.error('CRITICAL: JWT_SECRET environment variable is not set')
+}
+const jwtSecret = new TextEncoder().encode(JWT_SECRET || '')
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 

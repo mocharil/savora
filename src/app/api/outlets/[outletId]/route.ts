@@ -4,9 +4,12 @@ import { jwtVerify } from 'jose'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const jwtSecret = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'your-super-secret-jwt-key-min-32-chars!'
-)
+// JWT Secret - required environment variable
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+  console.error('CRITICAL: JWT_SECRET environment variable is not set')
+}
+const jwtSecret = new TextEncoder().encode(JWT_SECRET || '')
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 

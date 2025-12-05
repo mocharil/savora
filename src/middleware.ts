@@ -1,9 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { jwtVerify } from 'jose'
 
-const jwtSecret = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'your-super-secret-jwt-key-min-32-chars!'
-)
+// JWT Secret - required environment variable
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+  console.error('CRITICAL: JWT_SECRET environment variable is not set')
+}
+const jwtSecret = new TextEncoder().encode(JWT_SECRET || '')
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
