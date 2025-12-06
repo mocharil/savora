@@ -13,6 +13,7 @@
   <img src="https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Supabase-PostgreSQL-green?style=flat-square&logo=supabase" alt="Supabase" />
   <img src="https://img.shields.io/badge/AI-Gemini-orange?style=flat-square&logo=google" alt="Gemini AI" />
+  <img src="https://img.shields.io/badge/AI-Kolosal-purple?style=flat-square" alt="Kolosal AI" />
 </p>
 
 <p align="center">
@@ -45,7 +46,7 @@ UMKM F&B di Indonesia menghadapi berbagai tantangan operasional yang menghambat 
 
 ## Solusi Savora
 
-Savora adalah platform manajemen restoran all-in-one yang dirancang khusus untuk UMKM F&B di Indonesia. Dengan fitur AI terintegrasi menggunakan **Google Gemini**, Savora membantu pemilik bisnis kuliner untuk mengelola operasional, meningkatkan penjualan, dan memberikan pengalaman terbaik kepada pelanggan.
+Savora adalah platform manajemen restoran all-in-one yang dirancang khusus untuk UMKM F&B di Indonesia. Dengan fitur AI terintegrasi menggunakan **Google Gemini** dan **Kolosal AI** (LLM Indonesia), Savora membantu pemilik bisnis kuliner untuk mengelola operasional, meningkatkan penjualan, dan memberikan pengalaman terbaik kepada pelanggan.
 
 ### Keunggulan
 
@@ -79,6 +80,7 @@ flowchart TB
 
     subgraph AI["AI Services"]
         GEM[Google Gemini]
+        KOL[Kolosal AI]
         VO[Voice Ordering]
         FC[Forecasting]
         PR[Smart Pricing]
@@ -103,11 +105,14 @@ flowchart TB
     MW --> SB
     MW --> ST
     NEXT --> GEM
+    NEXT --> KOL
     GEM --> VO
     GEM --> FC
     GEM --> PR
     GEM --> IN
     GEM --> MC
+    KOL --> VO
+    KOL --> IN
     NEXT --> MT
     SB --> RT
     RT --> CW
@@ -222,7 +227,7 @@ flowchart TB
 
 ### AI Features
 
-Powered by **Google Gemini**, fitur AI terintegrasi untuk meningkatkan operasional dan penjualan:
+Powered by **Google Gemini** dan **Kolosal AI**, fitur AI terintegrasi untuk meningkatkan operasional dan penjualan:
 
 ```mermaid
 mindmap
@@ -315,6 +320,7 @@ flowchart LR
 
     subgraph External
         GEM[Gemini AI]
+        KOL[Kolosal AI]
         MT[Midtrans]
     end
 
@@ -328,7 +334,8 @@ flowchart LR
 | **Framework** | Next.js 16 (App Router) | Server components, API routes, optimized performance |
 | **Language** | TypeScript | Type safety, better DX |
 | **Database** | Supabase (PostgreSQL) | Managed database, realtime, auth built-in |
-| **AI/ML** | Google Gemini | State-of-the-art LLM, Indonesian language support |
+| **AI/ML** | Google Gemini | State-of-the-art LLM, vision capabilities |
+| **AI/ML** | Kolosal AI | LLM Indonesia, optimized for Indonesian language |
 | **Styling** | Tailwind CSS + shadcn/ui | Rapid development, consistent design |
 | **State** | Zustand | Simple, performant state management |
 | **Animation** | Framer Motion | Smooth animations |
@@ -376,14 +383,18 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 JWT_SECRET=your_jwt_secret_min_32_chars
 
-# Gemini AI (optional)
+# Kolosal AI - Get from https://kolosal.ai
+KOLOSAL_API_KEY=your_kolosal_api_key
+
+# Gemini AI (optional) - Get from Google Cloud Console
 GEMINI_PROJECT_ID=your_gcp_project_id
 GEMINI_LOCATION=us-central1
 GEMINI_CREDENTIALS={"type":"service_account",...}
 
-# Midtrans (optional)
+# Midtrans (optional) - Get from https://dashboard.midtrans.com
 MIDTRANS_SERVER_KEY=your_server_key
 MIDTRANS_CLIENT_KEY=your_client_key
+NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your_client_key
 ```
 
 ### Database Setup
@@ -399,23 +410,59 @@ MIDTRANS_CLIENT_KEY=your_client_key
 ```
 savora/
 ├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── (auth)/             # Login, Register
-│   │   ├── [storeSlug]/        # Customer pages
-│   │   ├── admin/              # Admin dashboard
-│   │   └── api/                # API routes
+│   ├── app/                          # Next.js App Router
+│   │   ├── (auth)/                   # Auth pages (login, register)
+│   │   ├── [storeSlug]/              # Customer-facing pages
+│   │   │   └── order/                # Order flow (menu, cart, checkout, track)
+│   │   ├── admin/                    # Admin dashboard
+│   │   │   ├── dashboard/            # Analytics dashboard
+│   │   │   ├── menu/                 # Menu management
+│   │   │   ├── menu-creator/         # AI Menu Creator
+│   │   │   ├── categories/           # Category management
+│   │   │   ├── orders/               # Order management
+│   │   │   ├── pos/                  # Point of Sale
+│   │   │   ├── tables/               # Table & QR management
+│   │   │   ├── users/                # User management
+│   │   │   ├── ai/                   # AI Analytics page
+│   │   │   ├── analytics/            # Business analytics
+│   │   │   ├── profile/              # User profile
+│   │   │   └── settings/             # Store settings
+│   │   └── api/                      # API Routes
+│   │       ├── auth/                 # Authentication (login, register, logout)
+│   │       ├── admin/                # Admin APIs (menu, orders, tables, etc)
+│   │       ├── ai/                   # AI endpoints (voice, forecast, insights)
+│   │       ├── customer/             # Customer APIs (recommendations)
+│   │       ├── orders/               # Order APIs
+│   │       ├── payment/              # Payment APIs (Midtrans)
+│   │       └── upload/               # File upload API
 │   ├── components/
-│   │   ├── admin/              # Admin components
-│   │   ├── customer/           # Customer components
-│   │   └── ui/                 # UI components
+│   │   ├── admin/                    # Admin components
+│   │   │   ├── ai/                   # AI-related components
+│   │   │   ├── ftue/                 # First-time user experience
+│   │   │   └── tour/                 # Guided tour components
+│   │   ├── customer/                 # Customer components
+│   │   └── ui/                       # shadcn/ui + custom components
+│   ├── hooks/                        # Custom React hooks
 │   ├── lib/
-│   │   ├── ai/                 # AI services
-│   │   ├── supabase/           # Database clients
-│   │   └── utils.ts            # Utilities
-│   ├── stores/                 # Zustand stores
-│   └── types/                  # TypeScript types
-├── public/                     # Static assets
-└── supabase/migrations/        # Database migrations
+│   │   ├── ai/                       # AI services
+│   │   │   ├── forecast-service.ts   # Sales forecasting
+│   │   │   ├── insights-service.ts   # Business insights
+│   │   │   ├── pricing-service.ts    # Smart pricing
+│   │   │   └── voice-service.ts      # Voice ordering
+│   │   ├── supabase/                 # Supabase clients
+│   │   ├── midtrans/                 # Payment client
+│   │   ├── gemini.ts                 # Gemini AI client
+│   │   ├── kolosal.ts                # Kolosal AI client
+│   │   └── utils.ts                  # Utility functions
+│   ├── stores/                       # Zustand state stores
+│   │   ├── cart-store.ts             # Shopping cart state
+│   │   └── outlet-store.ts           # Outlet selection state
+│   └── types/                        # TypeScript type definitions
+├── public/                           # Static assets (images, icons)
+├── scripts/                          # Database scripts & utilities
+├── supabase/
+│   └── migrations/                   # Database migrations
+└── sql/                              # Additional SQL scripts
 ```
 
 ---
@@ -440,6 +487,10 @@ savora/
 | POST | `/api/ai/business-insights` | Business insights |
 | POST | `/api/ai/pricing-optimizer` | Smart pricing |
 | POST | `/api/ai/menu-creator` | Generate recipes |
+| POST | `/api/ai/menu-creator-v2` | Generate recipes (v2) |
+| POST | `/api/ai/generate-dish-image` | Generate dish images |
+| POST | `/api/ai/chat` | AI chat assistant |
+| POST | `/api/customer/ai-recommend` | Menu recommendations |
 
 ### Admin Endpoints
 
@@ -449,6 +500,10 @@ savora/
 | GET/POST | `/api/admin/categories` | Categories CRUD |
 | GET/POST | `/api/admin/tables` | Tables management |
 | GET/PATCH | `/api/admin/orders` | Orders management |
+| GET/POST | `/api/admin/users` | User management |
+| GET | `/api/admin/reports/dashboard` | Dashboard reports |
+| POST | `/api/admin/pos/orders` | POS order creation |
+| GET/PATCH | `/api/admin/profile` | Profile management |
 
 ---
 
