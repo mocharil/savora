@@ -123,6 +123,9 @@ export default async function DashboardPage() {
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Selamat Pagi' : hour < 18 ? 'Selamat Siang' : 'Selamat Malam'
 
+  // Check if there's any historical data (yesterday's orders)
+  const hasHistoricalData = yesterdayOrderCount > 0 || yesterdayRevenue > 0
+
   return (
     <div className="space-y-6">
       {/* FTUE Progress Card */}
@@ -131,8 +134,8 @@ export default async function DashboardPage() {
       {/* Page Header */}
       <DashboardPageClient />
 
-      {/* AI Daily Summary */}
-      <DailySummaryCard />
+      {/* AI Daily Summary - only show if there's yesterday's data */}
+      <DailySummaryCard hasData={hasHistoricalData} />
 
       {/* Executive Summary Hero */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 via-orange-600 to-amber-600 p-6 md:p-8" data-tour="dashboard-stats">
@@ -170,20 +173,22 @@ export default async function DashboardPage() {
               <h2 className="text-4xl md:text-5xl font-bold mb-2">
                 {formatCurrency(todayRevenue)}
               </h2>
-              <div className="flex items-center gap-2">
-                {revenueChange >= 0 ? (
-                  <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 text-green-100 text-sm font-medium">
-                    <ArrowUpRight className="w-4 h-4" />
-                    +{Math.abs(revenueChange).toFixed(0)}%
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/20 text-red-100 text-sm font-medium">
-                    <ArrowDownRight className="w-4 h-4" />
-                    -{Math.abs(revenueChange).toFixed(0)}%
-                  </span>
-                )}
-                <span className="text-orange-100 text-sm">vs kemarin ({formatCurrency(yesterdayRevenue)})</span>
-              </div>
+              {yesterdayRevenue > 0 && (
+                <div className="flex items-center gap-2">
+                  {revenueChange >= 0 ? (
+                    <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 text-green-100 text-sm font-medium">
+                      <ArrowUpRight className="w-4 h-4" />
+                      +{Math.abs(revenueChange).toFixed(0)}%
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/20 text-red-100 text-sm font-medium">
+                      <ArrowDownRight className="w-4 h-4" />
+                      -{Math.abs(revenueChange).toFixed(0)}%
+                    </span>
+                  )}
+                  <span className="text-orange-100 text-sm">vs kemarin ({formatCurrency(yesterdayRevenue)})</span>
+                </div>
+              )}
             </div>
 
             {/* Quick Action Stats */}

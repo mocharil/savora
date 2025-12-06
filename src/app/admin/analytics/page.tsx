@@ -192,6 +192,9 @@ export default async function AnalyticsPage({
 
   const periodLabel = periods.find(p => p.value === period)?.label || '7 Hari'
 
+  // Check if there's any data at all
+  const hasData = totalOrders > 0 || totalRevenue > 0
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -250,141 +253,176 @@ export default async function AnalyticsPage({
         </div>
       </div>
 
-      {/* KPI Cards - Unique Metrics Only */}
-      <div data-tour="analytics-kpi-cards" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Orders */}
-        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
-              <BarChart3 className="w-5 h-5 text-white" />
-            </div>
-            <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
-              ordersChange >= 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-            }`}>
-              {ordersChange >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-              {Math.abs(ordersChange).toFixed(1)}%
-            </div>
+      {/* Empty State - No Data */}
+      {!hasData && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center mx-auto mb-6">
+            <BarChart3 className="w-10 h-10 text-orange-400" />
           </div>
-          <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
-          <p className="text-sm text-gray-500">Total Pesanan</p>
-        </div>
-
-        {/* Avg Order Value */}
-        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
-              <Target className="w-5 h-5 text-white" />
-            </div>
-            <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
-              avgChange >= 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-            }`}>
-              {avgChange >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-              {Math.abs(avgChange).toFixed(1)}%
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-gray-900">{formatCurrency(avgOrderValue)}</p>
-          <p className="text-sm text-gray-500">Rata-rata per Pesanan</p>
-        </div>
-
-        {/* Items Sold */}
-        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-              <Utensils className="w-5 h-5 text-white" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-gray-900">{totalItemsSold}</p>
-          <p className="text-sm text-gray-500">Item Terjual</p>
-        </div>
-
-        {/* Peak Hour */}
-        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-              <Clock className="w-5 h-5 text-white" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-gray-900">{peakHour[0].toString().padStart(2, '0')}:00</p>
-          <p className="text-sm text-gray-500">Jam Tersibuk ({peakHour[1]} pesanan)</p>
-        </div>
-      </div>
-
-      {/* Payment Analytics */}
-      <div data-tour="analytics-payment" className="grid gap-4 md:grid-cols-2">
-        {/* Paid */}
-        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                <CreditCard className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Sudah Dibayar</p>
-                <p className="text-xl font-bold text-green-600">{formatCurrency(paidRevenue)}</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-gray-900">{paidOrders.length}</p>
-              <p className="text-xs text-gray-400">transaksi</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Unpaid */}
-        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Belum Dibayar</p>
-                <p className="text-xl font-bold text-amber-600">{formatCurrency(unpaidRevenue)}</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-gray-900">{unpaidOrders.length}</p>
-              <p className="text-xs text-gray-400">transaksi</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Daily Trend Chart - Combined */}
-      {dailyBreakdown.length > 1 && (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                <CalendarDays className="w-4 h-4 text-white" />
-              </div>
-              Tren Harian
-            </h2>
-          </div>
-          <div className="p-6">
-            <div className="space-y-3">
-              {dailyBreakdown.map((data, index) => {
-                const orderWidth = (data.orders / maxDailyOrders) * 100
-                return (
-                  <div key={index} className="flex items-center gap-3">
-                    <span className="text-xs text-gray-500 w-14 flex-shrink-0">{data.date}</span>
-                    <div className="flex-1 h-5 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
-                        style={{ width: `${Math.max(orderWidth, 8)}%` }}
-                      />
-                    </div>
-                    <div className="flex items-center gap-4 text-xs">
-                      <span className="text-gray-600 font-medium w-8">{data.orders} <span className="text-gray-400">psn</span></span>
-                      <span className="text-green-600 font-medium w-20 text-right">{formatCurrency(data.revenue)}</span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Belum Ada Data Penjualan</h3>
+          <p className="text-gray-500 max-w-md mx-auto mb-6">
+            Data analytics akan muncul setelah Anda memiliki transaksi penjualan.
+            Mulai terima pesanan pertama Anda untuk melihat statistik dan insight bisnis.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <a
+              href="/admin/menu"
+              className="inline-flex items-center justify-center px-5 py-2.5 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors"
+            >
+              <Utensils className="w-4 h-4 mr-2" />
+              Kelola Menu
+            </a>
+            <a
+              href="/admin/tables"
+              className="inline-flex items-center justify-center px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+            >
+              Generate QR Code
+            </a>
           </div>
         </div>
       )}
+
+      {/* KPI Cards - Only show if has data */}
+      {hasData && (
+        <>
+          <div data-tour="analytics-kpi-cards" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Total Orders */}
+            <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-white" />
+                </div>
+                {prevTotalOrders > 0 && (
+                  <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
+                    ordersChange >= 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+                  }`}>
+                    {ordersChange >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                    {Math.abs(ordersChange).toFixed(1)}%
+                  </div>
+                )}
+              </div>
+              <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
+              <p className="text-sm text-gray-500">Total Pesanan</p>
+            </div>
+
+            {/* Avg Order Value */}
+            <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-white" />
+                </div>
+                {prevAvgValue > 0 && (
+                  <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
+                    avgChange >= 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+                  }`}>
+                    {avgChange >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                    {Math.abs(avgChange).toFixed(1)}%
+                  </div>
+                )}
+              </div>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(avgOrderValue)}</p>
+              <p className="text-sm text-gray-500">Rata-rata per Pesanan</p>
+            </div>
+
+            {/* Items Sold */}
+            <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                  <Utensils className="w-5 h-5 text-white" />
+                </div>
+              </div>
+              <p className="text-2xl font-bold text-gray-900">{totalItemsSold}</p>
+              <p className="text-sm text-gray-500">Item Terjual</p>
+            </div>
+
+            {/* Peak Hour */}
+            <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-white" />
+                </div>
+              </div>
+              <p className="text-2xl font-bold text-gray-900">{peakHour[0].toString().padStart(2, '0')}:00</p>
+              <p className="text-sm text-gray-500">Jam Tersibuk ({peakHour[1]} pesanan)</p>
+            </div>
+          </div>
+
+          {/* Payment Analytics */}
+          <div data-tour="analytics-payment" className="grid gap-4 md:grid-cols-2">
+            {/* Paid */}
+            <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                    <CreditCard className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Sudah Dibayar</p>
+                    <p className="text-xl font-bold text-green-600">{formatCurrency(paidRevenue)}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-gray-900">{paidOrders.length}</p>
+                  <p className="text-xs text-gray-400">transaksi</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Unpaid */}
+            <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Belum Dibayar</p>
+                    <p className="text-xl font-bold text-amber-600">{formatCurrency(unpaidRevenue)}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-gray-900">{unpaidOrders.length}</p>
+                  <p className="text-xs text-gray-400">transaksi</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Daily Trend Chart - Combined */}
+          {dailyBreakdown.length > 1 && (
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <CalendarDays className="w-4 h-4 text-white" />
+                  </div>
+                  Tren Harian
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-3">
+                  {dailyBreakdown.map((data, index) => {
+                    const orderWidth = (data.orders / maxDailyOrders) * 100
+                    return (
+                      <div key={index} className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500 w-14 flex-shrink-0">{data.date}</span>
+                        <div className="flex-1 h-5 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+                            style={{ width: `${Math.max(orderWidth, 8)}%` }}
+                          />
+                        </div>
+                        <div className="flex items-center gap-4 text-xs">
+                          <span className="text-gray-600 font-medium w-8">{data.orders} <span className="text-gray-400">psn</span></span>
+                          <span className="text-green-600 font-medium w-20 text-right">{formatCurrency(data.revenue)}</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
 
       {/* Hourly Distribution */}
       <div data-tour="analytics-charts" className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -621,10 +659,12 @@ export default async function AnalyticsPage({
           </div>
         </div>
       </div>
+        </>
+      )}
 
       {/* AI Analytics Section */}
       <div data-tour="analytics-ai-panel" className="mt-8">
-        <AIAnalyticsPanel />
+        <AIAnalyticsPanel hasData={hasData} />
       </div>
     </div>
   )

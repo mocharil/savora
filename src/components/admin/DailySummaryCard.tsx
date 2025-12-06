@@ -137,7 +137,11 @@ function PriorityBadge({ priority }: { priority: AIRecommendation['priority'] })
   )
 }
 
-export function DailySummaryCard() {
+interface DailySummaryCardProps {
+  hasData?: boolean
+}
+
+export function DailySummaryCard({ hasData = true }: DailySummaryCardProps) {
   const [summary, setSummary] = useState<DailySummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -181,8 +185,13 @@ export function DailySummaryCard() {
   }
 
   useEffect(() => {
-    fetchSummary()
-  }, [])
+    // Only fetch if there's data to analyze
+    if (hasData) {
+      fetchSummary()
+    } else {
+      setLoading(false)
+    }
+  }, [hasData])
 
   if (loading) {
     return (
@@ -208,6 +217,33 @@ export function DailySummaryCard() {
         >
           Coba Lagi
         </button>
+      </div>
+    )
+  }
+
+  // Show empty state if no data
+  if (!hasData) {
+    return (
+      <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl border border-orange-200 p-6" data-tour="dashboard-daily-summary">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Ringkasan Harian AI</h3>
+            <p className="text-xs text-gray-500">Analisis performa bisnis Anda</p>
+          </div>
+        </div>
+        <div className="text-center py-6">
+          <div className="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-3">
+            <Sparkles className="w-7 h-7 text-orange-400" />
+          </div>
+          <h4 className="font-medium text-gray-900 mb-1">Belum Ada Ringkasan</h4>
+          <p className="text-sm text-gray-500 max-w-sm mx-auto">
+            Ringkasan AI akan tersedia setelah ada data penjualan.
+            Mulai terima pesanan untuk melihat insight harian.
+          </p>
+        </div>
       </div>
     )
   }

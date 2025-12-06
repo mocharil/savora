@@ -46,7 +46,11 @@ interface AIAnalyticsData {
   remainingMinutes: number
 }
 
-export function AIAnalyticsPanel() {
+interface AIAnalyticsPanelProps {
+  hasData?: boolean
+}
+
+export function AIAnalyticsPanel({ hasData = true }: AIAnalyticsPanelProps) {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -83,8 +87,13 @@ export function AIAnalyticsPanel() {
   }
 
   useEffect(() => {
-    fetchAnalytics()
-  }, [])
+    // Only fetch if there's data to analyze
+    if (hasData) {
+      fetchAnalytics()
+    } else {
+      setLoading(false)
+    }
+  }, [hasData])
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
@@ -156,6 +165,39 @@ export function AIAnalyticsPanel() {
           >
             Coba Lagi
           </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Show empty state if no data
+  if (!hasData) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-gradient-to-r from-violet-500 to-purple-600 p-6 text-white">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-white/20 rounded-xl">
+              <Brain className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">AI Business Analytics</h2>
+              <p className="text-violet-200 text-sm">
+                Analisis otomatis untuk bisnis Anda
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="p-8 text-center">
+          <div className="w-16 h-16 rounded-full bg-violet-100 flex items-center justify-center mx-auto mb-4">
+            <Brain className="w-8 h-8 text-violet-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Belum Bisa Menganalisis
+          </h3>
+          <p className="text-gray-500 max-w-sm mx-auto">
+            AI membutuhkan data penjualan untuk memberikan insight dan rekomendasi bisnis.
+            Mulai terima pesanan untuk mengaktifkan fitur analisis AI.
+          </p>
         </div>
       </div>
     )
