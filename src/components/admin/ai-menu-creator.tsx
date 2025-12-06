@@ -51,14 +51,14 @@ interface GeneratedDish {
 type Step = 'input' | 'generating' | 'results'
 
 const cuisineOptions = [
-  { id: 'indonesian', label: 'Indonesia', icon: '🇮🇩' },
-  { id: 'western', label: 'Western', icon: '🍔' },
-  { id: 'japanese', label: 'Jepang', icon: '🍱' },
-  { id: 'chinese', label: 'China', icon: '🥡' },
-  { id: 'korean', label: 'Korea', icon: '🍜' },
-  { id: 'italian', label: 'Italia', icon: '🍝' },
-  { id: 'dessert', label: 'Dessert', icon: '🍰' },
-  { id: 'beverage', label: 'Minuman', icon: '🥤' },
+  { id: 'indonesian', label: 'Indonesia', image: '/indonesia.png' },
+  { id: 'western', label: 'Western', image: '/western.png' },
+  { id: 'japanese', label: 'Jepang', image: '/jepang.png' },
+  { id: 'chinese', label: 'China', image: '/china.png' },
+  { id: 'korean', label: 'Korea', image: '/korea.png' },
+  { id: 'italian', label: 'Italia', image: '/italia.png' },
+  { id: 'dessert', label: 'Dessert', image: '/dessert.png' },
+  { id: 'beverage', label: 'Minuman', image: '/minuman.png' },
 ]
 
 const priceRanges = [
@@ -330,11 +330,18 @@ export function AIMenuCreator({ storeId }: AIMenuCreatorProps) {
                     onClick={() => setCuisineType(option.id)}
                     className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
                       cuisineType === option.id
-                        ? 'border-orange-500 bg-orange-50'
+                        ? 'border-orange-500 bg-orange-50 shadow-md shadow-orange-500/20'
                         : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
                     }`}
                   >
-                    <span className="text-2xl">{option.icon}</span>
+                    <div className="relative w-10 h-10 rounded-lg overflow-hidden">
+                      <Image
+                        src={option.image}
+                        alt={option.label}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
                     <span className={`text-xs font-medium ${cuisineType === option.id ? 'text-orange-700' : 'text-gray-600'}`}>
                       {option.label}
                     </span>
