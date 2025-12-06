@@ -454,8 +454,7 @@ savora/
 │   │   ├── kolosal.ts                # Kolosal AI client
 │   │   └── utils.ts                  # Utility functions
 │   ├── stores/                       # Zustand state stores
-│   │   ├── cart-store.ts             # Shopping cart state
-│   │   └── outlet-store.ts           # Outlet selection state
+│   │   └── cart-store.ts             # Shopping cart state
 │   └── types/                        # TypeScript type definitions
 ├── public/                           # Static assets (images, icons)
 ├── scripts/                          # Database scripts & utilities

@@ -58,7 +58,6 @@ export async function middleware(request: NextRequest) {
       '/api/auth/register',
       '/api/payment/webhook',
       '/api/stores/', // Public store lookup
-      '/api/outlets/', // Public outlet lookup
       '/api/customer/', // Customer-facing APIs (AI recommend, orders, etc.)
       '/api/ai/voice-order', // Voice ordering API
     ]
