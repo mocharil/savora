@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Plus, UtensilsCrossed, Sparkles } from 'lucide-react'
+import { Plus, Sparkles, UtensilsCrossed } from 'lucide-react'
 import { PageTourButton } from '@/components/admin/tour'
 import { ShimmerButton } from '@/components/ui/shimmer-button'
 

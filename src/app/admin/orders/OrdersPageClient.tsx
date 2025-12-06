@@ -21,11 +21,10 @@ import {
   Package,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   ArrowUpDown,
   SortAsc,
   SortDesc,
-  CreditCard,
-  ChevronDown
 } from 'lucide-react'
 
 type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled'

@@ -6,7 +6,6 @@ import { redirect } from 'next/navigation'
 import { CategoriesPageClient } from './CategoriesPageClient'
 import { CategoryFilters } from '@/components/admin/category-filters'
 import {
-  Plus,
   Package,
   Layers,
   ToggleRight,

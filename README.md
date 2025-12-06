@@ -423,7 +423,6 @@ savora/
 │   │   │   ├── pos/                  # Point of Sale
 │   │   │   ├── tables/               # Table & QR management
 │   │   │   ├── users/                # User management
-│   │   │   ├── ai/                   # AI Analytics page
 │   │   │   ├── analytics/            # Business analytics
 │   │   │   ├── profile/              # User profile
 │   │   │   └── settings/             # Store settings
@@ -489,7 +488,6 @@ savora/
 | POST | `/api/ai/menu-creator` | Generate recipes |
 | POST | `/api/ai/menu-creator-v2` | Generate recipes (v2) |
 | POST | `/api/ai/generate-dish-image` | Generate dish images |
-| POST | `/api/ai/chat` | AI chat assistant |
 | POST | `/api/customer/ai-recommend` | Menu recommendations |
 
 ### Admin Endpoints

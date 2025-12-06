@@ -16,24 +16,12 @@ import {
   ShoppingBag,
   BarChart3,
   Settings,
-  ChevronLeft,
-  ChevronRight,
-  Sparkles,
   Users,
   LogOut,
-  User as UserIcon,
   PanelLeftClose,
   PanelLeft,
-  MoreVertical,
   Receipt,
 } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
   Tooltip,
   TooltipContent,
@@ -101,7 +89,6 @@ const menuGroups: MenuGroup[] = [
     label: 'Pengguna & Insight',
     items: [
       { name: 'Users', href: '/admin/users', icon: Users, allowedRoles: ['tenant_admin'], tourId: 'sidebar-users' },
-      { name: 'AI Assistant', href: '/admin/ai', icon: Sparkles, allowedRoles: ['tenant_admin'], tourId: 'sidebar-ai' },
       { name: 'Analytics', href: '/admin/analytics', icon: BarChart3, allowedRoles: ['tenant_admin'], tourId: 'sidebar-analytics' },
     ]
   },
