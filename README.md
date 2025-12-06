@@ -5,13 +5,13 @@
 <h1 align="center">Savora</h1>
 
 <p align="center">
-  <strong>Platform Manajemen Restoran Berbasis AI untuk UMKM F&B Indonesia</strong>
+  <strong>Platform Manajemen Restoran Berbasis AI Pertama di Indonesia untuk UMKM F&B</strong>
 </p>
 
 <p align="center">
   <a href="#masalah-yang-diselesaikan">Masalah</a> •
   <a href="#solusi-savora">Solusi</a> •
-  <a href="#fitur">Fitur</a> •
+  <a href="#fitur-utama">Fitur</a> •
   <a href="#tech-stack">Tech Stack</a> •
   <a href="#instalasi">Instalasi</a> •
   <a href="#demo">Demo</a>
@@ -38,14 +38,16 @@ Menurut data BPS, lebih dari 60% UMKM F&B masih menggunakan pencatatan manual da
 
 ## Solusi Savora
 
-Savora adalah platform manajemen restoran all-in-one yang dirancang khusus untuk UMKM F&B. Dengan integrasi AI menggunakan Google Gemini, Savora mengubah cara bisnis kuliner beroperasi:
+Savora adalah platform manajemen restoran all-in-one yang dirancang khusus untuk UMKM F&B di Indonesia. Dengan fitur AI terintegrasi menggunakan **Google Gemini**, Savora membantu pemilik bisnis kuliner untuk mengelola operasional, meningkatkan penjualan, dan memberikan pengalaman terbaik kepada pelanggan.
 
-### Nilai Utama
+### Mengapa Savora?
 
-1. **Digitalisasi Operasional** - Semua proses dari order hingga pembayaran digital dan tercatat
-2. **AI-Powered Insights** - Keputusan bisnis berbasis data, bukan intuisi
-3. **Customer Experience** - Pemesanan cepat via QR, tidak perlu antri
-4. **Affordable** - Pricing yang accessible untuk UMKM, ada tier gratis
+- **AI-Powered**: Fitur AI canggih untuk voice ordering, business insights, forecasting, dan smart pricing
+- **Multi-tenant**: Satu platform untuk banyak toko dengan manajemen terpisah
+- **QR Ordering**: Pelanggan pesan langsung dari meja via scan QR code
+- **Real-time**: Update pesanan dan notifikasi secara real-time
+- **Mobile-first**: Desain responsif untuk penggunaan di berbagai device
+- **Affordable**: Pricing yang accessible untuk UMKM, ada tier gratis
 
 ### Arsitektur Multi-Tenant
 
@@ -57,26 +59,28 @@ Savora menggunakan arsitektur multi-tenant yang memungkinkan:
 
 ---
 
-## Fitur
+## Fitur Utama
 
-### AI Features (Google Gemini)
+### AI Features (Gemini-Powered)
 
 | Fitur | Deskripsi | Manfaat |
 |-------|-----------|---------|
-| **Voice Ordering** | Pelanggan memesan dengan berbicara dalam Bahasa Indonesia | Pemesanan lebih cepat, accessible untuk semua usia |
+| **Voice Ordering** | Pelanggan bisa memesan dengan berbicara dalam Bahasa Indonesia | Pemesanan lebih cepat, accessible untuk semua usia |
+| **AI Food Assistant** | Chatbot rekomendasi menu personal berdasarkan preferensi pelanggan | Upselling otomatis, customer experience |
 | **AI Menu Creator** | Generate resep dan kalkulasi HPP otomatis dari bahan yang tersedia | Efisiensi R&D menu, optimasi food cost |
-| **Business Insights** | Analisis penjualan harian dengan rekomendasi actionable | Keputusan berbasis data, identifikasi peluang |
-| **Sales Forecasting** | Prediksi penjualan 14 hari ke depan per menu item | Perencanaan stok akurat, kurangi food waste |
-| **Smart Pricing** | Rekomendasi harga optimal berdasarkan demand pattern | Margin lebih baik, pricing kompetitif |
-| **AI Food Assistant** | Chatbot rekomendasi menu personal untuk pelanggan | Upselling otomatis, customer experience |
+| **Business Insights** | Analisis bisnis otomatis dengan tips actionable | Keputusan berbasis data, identifikasi peluang |
+| **Sales Forecasting** | Prediksi penjualan 14 hari ke depan untuk perencanaan stok | Perencanaan stok akurat, kurangi food waste |
+| **Smart Pricing** | Rekomendasi harga optimal berdasarkan data penjualan | Margin lebih baik, pricing kompetitif |
 
-### Customer Features
+### Customer Side
 
 | Fitur | Deskripsi |
 |-------|-----------|
-| **QR Code Ordering** | Scan QR di meja, langsung browse menu dan pesan |
-| **Menu Browsing** | Filter berdasarkan kategori, search menu |
-| **Real-time Order Tracking** | Lacak status pesanan dari confirmed hingga ready |
+| **QR Code Ordering** | Scan QR di meja untuk mulai pesan |
+| **Menu Browsing** | Jelajahi menu dengan filter kategori |
+| **AI Recommendations** | Rekomendasi menu personal dari AI |
+| **Shopping Cart** | Keranjang belanja dengan update real-time |
+| **Order Tracking** | Lacak status pesanan secara real-time |
 | **Multiple Payment** | QRIS, e-wallet, transfer bank, tunai |
 | **Order History** | Riwayat pesanan untuk repeat order |
 
@@ -84,40 +88,42 @@ Savora menggunakan arsitektur multi-tenant yang memungkinkan:
 
 | Fitur | Deskripsi |
 |-------|-----------|
-| **Dashboard Analytics** | Overview penjualan, grafik trend, perbandingan periode |
-| **Menu Management** | CRUD menu dengan gambar, kategori, harga, ketersediaan |
-| **Category Management** | Organisasi menu dalam kategori dengan icon/gambar |
-| **Table Management** | Kelola meja, generate QR code per meja |
-| **Order Management** | Terima, proses, selesaikan pesanan dengan status tracking |
-| **POS System** | Point of Sale untuk transaksi kasir walk-in |
+| **Dashboard Analytics** | Statistik penjualan, grafik, dan overview |
+| **Menu Management** | Kelola menu dengan gambar dan kategori |
+| **Category Management** | Organisasi menu berdasarkan kategori |
+| **Table & QR Management** | Generate dan kelola QR code untuk setiap meja |
+| **Order Management** | Kelola pesanan dengan update status real-time |
+| **POS System** | Point of Sale untuk kasir dengan UI modern |
 | **User Management** | Kelola staff dengan role-based access |
 | **Outlet Management** | Multi-outlet dalam satu toko |
-| **Store Settings** | Konfigurasi toko, tema, jam operasional |
+| **Reports** | Laporan penjualan dan analitik |
+| **Settings** | Pengaturan toko, tema, dan konfigurasi |
 
-### Onboarding System (FTUE)
+### UI/UX Features
 
-Sistem panduan untuk user baru dengan checklist setup:
-1. Buat outlet pertama
-2. Buat kategori menu
-3. Tambahkan menu item
-4. Setup meja dan QR code
-5. Undang staff (opsional)
+- **Modern Design**: UI clean dan modern dengan Tailwind CSS
+- **Custom Theming**: Setiap toko bisa kustomisasi warna tema
+- **Loading States**: Animasi loading yang menarik (BlockLoader)
+- **Responsive**: Optimal di desktop dan mobile
+- **Dark/Light Mode**: Support tema gelap dan terang
+- **FTUE Onboarding**: Panduan setup untuk user baru
 
 ---
 
 ## Tech Stack
 
-| Layer | Teknologi | Alasan |
-|-------|-----------|--------|
+| Kategori | Teknologi | Alasan |
+|----------|-----------|--------|
 | **Framework** | Next.js 15 (App Router) | Server components, API routes, optimized performance |
 | **Language** | TypeScript | Type safety, better DX, catch errors early |
 | **Database** | Supabase (PostgreSQL) | Managed database, realtime, auth built-in |
 | **AI/ML** | Google Gemini (Vertex AI) | State-of-the-art LLM, vision capabilities, Indonesian language support |
 | **Styling** | Tailwind CSS + shadcn/ui | Rapid development, consistent design system |
-| **State** | Zustand | Simple, performant state management |
-| **Auth** | JWT + bcrypt | Stateless auth, secure password hashing |
+| **State Management** | Zustand | Simple, performant state management |
+| **Animation** | Framer Motion | Smooth animations |
+| **Authentication** | JWT + bcrypt | Stateless auth, secure password hashing |
+| **Real-time** | Supabase Realtime | Live updates |
 | **Payment** | Midtrans | Indonesian payment gateway, full coverage |
-| **Hosting** | Vercel | Edge network, automatic scaling |
 
 ---
 
@@ -125,76 +131,113 @@ Sistem panduan untuk user baru dengan checklist setup:
 
 ### Prerequisites
 
-- Node.js 18.0+
-- npm/yarn/pnpm
-- Supabase account (gratis)
-- Google Cloud account (untuk AI features)
+- **Node.js** 18.0 atau lebih baru
+- **npm** atau **yarn** atau **pnpm**
+- **Supabase** account (gratis)
+- **Google Cloud** account untuk Gemini AI (opsional)
 
-### 1. Clone Repository
+### Step 1: Clone Repository
 
 ```bash
 git clone https://github.com/mocharil/savora.git
 cd savora
 ```
 
-### 2. Install Dependencies
+### Step 2: Install Dependencies
 
 ```bash
 npm install
+# atau
+yarn install
+# atau
+pnpm install
 ```
 
-### 3. Setup Environment Variables
+### Step 3: Setup Environment Variables
 
 Buat file `.env` di root project:
 
 ```env
-# Supabase
+# Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-# App
+# App Configuration
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-JWT_SECRET=your_jwt_secret_key_minimum_32_characters
+JWT_SECRET=your_jwt_secret_key_min_32_chars
 
 # Gemini AI (untuk fitur AI)
 GEMINI_PROJECT_ID=your_gcp_project_id
 GEMINI_LOCATION=us-central1
 GEMINI_CREDENTIALS={"type":"service_account","project_id":"...","private_key":"..."}
 
-# Midtrans Payment (opsional)
-MIDTRANS_SERVER_KEY=your_server_key
-MIDTRANS_CLIENT_KEY=your_client_key
+# Midtrans Payment (Optional)
+MIDTRANS_SERVER_KEY=your_midtrans_server_key
+MIDTRANS_CLIENT_KEY=your_midtrans_client_key
 MIDTRANS_IS_PRODUCTION=false
 ```
 
-### 4. Setup Supabase Database
+### Step 4: Setup Database
 
-1. Buat project di [Supabase](https://supabase.com)
-2. Buka SQL Editor
-3. Jalankan migration scripts dari `supabase/migrations/` secara berurutan (001, 002, dst)
-4. Buat Storage Buckets:
+1. Buat project baru di [Supabase](https://supabase.com)
+2. Buka **SQL Editor** di Supabase Dashboard
+3. Jalankan migration script dari folder `supabase/migrations/` secara berurutan
+4. **Disable RLS** untuk development (atau setup policies sesuai kebutuhan)
+
+```sql
+-- Disable RLS untuk semua tabel (development only)
+ALTER TABLE stores DISABLE ROW LEVEL SECURITY;
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE categories DISABLE ROW LEVEL SECURITY;
+ALTER TABLE menu_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE tables DISABLE ROW LEVEL SECURITY;
+ALTER TABLE orders DISABLE ROW LEVEL SECURITY;
+ALTER TABLE order_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE payments DISABLE ROW LEVEL SECURITY;
+```
+
+5. Buat Storage Buckets:
    - `store-logos`
    - `store-banners`
    - `menu-images`
    - `category-images`
    - `qr-codes`
 
-### 5. Setup Google Cloud (untuk AI)
+### Step 5: Setup Gemini AI (Opsional)
+
+Untuk mengaktifkan fitur AI:
 
 1. Buat project di [Google Cloud Console](https://console.cloud.google.com)
-2. Enable Vertex AI API
+2. Enable **Vertex AI API**
 3. Buat Service Account dengan role "Vertex AI User"
 4. Download JSON key
 5. Convert ke single-line JSON dan masukkan ke `GEMINI_CREDENTIALS` env var
 
-### 6. Jalankan Development Server
+---
+
+## Menjalankan Aplikasi
+
+### Development Mode
 
 ```bash
 npm run dev
 ```
 
-Buka [http://localhost:3000](http://localhost:3000)
+Aplikasi akan berjalan di [http://localhost:3000](http://localhost:3000)
+
+### Production Build
+
+```bash
+npm run build
+npm start
+```
+
+### Linting
+
+```bash
+npm run lint
+```
 
 ---
 
@@ -203,23 +246,31 @@ Buka [http://localhost:3000](http://localhost:3000)
 ```
 savora/
 ├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── (auth)/             # Login, Register
-│   │   ├── [storeSlug]/        # Customer pages (dynamic routing)
-│   │   ├── admin/              # Admin dashboard
-│   │   └── api/                # API routes
+│   ├── app/                      # Next.js App Router
+│   │   ├── (auth)/              # Login, Register pages
+│   │   ├── [storeSlug]/         # Customer-facing pages (dynamic)
+│   │   ├── admin/               # Admin dashboard pages
+│   │   └── api/                 # API routes
+│   │       ├── admin/           # Admin APIs
+│   │       ├── ai/              # AI-related APIs
+│   │       ├── auth/            # Authentication APIs
+│   │       └── customer/        # Customer APIs
 │   ├── components/
-│   │   ├── admin/              # Admin components
-│   │   ├── customer/           # Customer components
-│   │   └── ui/                 # Shared UI components
+│   │   ├── admin/               # Admin components
+│   │   ├── customer/            # Customer components
+│   │   └── ui/                  # shadcn/ui + custom components
 │   ├── lib/
-│   │   ├── ai/                 # AI services
-│   │   ├── supabase/           # Database clients
-│   │   └── gemini.ts           # Gemini AI client
-│   ├── stores/                 # Zustand state
-│   └── types/                  # TypeScript types
-├── public/                     # Static assets
-└── supabase/migrations/        # Database migrations
+│   │   ├── ai/                  # AI services (forecast, insights, pricing)
+│   │   ├── supabase/            # Supabase clients
+│   │   ├── gemini.ts            # Gemini AI client
+│   │   └── utils.ts             # Utility functions
+│   ├── stores/                  # Zustand stores
+│   ├── types/                   # TypeScript types
+│   └── middleware.ts            # Auth middleware
+├── public/                      # Static assets
+├── supabase/
+│   └── migrations/              # Database migrations
+└── sql/                         # Additional SQL scripts
 ```
 
 ---
@@ -229,22 +280,23 @@ savora/
 ### Authentication
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
-| POST | `/api/auth/register` | Register + create store |
-| POST | `/api/auth/login` | Login, return JWT |
-| POST | `/api/auth/logout` | Clear session |
-| GET | `/api/auth/me` | Get current user |
+| POST | `/api/auth/register` | Register user baru + buat store |
+| POST | `/api/auth/login` | Login dan dapatkan JWT token |
+| POST | `/api/auth/logout` | Logout dan hapus session |
+| GET | `/api/auth/me` | Get current user info |
 
 ### AI Features
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
-| POST | `/api/ai/voice-order` | Parse voice to order items |
-| POST | `/api/ai/forecast` | Sales prediction 14 days |
-| POST | `/api/ai/insights` | Business recommendations |
-| POST | `/api/ai/pricing` | Price optimization |
+| POST | `/api/ai/voice-order` | Parse voice input ke order items |
+| POST | `/api/ai/forecast` | Generate sales forecast |
+| POST | `/api/ai/insights` | Get AI business insights |
+| POST | `/api/ai/pricing` | Get smart pricing recommendations |
 | POST | `/api/ai/menu-creator` | Generate recipe from ingredients |
 | POST | `/api/ai/generate-dish-image` | Generate menu image with AI |
+| POST | `/api/customer/ai-recommend` | Get menu recommendations |
 
-### Admin
+### Admin APIs
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
 | GET/POST | `/api/admin/menu` | Menu CRUD |
@@ -257,7 +309,7 @@ savora/
 
 ## Demo
 
-### Development Credentials
+### Login Credentials (Development)
 
 ```
 Email: admin@savora.id
@@ -266,70 +318,103 @@ Password: Password123
 
 ### Customer Flow
 
-1. Buka `/{store-slug}/order`
-2. Browse menu, tambah ke cart
-3. Gunakan voice ordering atau AI assistant
-4. Checkout, pilih payment method
+1. Buka `http://localhost:3000/{store-slug}/order`
+2. Browse menu dan tambah ke keranjang
+3. Klik tombol AI untuk rekomendasi
+4. Checkout dan pilih metode pembayaran
 
 ### Admin Flow
 
-1. Login di `/login`
-2. Dashboard overview di `/admin/dashboard`
-3. Kelola menu di `/admin/menu`
-4. Proses order di `/admin/orders`
-5. Gunakan POS di `/admin/pos`
+1. Login di `http://localhost:3000/login`
+2. Akses dashboard di `/admin/dashboard`
+3. Kelola menu, kategori, meja, dan pesanan
+4. Gunakan POS untuk transaksi kasir
+
+---
+
+## Screenshots
+
+<details>
+<summary>Lihat Screenshots</summary>
+
+### Landing Page
+Modern landing page dengan fitur highlight dan pricing
+
+### Admin Dashboard
+Dashboard dengan statistik real-time dan grafik penjualan
+
+### POS System
+Point of Sale dengan menu grouped by category
+
+### AI Chatbot
+Chatbot rekomendasi menu dengan visual menu cards
+
+### Customer Order
+Halaman pemesanan customer dengan tema kustomisasi
+
+</details>
 
 ---
 
 ## Roadmap
 
 ### Completed
-- Core Features (Menu, Order, Payment)
-- AI Voice Ordering
-- AI Recommendations & Insights
-- Sales Forecasting & Smart Pricing
-- POS System
-- Multi-tenant Architecture
-- FTUE Onboarding
+- [x] Core Features (Menu, Order, Payment)
+- [x] AI Voice Ordering
+- [x] AI Recommendations
+- [x] AI Menu Creator
+- [x] Business Insights & Forecasting
+- [x] POS System
+- [x] Multi-tenant Architecture
+- [x] FTUE Onboarding
 
 ### Planned
-- Kitchen Display System (KDS)
-- Inventory Management
-- Loyalty Program
-- Multi-language Support
-- Mobile App (React Native)
+- [ ] Kitchen Display System (KDS)
+- [ ] Inventory Management
+- [ ] Loyalty Program
+- [ ] Multi-language Support
+- [ ] Mobile App (React Native)
 
 ---
 
 ## Contributing
 
+Contributions are welcome! Please read our contributing guidelines before submitting PRs.
+
 ```bash
-# Fork repo
-# Create feature branch
-git checkout -b feature/your-feature
+# Fork the repo
+# Create your feature branch
+git checkout -b feature/amazing-feature
 
-# Commit changes
-git commit -m "feat: add your feature"
+# Commit your changes
+git commit -m 'Add some amazing feature'
 
-# Push and create PR
-git push origin feature/your-feature
+# Push to the branch
+git push origin feature/amazing-feature
+
+# Open a Pull Request
 ```
 
 ---
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
 ## Support
 
-- Documentation: [SETUP.md](SETUP.md)
-- Issues: [GitHub Issues](https://github.com/mocharil/savora/issues)
+- **Documentation**: [SETUP.md](SETUP.md)
+- **Issues**: [GitHub Issues](https://github.com/mocharil/savora/issues)
 
 ---
 
 <p align="center">
   <strong>Built for Indonesian UMKM F&B</strong>
+</p>
+
+<p align="center">
+  <a href="https://savora.id">Website</a> •
+  <a href="https://github.com/mocharil/savora">GitHub</a>
 </p>
