@@ -318,7 +318,7 @@ export function AIMenuCreator({ storeId }: AIMenuCreatorProps) {
         {step === 'input' && (
           <div className="space-y-8 animate-in fade-in duration-500">
             {/* Cuisine Type */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm" data-tour="ai-cuisine-type">
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <ChefHat className="w-5 h-5 text-orange-500" />
                 Jenis Kuliner
@@ -351,7 +351,7 @@ export function AIMenuCreator({ storeId }: AIMenuCreatorProps) {
             </div>
 
             {/* Ingredients */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm" data-tour="ai-ingredients">
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Leaf className="w-5 h-5 text-green-500" />
                 Bahan yang Tersedia
@@ -400,7 +400,7 @@ export function AIMenuCreator({ storeId }: AIMenuCreatorProps) {
             </div>
 
             {/* Price Range */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm" data-tour="ai-price-range">
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-emerald-500" />
                 Target Harga Jual
@@ -429,7 +429,7 @@ export function AIMenuCreator({ storeId }: AIMenuCreatorProps) {
 
             {/* Difficulty & Portion */}
             <div className="grid sm:grid-cols-2 gap-6">
-              <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+              <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm" data-tour="ai-difficulty">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <Flame className="w-5 h-5 text-red-500" />
                   Tingkat Kesulitan
@@ -459,7 +459,7 @@ export function AIMenuCreator({ storeId }: AIMenuCreatorProps) {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+              <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm" data-tour="ai-portion">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <Users className="w-5 h-5 text-blue-500" />
                   Ukuran Porsi
@@ -491,7 +491,7 @@ export function AIMenuCreator({ storeId }: AIMenuCreatorProps) {
             </div>
 
             {/* Output Format */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm" data-tour="ai-output-format">
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Star className="w-5 h-5 text-amber-500" />
                 Format Output
@@ -521,6 +521,7 @@ export function AIMenuCreator({ storeId }: AIMenuCreatorProps) {
             {/* Generate Button */}
             <button
               onClick={handleGenerate}
+              data-tour="ai-generate-btn"
               className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-2xl font-semibold text-lg hover:from-orange-600 hover:to-amber-600 transition-all shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30"
             >
               <Sparkles className="w-6 h-6" />

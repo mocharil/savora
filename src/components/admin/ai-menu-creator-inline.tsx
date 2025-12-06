@@ -84,14 +84,14 @@ interface GeneratedDish {
 type Step = 'input' | 'generating' | 'results'
 
 const cuisineOptions = [
-  { id: 'indonesian', label: 'Indonesia', icon: '🇮🇩' },
-  { id: 'western', label: 'Western', icon: '🍔' },
-  { id: 'japanese', label: 'Jepang', icon: '🍱' },
-  { id: 'chinese', label: 'China', icon: '🥡' },
-  { id: 'korean', label: 'Korea', icon: '🍜' },
-  { id: 'italian', label: 'Italia', icon: '🍝' },
-  { id: 'dessert', label: 'Dessert', icon: '🍰' },
-  { id: 'beverage', label: 'Minuman', icon: '🥤' },
+  { id: 'indonesian', label: 'Indonesia', image: '/indonesia.png' },
+  { id: 'western', label: 'Western', image: '/western.png' },
+  { id: 'japanese', label: 'Jepang', image: '/jepang.png' },
+  { id: 'chinese', label: 'China', image: '/china.png' },
+  { id: 'korean', label: 'Korea', image: '/korea.png' },
+  { id: 'italian', label: 'Italia', image: '/italia.png' },
+  { id: 'dessert', label: 'Dessert', image: '/dessert.png' },
+  { id: 'beverage', label: 'Minuman', image: '/minuman.png' },
 ]
 
 const priceRanges = [
@@ -155,6 +155,11 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
   const [showCategoryModal, setShowCategoryModal] = useState(false)
   const [selectedDishForCategory, setSelectedDishForCategory] = useState<GeneratedDish | null>(null)
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('')
+
+  // Create category state
+  const [showCreateCategory, setShowCreateCategory] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [creatingCategory, setCreatingCategory] = useState(false)
 
   // Fetch categories on mount
   useEffect(() => {
@@ -314,14 +319,51 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
     }
   }
 
-  // Open category selection modal
-  const handleAddToMenu = (dish: GeneratedDish) => {
-    if (categories.length === 0) {
-      alert('Belum ada kategori. Silakan buat kategori terlebih dahulu di menu Kategori.')
+  // Create new category
+  const handleCreateCategory = async () => {
+    if (!newCategoryName.trim()) {
       return
     }
+
+    setCreatingCategory(true)
+    try {
+      const response = await fetch('/api/admin/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newCategoryName.trim(),
+          is_active: true,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create category')
+      }
+
+      // Add new category to list and select it
+      const newCategory = { id: data.category.id, name: data.category.name }
+      setCategories(prev => [...prev, newCategory])
+      setSelectedCategoryId(newCategory.id)
+      setNewCategoryName('')
+      setShowCreateCategory(false)
+    } catch (error: any) {
+      console.error('Create category error:', error)
+      alert('Gagal membuat kategori: ' + error.message)
+    } finally {
+      setCreatingCategory(false)
+    }
+  }
+
+  // Open category selection modal
+  const handleAddToMenu = (dish: GeneratedDish) => {
     setSelectedDishForCategory(dish)
     setShowCategoryModal(true)
+    // Show create form if no categories
+    if (categories.length === 0) {
+      setShowCreateCategory(true)
+    }
   }
 
   // Actually add dish to menu with selected category
@@ -419,7 +461,7 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
 
           <div className="flex items-center gap-3">
             {/* Tutorial Button */}
-            <button
+            {/* <button
               onClick={() => setShowTutorial(!showTutorial)}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 showTutorial
@@ -429,7 +471,7 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
             >
               <HelpCircle className="w-4 h-4" />
               Tutorial
-            </button>
+            </button> */}
 
             {/* Progress Steps */}
             <div className="hidden sm:flex items-center gap-2">
@@ -462,6 +504,7 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
               })}
             </div>
           </div>
+          
         </div>
       </div>
 
@@ -516,24 +559,31 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
         {step === 'input' && (
           <div className="space-y-6 animate-in fade-in duration-300">
             {/* Cuisine Type */}
-            <div>
+            <div data-tour="ai-cuisine-type">
               <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                 <ChefHat className="w-4 h-4 text-orange-500" />
                 Jenis Kuliner
               </h3>
-              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+              <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
                 {cuisineOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setCuisineType(option.id)}
-                    className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all ${
+                    className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border-2 transition-all ${
                       cuisineType === option.id
-                        ? 'border-orange-500 bg-orange-50'
+                        ? 'border-orange-500 bg-orange-50 shadow-md shadow-orange-500/20'
                         : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
                     }`}
                   >
-                    <span className="text-xl">{option.icon}</span>
-                    <span className={`text-[10px] font-medium ${cuisineType === option.id ? 'text-orange-700' : 'text-gray-600'}`}>
+                    <div className="relative w-16 h-16 rounded-xl overflow-hidden">
+                      <Image
+                        src={option.image}
+                        alt={option.label}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <span className={`text-sm font-medium ${cuisineType === option.id ? 'text-orange-700' : 'text-gray-600'}`}>
                       {option.label}
                     </span>
                   </button>
@@ -542,7 +592,7 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
             </div>
 
             {/* Ingredients */}
-            <div>
+            <div data-tour="ai-ingredients">
               <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                 <Leaf className="w-4 h-4 text-green-500" />
                 Bahan yang Tersedia
@@ -585,9 +635,9 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
             </div>
 
             {/* Settings Grid */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4" data-tour="ai-settings">
               {/* Price Range */}
-              <div>
+              <div data-tour="ai-price-range">
                 <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-emerald-500" />
                   Harga
@@ -611,7 +661,7 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
               </div>
 
               {/* Difficulty */}
-              <div>
+              <div data-tour="ai-difficulty">
                 <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   <Flame className="w-4 h-4 text-red-500" />
                   Kesulitan
@@ -635,7 +685,7 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
               </div>
 
               {/* Portion */}
-              <div>
+              <div data-tour="ai-portion">
                 <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   <Users className="w-4 h-4 text-blue-500" />
                   Porsi
@@ -659,7 +709,7 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
               </div>
 
               {/* Output Format */}
-              <div>
+              <div data-tour="ai-output-format">
                 <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   <Star className="w-4 h-4 text-amber-500" />
                   Output
@@ -686,6 +736,7 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
             {/* Generate Button */}
             <button
               onClick={handleGenerate}
+              data-tour="ai-generate-btn"
               className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all shadow-lg shadow-orange-500/25"
             >
               <Sparkles className="w-5 h-5" />
@@ -721,17 +772,17 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
             {/* Results Header */}
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-gray-900">
+                <h3 className="text-lg font-bold text-gray-900">
                   Ide Menu ({generatedDishes.length})
                 </h3>
-                <p className="text-xs text-gray-500">Pilih dan tambahkan ke menu Anda</p>
+                <p className="text-sm text-gray-500">Pilih dan tambahkan ke menu Anda</p>
               </div>
               <button
                 onClick={resetCreator}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-xl border border-orange-200 transition-colors"
               >
                 <RefreshCw className="w-4 h-4" />
-                Ulang
+                Generate Ulang
               </button>
             </div>
 
@@ -783,38 +834,38 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
                       </div>
 
                       {/* Content */}
-                      <div className="flex-1 p-4">
-                        <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 p-5">
+                        <div className="flex items-start justify-between gap-4">
                           <div>
-                            <h4 className="font-bold text-gray-900">{dish.name}</h4>
-                            <p className="mt-1 text-sm text-gray-600 line-clamp-2">{dish.description}</p>
+                            <h4 className="text-xl font-bold text-gray-900">{dish.name}</h4>
+                            <p className="mt-1.5 text-base text-gray-600 line-clamp-2">{dish.description}</p>
                           </div>
                           <div className="text-right flex-shrink-0">
-                            <p className="text-lg font-bold text-orange-600">{formatCurrency(dish.suggestedPrice)}</p>
-                            <p className="text-[10px] text-gray-500">HPP: {formatCurrency(dish.costEstimate)}</p>
-                            <p className="text-[10px] text-green-600 font-medium">Margin {dish.profitMargin}%</p>
+                            <p className="text-2xl font-bold text-orange-600">{formatCurrency(dish.suggestedPrice)}</p>
+                            <p className="text-xs text-gray-500">HPP: {formatCurrency(dish.costEstimate)}</p>
+                            <p className="text-xs text-green-600 font-medium">Margin {dish.profitMargin}%</p>
                           </div>
                         </div>
 
                         {/* Tags */}
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
                             dish.difficulty === 'mudah' ? 'bg-green-100 text-green-700' :
                             dish.difficulty === 'sedang' ? 'bg-yellow-100 text-yellow-700' :
                             'bg-red-100 text-red-700'
                           }`}>
                             {dish.difficulty}
                           </span>
-                          <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-medium flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
+                          <span className="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5" />
                             {dish.cookingTime}
                           </span>
-                          <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-[10px] font-medium flex items-center gap-1">
-                            <Users className="w-3 h-3" />
+                          <span className="px-2.5 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium flex items-center gap-1">
+                            <Users className="w-3.5 h-3.5" />
                             {dish.servings} porsi
                           </span>
                           {dish.tags.slice(0, 2).map((tag) => (
-                            <span key={tag} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px]">
+                            <span key={tag} className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs">
                               {tag}
                             </span>
                           ))}
@@ -822,20 +873,20 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
 
                         {/* Composition Summary */}
                         {dish.composition && (
-                          <div className="mt-3 p-2 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border border-orange-100">
-                            <p className="text-[10px] font-medium text-orange-700 mb-1 flex items-center gap-1">
-                              <Layers className="w-3 h-3" />
+                          <div className="mt-4 p-3 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border border-orange-100">
+                            <p className="text-xs font-semibold text-orange-700 mb-1.5 flex items-center gap-1.5">
+                              <Layers className="w-4 h-4" />
                               Komposisi:
                             </p>
-                            <p className="text-xs text-orange-800">{dish.composition}</p>
+                            <p className="text-sm text-orange-800">{dish.composition}</p>
                           </div>
                         )}
 
                         {/* Tips */}
                         {dish.tips && (
-                          <div className="mt-2 p-2 bg-amber-50 rounded-lg border border-amber-100">
-                            <p className="text-[10px] text-amber-700 flex items-start gap-1">
-                              <Lightbulb className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                          <div className="mt-3 p-3 bg-amber-50 rounded-xl border border-amber-100">
+                            <p className="text-sm text-amber-700 flex items-start gap-1.5">
+                              <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" />
                               <span><strong>Tips:</strong> {dish.tips}</span>
                             </p>
                           </div>
@@ -844,7 +895,7 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
                         {/* Expand Button */}
                         <button
                           onClick={() => toggleCardExpanded(dish.id)}
-                          className="mt-3 w-full flex items-center justify-center gap-2 py-2 text-xs text-orange-600 hover:bg-orange-50 rounded-lg transition-colors border border-orange-200"
+                          className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-xl transition-colors border border-orange-200"
                         >
                           {isExpanded ? (
                             <>
@@ -860,11 +911,11 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
                         </button>
 
                         {/* Actions */}
-                        <div className="mt-3 flex gap-2">
+                        <div className="mt-4 flex gap-3">
                           <button
                             onClick={() => handleAddToMenu(dish)}
                             disabled={addingToMenu === dish.id}
-                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl text-sm font-medium hover:from-orange-600 hover:to-amber-600 transition-all disabled:opacity-50"
+                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-amber-600 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25"
                           >
                             {addingToMenu === dish.id ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
@@ -875,10 +926,10 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
                           </button>
                           <button
                             onClick={() => handleCopy(`${dish.name}\n${dish.description}\n\nKomposisi: ${dish.composition}\n\nBahan:\n${dish.ingredients.join('\n')}\n\nCara Membuat:\n${dish.recipe?.steps?.join('\n') || ''}\n\nHarga: ${formatCurrency(dish.suggestedPrice)}`, `full-${dish.id}`)}
-                            className="px-3 py-2.5 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors"
+                            className="px-4 py-3 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors"
                             title="Copy resep lengkap"
                           >
-                            {copied === `full-${dish.id}` ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                            {copied === `full-${dish.id}` ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
                           </button>
                         </div>
                       </div>
@@ -1020,13 +1071,15 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
             </div>
 
             {/* Back Button */}
-            <button
-              onClick={() => setStep('input')}
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Kembali ke pengaturan
-            </button>
+            <div className="pt-4 border-t border-gray-200">
+              <button
+                onClick={() => setStep('input')}
+                className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all border border-gray-200"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Kembali ke Pengaturan
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -1051,18 +1104,79 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kategori <span className="text-red-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Kategori <span className="text-red-500">*</span>
+                </label>
+                {categories.length > 0 && !showCreateCategory && (
+                  <button
+                    onClick={() => setShowCreateCategory(true)}
+                    className="text-xs text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Buat Baru
+                  </button>
+                )}
+              </div>
+
+              {/* Create New Category Form */}
+              {showCreateCategory && (
+                <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200 animate-in fade-in duration-200">
+                  <p className="text-xs font-medium text-blue-700 mb-2">Buat Kategori Baru</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleCreateCategory()}
+                      placeholder="Nama kategori..."
+                      className="flex-1 px-3 py-2 border border-blue-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleCreateCategory}
+                      disabled={!newCategoryName.trim() || creatingCategory}
+                      className="px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50"
+                    >
+                      {creatingCategory ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Check className="w-4 h-4" />
+                      )}
+                    </button>
+                    {categories.length > 0 && (
+                      <button
+                        onClick={() => {
+                          setShowCreateCategory(false)
+                          setNewCategoryName('')
+                        }}
+                        className="px-3 py-2 border border-blue-200 text-blue-600 rounded-lg text-sm hover:bg-blue-100 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {loadingCategories ? (
                 <div className="flex items-center justify-center py-4">
                   <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
                 </div>
-              ) : categories.length === 0 ? (
-                <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200 text-sm text-yellow-700">
-                  Belum ada kategori. Silakan buat kategori terlebih dahulu.
+              ) : categories.length === 0 && !showCreateCategory ? (
+                <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200 text-center">
+                  <p className="text-sm text-yellow-700 mb-3">Belum ada kategori.</p>
+                  <button
+                    onClick={() => setShowCreateCategory(true)}
+                    className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium hover:bg-yellow-600 transition-colors"
+                  >
+                    <span className="flex items-center justify-center gap-1.5">
+                      <Plus className="w-4 h-4" />
+                      Buat Kategori Pertama
+                    </span>
+                  </button>
                 </div>
-              ) : (
+              ) : categories.length > 0 ? (
                 <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
                   {categories.map((category) => (
                     <button
@@ -1078,7 +1192,7 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
                     </button>
                   ))}
                 </div>
-              )}
+              ) : null}
             </div>
 
             <div className="flex gap-2">
@@ -1086,6 +1200,8 @@ export function AIMenuCreatorInline({ storeId }: AIMenuCreatorInlineProps) {
                 onClick={() => {
                   setShowCategoryModal(false)
                   setSelectedDishForCategory(null)
+                  setShowCreateCategory(false)
+                  setNewCategoryName('')
                 }}
                 className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm hover:bg-gray-50 transition-colors"
               >

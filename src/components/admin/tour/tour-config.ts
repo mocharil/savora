@@ -421,6 +421,41 @@ export const TOUR_AI_PAGE: TourConfig = {
   ],
 }
 
+// AI Menu Creator Tour
+export const TOUR_AI_MENU_CREATOR: TourConfig = {
+  id: 'tour_ai_menu_creator',
+  name: 'Tutorial AI Menu Creator',
+  description: 'Pelajari cara menggunakan AI untuk membuat ide menu baru',
+  category: 'feature',
+  steps: [
+    {
+      target: '[data-tour="ai-cuisine-type"]',
+      title: 'Pilih Jenis Kuliner',
+      description: 'Pilih jenis kuliner yang ingin Anda buat: Indonesia, Western, Jepang, China, Korea, Italia, Dessert, atau Minuman. AI akan menyesuaikan ide menu dengan karakteristik kuliner yang dipilih.',
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="ai-ingredients"]',
+      title: 'Bahan yang Tersedia',
+      description: 'Masukkan bahan-bahan yang Anda miliki (opsional). AI akan memprioritaskan penggunaan bahan tersebut dalam resep. Contoh: ayam, bawang putih, kecap manis.',
+      position: 'bottom',
+    },
+    {
+      target: '[data-tour="ai-settings"]',
+      title: 'Pengaturan Menu',
+      description: 'Atur preferensi menu: Target Harga (Budget hingga Luxury), Tingkat Kesulitan (Mudah/Sedang/Sulit), Ukuran Porsi (1-6 porsi), dan Format Output (1 ide, 3 ide, atau set menu lengkap).',
+      position: 'top',
+      spotlightPadding: 12,
+    },
+    {
+      target: '[data-tour="ai-generate-btn"]',
+      title: 'Generate Ide Menu',
+      description: 'Klik tombol ini untuk memulai proses AI. AI akan menganalisis preferensi Anda dan menghasilkan ide menu lengkap dengan deskripsi, bahan, estimasi harga, foto AI, dan tips penyajian.',
+      position: 'top',
+    },
+  ],
+}
+
 // POS Kasir Page Tour
 export const TOUR_POS_PAGE: TourConfig = {
   id: 'tour_pos_page',
@@ -485,6 +520,7 @@ export const ALL_TOURS: TourConfig[] = [
   TOUR_DASHBOARD_PAGE,
   TOUR_ORDERS_PAGE,
   TOUR_MENU_PAGE,
+  TOUR_AI_MENU_CREATOR,
   TOUR_CATEGORIES_PAGE,
   TOUR_TABLES_PAGE,
   TOUR_OUTLETS_PAGE,

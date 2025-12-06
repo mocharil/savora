@@ -15,18 +15,21 @@ import { cn } from '@/lib/utils'
 
 interface PageTourButtonProps {
   className?: string
+  /** Optional tour ID to override auto-detection based on pathname */
+  tourId?: string
 }
 
 /**
  * A button that automatically shows the tutorial for the current page.
  * Place this in each page's header area.
+ * Can also accept a custom tourId prop to override the auto-detection.
  */
-export function PageTourButton({ className }: PageTourButtonProps) {
+export function PageTourButton({ className, tourId: customTourId }: PageTourButtonProps) {
   const pathname = usePathname()
   const { startTour, isActive } = useTour()
 
-  // Auto-detect tour based on current page
-  const tourId = getPageTourId(pathname)
+  // Use custom tourId if provided, otherwise auto-detect based on current page
+  const tourId = customTourId || getPageTourId(pathname)
   const tour = tourId ? getTourById(tourId) : null
 
   // Don't render if no tour available for this page

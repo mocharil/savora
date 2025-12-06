@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Plus, Sparkles, UtensilsCrossed, ChefHat } from 'lucide-react'
+import { Plus, Sparkles, UtensilsCrossed } from 'lucide-react'
 import { PageTourButton } from '@/components/admin/tour'
 import { ShimmerButton } from '@/components/ui/shimmer-button'
 
@@ -11,6 +11,9 @@ interface MenuPageClientProps {
 }
 
 export function MenuPageClient({ activeTab = 'list', onTabChange }: MenuPageClientProps) {
+  // Determine tour ID based on active tab
+  const tourId = activeTab === 'ai-creator' ? 'tour_ai_menu_creator' : 'tour_menu_page'
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -20,7 +23,7 @@ export function MenuPageClient({ activeTab = 'list', onTabChange }: MenuPageClie
           <p className="text-sm text-gray-500">Kelola menu makanan dan minuman</p>
         </div>
         <div className="flex items-center gap-3">
-          <PageTourButton />
+          <PageTourButton tourId={tourId} />
           {activeTab === 'list' && (
             <Link href="/admin/menu/create" data-tour="menu-add-btn">
               <ShimmerButton
