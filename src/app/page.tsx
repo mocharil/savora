@@ -268,7 +268,7 @@ export default function LandingPage() {
 
   const faqs = [
     { question: 'Apakah pelanggan perlu install aplikasi?', answer: 'Tidak perlu sama sekali. Pelanggan cukup scan QR code dengan kamera smartphone, menu langsung terbuka di browser. Tidak perlu download apapun.', highlight: null },
-    { question: 'Bagaimana cara kerja Voice Ordering AI?', answerParts: ['Pelanggan tekan tombol mikrofon dan ucapkan pesanan dalam Bahasa Indonesia, misalnya "Pesan dua nasi goreng dan satu es teh". AI menggunakan ', ' untuk mengenali menu dan jumlah dengan akurasi tinggi.'], highlight: 'Llama 4 Maverick', highlightColor: '#8b5cf6' },
+    { question: 'Bagaimana cara kerja Voice Ordering AI?', answerParts: ['Pelanggan tekan tombol mikrofon dan ucapkan pesanan dalam Bahasa Indonesia, misalnya "Pesan dua nasi goreng dan satu es teh". AI menggunakan ', ' untuk mengenali menu dan jumlah dengan akurasi tinggi.'], highlight: 'Kolosal AI', highlightColor: '#8b5cf6' },
     { question: 'AI Image Generator pakai teknologi apa?', answerParts: ['Kami menggunakan ', ', model text-to-image terbaik dari Google. Hasil foto berkualitas studio profesional, cocok untuk menu digital maupun cetak.'], highlight: 'Google Imagen 3', highlightColor: '#3b82f6' },
     { question: 'Berapa lama proses setup?', answerParts: ['Setup dasar selesai dalam ', ' saja. Upload menu, generate foto dengan AI, generate QR code, dan langsung bisa terima pesanan di hari yang sama.'], highlight: '5 menit', highlightColor: '#22c55e' },
     { question: 'Apakah ada biaya tersembunyi untuk fitur AI?', answerParts: ['', '. Semua fitur AI (voice ordering, image generator, daily insights, chatbot) sudah termasuk dalam paket. Tidak ada charge per penggunaan.'], highlight: 'Tidak ada', highlightColor: '#22c55e' },
@@ -1014,7 +1014,7 @@ export default function LandingPage() {
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <Brain className="w-4 h-4" />
-              <span>Powered by Llama 4 &amp; Imagen 3</span>
+              <span>Powered by Kolosal AI</span>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center">
