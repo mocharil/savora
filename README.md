@@ -9,11 +9,20 @@
 </p>
 
 <p align="center">
+  <em>Powered by <a href="https://kolosal.ai">Kolosal.ai</a></em>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js" alt="Next.js" />
   <img src="https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Supabase-PostgreSQL-green?style=flat-square&logo=supabase" alt="Supabase" />
-  <img src="https://img.shields.io/badge/AI-Gemini-orange?style=flat-square&logo=google" alt="Gemini AI" />
-  <img src="https://img.shields.io/badge/AI-Kolosal-purple?style=flat-square" alt="Kolosal AI" />
+  <img src="https://img.shields.io/badge/AI-Kolosal.ai-purple?style=flat-square" alt="Kolosal AI" />
+</p>
+
+<p align="center">
+  <a href="https://savorai.vercel.app">🌐 Live Demo</a> ·
+  <a href="https://www.youtube.com/watch?v=r67qFogMxy4">🎬 Video Demo</a> ·
+  <a href="https://kolosal.ai">🤖 Powered by Kolosal.ai</a>
 </p>
 
 <p align="center">
@@ -24,6 +33,16 @@
   <a href="#tech-stack">Tech Stack</a> ·
   <a href="#instalasi">Instalasi</a>
 </p>
+
+---
+
+## 🔗 Link Penting
+
+| | Link |
+|---|---|
+| 🌐 **Website** | [https://savorai.vercel.app](https://savorai.vercel.app) |
+| 🎬 **Demo Video** | [https://www.youtube.com/watch?v=r67qFogMxy4](https://www.youtube.com/watch?v=r67qFogMxy4) |
+| 🤖 **Powered by** | [Kolosal.ai](https://kolosal.ai) - LLM Indonesia |
 
 ---
 
@@ -565,10 +584,13 @@ MIT License - see [LICENSE](LICENSE) for details.
 ---
 
 <p align="center">
-  <strong>Built for Indonesian UMKM F&B</strong>
+  <strong>Built for Indonesian UMKM F&B</strong><br/>
+  <em>Powered by <a href="https://kolosal.ai">Kolosal.ai</a></em>
 </p>
 
 <p align="center">
-  <a href="https://savora.id">Website</a> ·
-  <a href="https://github.com/mocharil/savora">GitHub</a>
+  <a href="https://savorai.vercel.app">🌐 Website</a> ·
+  <a href="https://www.youtube.com/watch?v=r67qFogMxy4">🎬 Demo Video</a> ·
+  <a href="https://github.com/mocharil/savora">💻 GitHub</a> ·
+  <a href="https://kolosal.ai">🤖 Kolosal.ai</a>
 </p>
