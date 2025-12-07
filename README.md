@@ -60,6 +60,60 @@
 
 ---
 
+## 📸 Screenshots
+
+<details>
+<summary><strong>🏠 Landing Page & Authentication</strong></summary>
+<br/>
+
+| Landing Page | Login |
+|:---:|:---:|
+| ![Landing Page](screenshots/landing_page.png) | ![Login](screenshots/LOGIN.png) |
+
+</details>
+
+<details>
+<summary><strong>📊 Admin Dashboard</strong></summary>
+<br/>
+
+| Dashboard | Analytics |
+|:---:|:---:|
+| ![Dashboard](screenshots/DASHBOARD.png) | ![Analytics](screenshots/Analytics.png) |
+
+| Pesanan | Menu |
+|:---:|:---:|
+| ![Pesanan](screenshots/PESANAN.png) | ![Menu](screenshots/Menu.png) |
+
+| Meja & QR Code | Users |
+|:---:|:---:|
+| ![Meja & QR](screenshots/Meja_and_QR.png) | ![Users](screenshots/Users.png) |
+
+| POS Kasir | Pengaturan |
+|:---:|:---:|
+| ![POS Kasir](screenshots/POS_KASIR.png) | ![Pengaturan](screenshots/Pengaturan.png) |
+
+</details>
+
+<details>
+<summary><strong>📱 Customer Experience</strong></summary>
+<br/>
+
+| Order Menu | AI Chatbot |
+|:---:|:---:|
+| ![Order](screenshots/customer_order.png) | ![Chatbot](screenshots/customer_chatbot.png) |
+
+| Voice AI Ordering | Payment |
+|:---:|:---:|
+| ![Voice AI](screenshots/customer_voice_ai.png) | ![Payment](screenshots/customer_payment.png) |
+
+| Order Tracking |
+|:---:|
+| ![Tracking](screenshots/customer_order_tracking.png) |
+
+</details>
+
+---
+
 ## Masalah yang Diselesaikan
 
 UMKM F&B di Indonesia menghadapi berbagai tantangan operasional yang menghambat pertumbuhan bisnis:
