@@ -46,6 +46,20 @@
 
 ---
 
+## 🎬 Demo Video
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=r67qFogMxy4">
+    <img src="https://img.youtube.com/vi/r67qFogMxy4/maxresdefault.jpg" alt="Savora Demo Video" width="600" />
+  </a>
+</p>
+
+<p align="center">
+  <em>Klik gambar di atas untuk menonton demo video di YouTube</em>
+</p>
+
+---
+
 ## Masalah yang Diselesaikan
 
 UMKM F&B di Indonesia menghadapi berbagai tantangan operasional yang menghambat pertumbuhan bisnis:
@@ -590,7 +604,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 <p align="center">
   <a href="https://savorai.vercel.app">🌐 Website</a> ·
-  <a href="https://www.youtube.com/watch?v=r67qFogMxy4">🎬 Demo Video</a> ·
+  <a href="https://youtu.be/SjMy8e7XLrs">🎬 Demo Video</a> ·
   <a href="https://github.com/mocharil/savora">💻 GitHub</a> ·
   <a href="https://kolosal.ai">🤖 Kolosal.ai</a>
 </p>
