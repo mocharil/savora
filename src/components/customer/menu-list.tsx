@@ -502,7 +502,6 @@ export function MenuList({ categories, storeId, outletId, tableId, storeSlug, ou
           outletId={outletId}
           onOrderConfirmed={handleVoiceOrderConfirmed}
           onClose={() => setShowVoiceOrder(false)}
-          autoStart={true}
         />
       )}
     </div>
