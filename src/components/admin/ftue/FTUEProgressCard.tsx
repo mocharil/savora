@@ -9,16 +9,13 @@ import {
   ChevronDown,
   X,
   Rocket,
-  Building2,
   UtensilsCrossed,
   QrCode,
   Users,
   FolderOpen,
-  Star,
 } from 'lucide-react'
 
-const stepIcons: Record<string, typeof Building2> = {
-  outlet: Building2,
+const stepIcons: Record<string, typeof FolderOpen> = {
   categories: FolderOpen,
   menu: UtensilsCrossed,
   tables: QrCode,

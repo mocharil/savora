@@ -7,7 +7,6 @@ import {
   Lightbulb,
   ChevronRight,
   X,
-  Building2,
   UtensilsCrossed,
   QrCode,
   Users,
@@ -16,22 +15,13 @@ import {
 } from 'lucide-react'
 
 interface FTUEBannerProps {
-  stepId: 'outlet' | 'categories' | 'menu' | 'tables' | 'users'
+  stepId: 'categories' | 'menu' | 'tables' | 'users'
   emptyState?: boolean
   ctaLabel?: string
   ctaHref?: string
 }
 
 const stepConfig = {
-  outlet: {
-    icon: Building2,
-    title: 'Buat Outlet Pertama Anda',
-    description: 'Outlet adalah lokasi fisik bisnis Anda. Tambahkan outlet untuk mulai menerima pesanan.',
-    emptyTitle: 'Belum ada outlet',
-    emptyDescription: 'Tambahkan outlet pertama untuk mulai menggunakan Savora.',
-    ctaLabel: 'Tambah Outlet',
-    ctaHref: '/admin/outlets/create',
-  },
   categories: {
     icon: FolderOpen,
     title: 'Buat Kategori Menu',
@@ -39,7 +29,7 @@ const stepConfig = {
     emptyTitle: 'Belum ada kategori',
     emptyDescription: 'Buat kategori dulu sebelum menambahkan menu.',
     ctaLabel: 'Tambah Kategori',
-    ctaHref: '/admin/menu?tab=categories',
+    ctaHref: '/admin/categories',
   },
   menu: {
     icon: UtensilsCrossed,
@@ -62,9 +52,9 @@ const stepConfig = {
   users: {
     icon: Users,
     title: 'Undang Staff atau Kasir',
-    description: 'Tambahkan user lain untuk membantu mengelola outlet dan pesanan.',
+    description: 'Tambahkan user lain untuk membantu mengelola toko dan pesanan.',
     emptyTitle: 'Belum ada staff lain',
-    emptyDescription: 'Anda bisa menambahkan staff untuk mengelola outlet tertentu.',
+    emptyDescription: 'Anda bisa menambahkan staff untuk membantu mengelola toko.',
     ctaLabel: 'Tambah User',
     ctaHref: '/admin/users',
   },

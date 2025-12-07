@@ -279,28 +279,6 @@ export const TOUR_CATEGORIES_PAGE: TourConfig = {
   ],
 }
 
-// Outlets Page Tour
-export const TOUR_OUTLETS_PAGE: TourConfig = {
-  id: 'tour_outlets_page',
-  name: 'Tutorial Halaman Outlet',
-  description: 'Pelajari cara mengelola outlet',
-  category: 'page',
-  steps: [
-    {
-      target: '[data-tour="outlets-add-btn"]',
-      title: 'Tambah Outlet',
-      description: 'Klik untuk menambahkan outlet/cabang baru ke bisnis Anda.',
-      position: 'left',
-    },
-    {
-      target: '[data-tour="outlets-list"]',
-      title: 'Daftar Outlet',
-      description: 'Semua outlet ditampilkan di sini. Klik outlet untuk melihat detail dan pengaturan.',
-      position: 'top',
-    },
-  ],
-}
-
 // Analytics Page Tour
 export const TOUR_ANALYTICS_PAGE: TourConfig = {
   id: 'tour_analytics_page',
@@ -523,7 +501,6 @@ export const ALL_TOURS: TourConfig[] = [
   TOUR_AI_MENU_CREATOR,
   TOUR_CATEGORIES_PAGE,
   TOUR_TABLES_PAGE,
-  TOUR_OUTLETS_PAGE,
   TOUR_USERS_PAGE,
   TOUR_ANALYTICS_PAGE,
   TOUR_AI_PAGE,
@@ -549,7 +526,6 @@ export function getPageTourId(pathname: string): string | null {
   if (pathname.includes('/admin/menu') && !pathname.includes('/create') && !pathname.includes('/edit')) return 'tour_menu_page'
   if (pathname.includes('/admin/categories') && !pathname.includes('/create') && !pathname.includes('/edit')) return 'tour_categories_page'
   if (pathname.includes('/admin/tables') && !pathname.includes('/create')) return 'tour_tables_page'
-  if (pathname.includes('/admin/outlets') && !pathname.includes('/create') && !pathname.includes('/edit')) return 'tour_outlets_page'
   if (pathname.includes('/admin/users')) return 'tour_users_page'
   if (pathname.includes('/admin/analytics')) return 'tour_analytics_page'
   if (pathname.includes('/admin/ai')) return 'tour_ai_page'
@@ -566,7 +542,6 @@ export function getTourTargetPath(tourId: string): string | null {
     'tour_menu_page': '/admin/menu',
     'tour_categories_page': '/admin/categories',
     'tour_tables_page': '/admin/tables',
-    'tour_outlets_page': '/admin/outlets',
     'tour_users_page': '/admin/users',
     'tour_analytics_page': '/admin/analytics',
     'tour_ai_page': '/admin/ai',

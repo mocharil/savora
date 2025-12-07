@@ -39,18 +39,10 @@ export function useFTUE() {
 
 const DEFAULT_STEPS: FTUEStep[] = [
   {
-    id: 'outlet',
-    title: 'Buat Outlet Pertama',
-    description: 'Tambahkan lokasi pertama bisnis Anda',
-    href: '/admin/outlets',
-    isCompleted: false,
-    checkPath: '/api/admin/ftue/check-outlets',
-  },
-  {
     id: 'categories',
     title: 'Buat Kategori Menu',
     description: 'Kelompokkan menu dalam kategori',
-    href: '/admin/menu?tab=categories',
+    href: '/admin/categories',
     isCompleted: false,
     checkPath: '/api/admin/ftue/check-categories',
   },
@@ -73,7 +65,7 @@ const DEFAULT_STEPS: FTUEStep[] = [
   {
     id: 'users',
     title: 'Undang Staff',
-    description: 'Tambahkan user untuk mengelola outlet',
+    description: 'Tambahkan user untuk mengelola toko',
     href: '/admin/users',
     isCompleted: false,
     checkPath: '/api/admin/ftue/check-users',
@@ -84,7 +76,6 @@ const DEFAULT_STEPS: FTUEStep[] = [
 interface FTUEProviderProps {
   children: ReactNode
   initialData?: {
-    hasOutlet: boolean
     hasCategories: boolean
     hasMenu: boolean
     hasTables: boolean
@@ -98,7 +89,6 @@ export function FTUEProvider({ children, initialData }: FTUEProviderProps) {
       return DEFAULT_STEPS.map(step => ({
         ...step,
         isCompleted:
-          (step.id === 'outlet' && initialData.hasOutlet) ||
           (step.id === 'categories' && initialData.hasCategories) ||
           (step.id === 'menu' && initialData.hasMenu) ||
           (step.id === 'tables' && initialData.hasTables) ||
@@ -126,7 +116,6 @@ export function FTUEProvider({ children, initialData }: FTUEProviderProps) {
           prev.map(step => ({
             ...step,
             isCompleted:
-              (step.id === 'outlet' && data.hasOutlet) ||
               (step.id === 'categories' && data.hasCategories) ||
               (step.id === 'menu' && data.hasMenu) ||
               (step.id === 'tables' && data.hasTables) ||

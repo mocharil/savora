@@ -12,13 +12,6 @@ export async function GET() {
 
     const supabase = createAdminClient()
 
-    // Check outlets
-    const { count: outletCount } = await supabase
-      .from('outlets')
-      .select('*', { count: 'exact', head: true })
-      .eq('store_id', user.storeId)
-      .eq('is_active', true)
-
     // Check categories
     const { count: categoryCount } = await supabase
       .from('categories')
@@ -46,7 +39,6 @@ export async function GET() {
       .neq('id', user.userId)
 
     return NextResponse.json({
-      hasOutlet: (outletCount || 0) > 0,
       hasCategories: (categoryCount || 0) > 0,
       hasMenu: (menuCount || 0) > 0,
       hasTables: (tableCount || 0) > 0,
