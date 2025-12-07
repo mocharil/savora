@@ -68,6 +68,7 @@ export function VoiceOrderButton({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null)
   const isRecordingRef = useRef(false)
+  const finalTranscriptRef = useRef('')  // Accumulate all final transcripts
 
   const MAX_RECORDING_TIME = 30
 
@@ -108,19 +109,24 @@ export function VoiceOrderButton({
     recognition.lang = 'id-ID'
 
     recognition.onresult = (event: any) => {
-      let finalTranscript = ''
       let interimTranscript = ''
 
-      for (let i = event.resultIndex; i < event.results.length; i++) {
+      // Process all results from the beginning
+      for (let i = 0; i < event.results.length; i++) {
         const result = event.results[i]
         if (result.isFinal) {
-          finalTranscript += result[0].transcript
+          // Accumulate final transcripts
+          if (i >= event.resultIndex) {
+            finalTranscriptRef.current += result[0].transcript + ' '
+          }
         } else {
           interimTranscript += result[0].transcript
         }
       }
 
-      setTranscript(finalTranscript || interimTranscript)
+      // Show accumulated final + current interim
+      const displayText = (finalTranscriptRef.current + interimTranscript).trim()
+      setTranscript(displayText)
     }
 
     recognition.onerror = (event: any) => {
@@ -166,6 +172,7 @@ export function VoiceOrderButton({
     setRecommendations([])
     setAiMessage('')
     setSelectedRecommendations(new Set())
+    finalTranscriptRef.current = ''  // Reset accumulated transcript
 
     const hasPermission = await requestMicrophonePermission()
     if (!hasPermission) return
@@ -323,6 +330,7 @@ export function VoiceOrderButton({
     if (recordingTimerRef.current) clearInterval(recordingTimerRef.current)
 
     isRecordingRef.current = false
+    finalTranscriptRef.current = ''  // Reset accumulated transcript
     setState('ready')
     setTranscript('')
     setParsedItems([])
