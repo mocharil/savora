@@ -38,29 +38,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { table_number, outlet_id, location, capacity, is_active, qr_code } = body
+    const { table_number, location, capacity, is_active, qr_code } = body
 
     if (!table_number?.trim()) {
       return NextResponse.json({ error: 'Table number is required' }, { status: 400 })
     }
 
-    if (!outlet_id) {
-      return NextResponse.json({ error: 'Outlet is required' }, { status: 400 })
-    }
-
     const supabase = createAdminClient()
-
-    // Verify outlet belongs to user's store
-    const { data: outlet } = await supabase
-      .from('outlets')
-      .select('id')
-      .eq('id', outlet_id)
-      .eq('store_id', user.storeId)
-      .single()
-
-    if (!outlet) {
-      return NextResponse.json({ error: 'Outlet not found' }, { status: 404 })
-    }
 
     // Generate QR code if not provided
     const finalQrCode = qr_code || `TABLE-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
@@ -69,7 +53,6 @@ export async function POST(request: NextRequest) {
       .from('tables')
       .insert({
         store_id: user.storeId,
-        outlet_id: outlet_id,
         table_number: table_number.trim(),
         location: location || null,
         capacity: capacity ?? 4,

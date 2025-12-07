@@ -24,21 +24,14 @@ import {
 import type { Table } from '@/types/database'
 import { QRCodeDisplay } from '@/components/admin/qrcode-display'
 
-interface Outlet {
-  id: string
-  name: string
-  slug: string
-}
-
 interface TableFormProps {
   storeId: string
   storeSlug: string
   storeName: string
-  outlets: Outlet[]
   initialData?: Table
 }
 
-export function TableForm({ storeId, storeSlug, storeName, outlets, initialData }: TableFormProps) {
+export function TableForm({ storeId, storeSlug, storeName, initialData }: TableFormProps) {
   const router = useRouter()
 
   const [loading, setLoading] = useState(false)
@@ -83,12 +76,8 @@ export function TableForm({ storeId, storeSlug, storeName, outlets, initialData 
     }
   }
 
-  // Default to first outlet if creating new table
-  const defaultOutletId = initialData?.outlet_id || (outlets.length > 0 ? outlets[0].id : '')
-
   const [formData, setFormData] = useState({
     table_number: initialData?.table_number || '',
-    outlet_id: defaultOutletId,
     location: initialData?.location || '',
     capacity: initialData?.capacity ?? 4,
     is_active: initialData?.is_active ?? true,
@@ -119,16 +108,9 @@ export function TableForm({ storeId, storeSlug, storeName, outlets, initialData 
       return
     }
 
-    if (!formData.outlet_id) {
-      setError('Outlet harus dipilih')
-      setLoading(false)
-      return
-    }
-
     try {
       const dataToSave = {
         table_number: formData.table_number,
-        outlet_id: formData.outlet_id,
         location: formData.location || null,
         capacity: Number(formData.capacity) || 4,
         is_active: formData.is_active,
@@ -251,27 +233,6 @@ export function TableForm({ storeId, storeSlug, storeName, outlets, initialData 
               </h2>
             </div>
             <div className="p-6 space-y-5">
-              {/* Outlet Selection */}
-              <div className="space-y-2">
-                <label htmlFor="outlet_id" className="block text-sm font-medium text-[#374151]">
-                  Outlet <span className="text-[#EF4444]">*</span>
-                </label>
-                <select
-                  id="outlet_id"
-                  value={formData.outlet_id}
-                  onChange={(e) => setFormData({ ...formData, outlet_id: e.target.value })}
-                  className="w-full h-11 px-4 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all cursor-pointer"
-                >
-                  <option value="">Pilih Outlet</option>
-                  {outlets.map((outlet) => (
-                    <option key={outlet.id} value={outlet.id}>{outlet.name}</option>
-                  ))}
-                </select>
-                <p className="text-xs text-[#6B7280]">
-                  Meja akan terdaftar di outlet ini
-                </p>
-              </div>
-
               {/* Table Number */}
               <div className="space-y-2">
                 <label htmlFor="table_number" className="block text-sm font-medium text-[#374151]">

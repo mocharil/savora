@@ -46,14 +46,10 @@ export async function PUT(
 
     const { tableId } = await params
     const body = await request.json()
-    const { table_number, outlet_id, location, capacity, is_active } = body
+    const { table_number, location, capacity, is_active } = body
 
     if (!table_number?.trim()) {
       return NextResponse.json({ error: 'Table number is required' }, { status: 400 })
-    }
-
-    if (!outlet_id) {
-      return NextResponse.json({ error: 'Outlet is required' }, { status: 400 })
     }
 
     const supabase = createAdminClient()
@@ -70,23 +66,10 @@ export async function PUT(
       return NextResponse.json({ error: 'Table not found' }, { status: 404 })
     }
 
-    // Verify outlet belongs to user's store
-    const { data: outlet } = await supabase
-      .from('outlets')
-      .select('id')
-      .eq('id', outlet_id)
-      .eq('store_id', user.storeId)
-      .single()
-
-    if (!outlet) {
-      return NextResponse.json({ error: 'Outlet not found' }, { status: 404 })
-    }
-
     const { data: table, error } = await supabase
       .from('tables')
       .update({
         table_number: table_number.trim(),
-        outlet_id: outlet_id,
         location: location || null,
         capacity: capacity ?? 4,
         is_active: is_active ?? true,

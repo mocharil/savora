@@ -14,27 +14,18 @@ export default async function CreateTablePage() {
   const storeId = user.storeId
   const supabase = createAdminClient()
 
-  // Fetch outlets and store info for this store
-  const [{ data: outlets }, { data: store }] = await Promise.all([
-    supabase
-      .from('outlets')
-      .select('id, name, slug')
-      .eq('store_id', storeId)
-      .eq('is_active', true)
-      .order('name'),
-    supabase
-      .from('stores')
-      .select('slug, name')
-      .eq('id', storeId)
-      .single()
-  ])
+  // Fetch store info
+  const { data: store } = await supabase
+    .from('stores')
+    .select('slug, name')
+    .eq('id', storeId)
+    .single()
 
   return (
     <TableForm
       storeId={storeId}
       storeSlug={store?.slug || ''}
       storeName={store?.name || ''}
-      outlets={outlets || []}
     />
   )
 }
