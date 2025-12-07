@@ -267,7 +267,16 @@ Respons dalam format JSON:
 ATURAN PENTING:
 - JANGAN pernah membuat menu baru yang tidak ada di daftar
 - Jika menu tidak ditemukan, SELALU rekomendasikan menu lain yang ada
-- Gunakan aiMessage untuk menjelaskan bahwa menu tidak tersedia dan menawarkan alternatif`
+- Gunakan aiMessage untuk menjelaskan bahwa menu tidak tersedia dan menawarkan alternatif
+- STRICT MATCHING: Nama menu harus BENAR-BENAR COCOK, bukan hanya mirip!
+  * "ayam bakar" ≠ "ayam goreng" (BERBEDA, jangan match!)
+  * "nasi goreng" ≠ "mie goreng" (BERBEDA, jangan match!)
+  * "es teh" = "es teh manis" (BOLEH match, karena subset)
+  * "nasi goreng ayam" = "nasi goreng" (BOLEH match jika ada)
+- Jika pelanggan pesan "ayam bakar" tapi hanya ada "ayam goreng", itu TIDAK COCOK!
+  * Set isAskingRecommendation = true
+  * aiMessage: "Maaf, ayam bakar belum tersedia. Kami punya ayam goreng, apakah mau?"
+  * Masukkan "ayam goreng" ke recommendations, BUKAN ke items`
 
     let parseResult: VoiceParseResponse
 
