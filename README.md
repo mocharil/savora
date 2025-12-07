@@ -21,7 +21,7 @@
 
 <p align="center">
   <a href="https://savorai.vercel.app">🌐 Live Demo</a> ·
-  <a href="https://www.youtube.com/watch?v=r67qFogMxy4">🎬 Video Demo</a> ·
+  <a href="https://youtu.be/SjMy8e7XLrs">🎬 Video Demo</a> ·
   <a href="https://kolosal.ai">🤖 Powered by Kolosal.ai</a>
 </p>
 
@@ -41,7 +41,7 @@
 | | Link |
 |---|---|
 | 🌐 **Website** | [https://savorai.vercel.app](https://savorai.vercel.app) |
-| 🎬 **Demo Video** | [https://www.youtube.com/watch?v=r67qFogMxy4](https://www.youtube.com/watch?v=r67qFogMxy4) |
+| 🎬 **Demo Video** | [https://youtu.be/SjMy8e7XLrs](https://youtu.be/SjMy8e7XLrs) |
 | 🤖 **Powered by** | [Kolosal.ai](https://kolosal.ai) - LLM Indonesia |
 
 ---
@@ -49,8 +49,8 @@
 ## 🎬 Demo Video
 
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=r67qFogMxy4">
-    <img src="https://img.youtube.com/vi/r67qFogMxy4/maxresdefault.jpg" alt="Savora Demo Video" width="600" />
+  <a href="https://youtu.be/SjMy8e7XLrs">
+    <img src="https://img.youtube.com/vi/SjMy8e7XLrs/maxresdefault.jpg" alt="Savora Demo Video" width="600" />
   </a>
 </p>
 
@@ -263,32 +263,32 @@ flowchart TB
 Powered by **Google Gemini** dan **Kolosal AI**, fitur AI terintegrasi untuk meningkatkan operasional dan penjualan:
 
 ```mermaid
-mindmap
-  root((AI Features))
-    Voice Ordering
-      Bahasa Indonesia
-      Natural Language
-      Fast Processing
-    Food Assistant
-      Menu Recommendations
-      Personal Preferences
-      Upselling
-    Menu Creator
-      Recipe Generation
-      HPP Calculation
-      Image Generation
-    Business Insights
-      Sales Analysis
-      Trend Detection
-      Actionable Tips
-    Forecasting
-      14-Day Prediction
-      Stock Planning
-      Demand Analysis
-    Smart Pricing
-      Margin Optimization
-      Competitive Analysis
-      Dynamic Pricing
+flowchart TB
+    subgraph AI["🤖 AI Features - Powered by Kolosal AI & Google Gemini"]
+        direction TB
+
+        subgraph Customer["Customer Experience"]
+            VO[🎤 Voice Ordering]
+            FA[💬 Food Assistant]
+        end
+
+        subgraph Operations["Business Operations"]
+            MC[🍳 Menu Creator]
+            BI[📊 Business Insights]
+        end
+
+        subgraph Analytics["Predictive Analytics"]
+            FC[📈 Sales Forecasting]
+            SP[💰 Smart Pricing]
+        end
+    end
+
+    VO --> |Bahasa Indonesia| O1[Natural Language Processing]
+    FA --> |Personalized| O2[Menu Recommendations]
+    MC --> |Auto Generate| O3[Recipe + HPP + Images]
+    BI --> |Daily| O4[Actionable Insights]
+    FC --> |14 Days| O5[Demand Prediction]
+    SP --> |Optimize| O6[Margin & Pricing]
 ```
 
 | Fitur | Deskripsi | Manfaat |
