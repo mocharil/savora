@@ -20,6 +20,13 @@ interface ParsedItem {
   originalText: string
 }
 
+interface RecommendedItem {
+  menuItemId: string
+  name: string
+  price: number
+  reason: string
+}
+
 interface VoiceParseResponse {
   items: ParsedItem[]
   unrecognized: string[]
@@ -28,6 +35,11 @@ interface VoiceParseResponse {
     text: string
     options: { name: string; id: string; price: number }[]
   }[]
+  // New: AI recommendations when asking for suggestions
+  isAskingRecommendation: boolean
+  recommendationQuery: string
+  recommendations: RecommendedItem[]
+  aiMessage: string
 }
 
 // Indonesian number words mapping
@@ -196,46 +208,56 @@ export async function POST(request: NextRequest) {
     }))
 
     // Use AI to parse the order
-    const prompt = `Kamu adalah sistem pengenalan pesanan restoran Indonesia. Parse transkrip suara berikut menjadi item pesanan.
+    const prompt = `Kamu adalah asisten pesanan restoran Indonesia yang ramah. Parse transkrip suara berikut.
 
-Menu yang tersedia:
-${menuList.map((m) => `- "${m.name}" (Rp ${m.price.toLocaleString('id-ID')}) [ID: ${m.id}]`).join('\n')}
+Menu yang tersedia (dengan kategori):
+${menuList.map((m) => `- "${m.name}" [${m.category}] (Rp ${m.price.toLocaleString('id-ID')}) [ID: ${m.id}]`).join('\n')}
 
 Transkrip pelanggan: "${normalizedTranscript}"
 Transkrip asli: "${transcript}"
 
-Parse transkrip dan cocokkan dengan menu yang tersedia. Perhatikan:
-1. Angka bisa dalam bentuk kata (satu, dua, tiga) atau digit (1, 2, 3)
-2. Nama menu mungkin tidak persis sama, gunakan fuzzy matching
-3. Pelanggan mungkin menyingkat nama menu
-4. Berikan confidence score untuk setiap item yang dikenali
+PENTING: Deteksi apakah pelanggan:
+1. MEMESAN LANGSUNG: menyebut nama menu spesifik dengan/tanpa jumlah (contoh: "nasi goreng dua", "es teh satu")
+2. BERTANYA/MINTA REKOMENDASI: bertanya tentang menu atau minta saran (contoh: "ada minuman apa", "rekomendasiin dong", "yang enak apa", "minuman dingin apa ya", "makanan pedas ada gak")
+
+Jika MEMESAN LANGSUNG:
+- Parse item pesanan dengan fuzzy matching
+- Angka bisa dalam kata (satu, dua) atau digit (1, 2)
+
+Jika BERTANYA/MINTA REKOMENDASI:
+- Set isAskingRecommendation = true
+- Berikan 3-5 rekomendasi menu yang relevan dengan pertanyaan
+- Berikan aiMessage yang ramah dan helpful
 
 Respons dalam format JSON:
 {
   "items": [
     {
-      "menuItemId": "uuid dari menu",
-      "name": "nama menu yang cocok",
+      "menuItemId": "uuid",
+      "name": "nama menu",
       "quantity": number,
       "price": number,
       "confidence": number (0.0-1.0),
-      "originalText": "bagian transkrip yang merujuk ke item ini"
+      "originalText": "bagian transkrip"
     }
   ],
-  "unrecognized": ["bagian yang tidak bisa dikenali"],
-  "total": number (total harga),
-  "suggestions": [
+  "unrecognized": ["bagian tidak dikenali"],
+  "total": number,
+  "suggestions": [],
+  "isAskingRecommendation": boolean,
+  "recommendationQuery": "apa yang ditanyakan pelanggan",
+  "recommendations": [
     {
-      "text": "kata yang ambigu",
-      "options": [
-        { "name": "nama menu 1", "id": "uuid", "price": number },
-        { "name": "nama menu 2", "id": "uuid", "price": number }
-      ]
+      "menuItemId": "uuid",
+      "name": "nama menu",
+      "price": number,
+      "reason": "alasan singkat kenapa direkomendasikan"
     }
-  ]
+  ],
+  "aiMessage": "Pesan ramah dari AI, contoh: 'Untuk minuman dingin, saya rekomendasikan Es Teh Manis yang segar!'"
 }
 
-Jika tidak ada item yang bisa dikenali, kembalikan items sebagai array kosong.`
+Jika tidak memesan dan tidak bertanya, kembalikan items dan recommendations kosong dengan aiMessage yang membantu.`
 
     let parseResult: VoiceParseResponse
 
@@ -324,6 +346,10 @@ Jika tidak ada item yang bisa dikenali, kembalikan items sebagai array kosong.`
         unrecognized,
         total: parsedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
         suggestions: [],
+        isAskingRecommendation: false,
+        recommendationQuery: '',
+        recommendations: [],
+        aiMessage: '',
       }
     }
 
