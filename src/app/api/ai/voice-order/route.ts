@@ -216,24 +216,31 @@ ${menuList.map((m) => `- "${m.name}" [${m.category}] (Rp ${m.price.toLocaleStrin
 Transkrip pelanggan: "${normalizedTranscript}"
 Transkrip asli: "${transcript}"
 
-PENTING: Deteksi apakah pelanggan:
-1. MEMESAN LANGSUNG: menyebut nama menu spesifik dengan/tanpa jumlah (contoh: "nasi goreng dua", "es teh satu")
-2. BERTANYA/MINTA REKOMENDASI: bertanya tentang menu atau minta saran (contoh: "ada minuman apa", "rekomendasiin dong", "yang enak apa", "minuman dingin apa ya", "makanan pedas ada gak")
+PENTING: Deteksi skenario berikut:
 
-Jika MEMESAN LANGSUNG:
-- Parse item pesanan dengan fuzzy matching
-- Angka bisa dalam kata (satu, dua) atau digit (1, 2)
+1. MEMESAN MENU YANG ADA:
+   - Pelanggan menyebut nama menu yang COCOK dengan daftar menu di atas
+   - Parse item pesanan, angka bisa dalam kata (satu, dua) atau digit (1, 2)
+   - Masukkan ke "items"
 
-Jika BERTANYA/MINTA REKOMENDASI:
-- Set isAskingRecommendation = true
-- Berikan 3-5 rekomendasi menu yang relevan dengan pertanyaan
-- Berikan aiMessage yang ramah dan helpful
+2. MEMESAN MENU YANG TIDAK ADA:
+   - Pelanggan menyebut nama menu yang TIDAK ADA di daftar menu
+   - Set isAskingRecommendation = true
+   - aiMessage: "Maaf, [nama menu] belum tersedia di resto kami. Tapi kami punya beberapa menu yang mungkin Anda suka:"
+   - Berikan recommendations berisi menu serupa/relevan dari daftar yang ada
+   - Contoh: pelanggan bilang "pizza" tapi tidak ada → rekomendasikan makanan lain yang ada
+
+3. BERTANYA/MINTA REKOMENDASI:
+   - Pelanggan bertanya tentang menu atau minta saran (contoh: "ada minuman apa", "yang enak apa", "minuman dingin apa ya")
+   - Set isAskingRecommendation = true
+   - Berikan 3-5 rekomendasi menu yang relevan
+   - Berikan aiMessage yang ramah
 
 Respons dalam format JSON:
 {
   "items": [
     {
-      "menuItemId": "uuid",
+      "menuItemId": "uuid dari menu yang ADA",
       "name": "nama menu",
       "quantity": number,
       "price": number,
@@ -241,23 +248,26 @@ Respons dalam format JSON:
       "originalText": "bagian transkrip"
     }
   ],
-  "unrecognized": ["bagian tidak dikenali"],
+  "unrecognized": ["menu yang diminta tapi tidak ada di daftar"],
   "total": number,
   "suggestions": [],
   "isAskingRecommendation": boolean,
-  "recommendationQuery": "apa yang ditanyakan pelanggan",
+  "recommendationQuery": "apa yang dicari/ditanyakan pelanggan",
   "recommendations": [
     {
       "menuItemId": "uuid",
       "name": "nama menu",
       "price": number,
-      "reason": "alasan singkat kenapa direkomendasikan"
+      "reason": "alasan kenapa direkomendasikan sebagai alternatif"
     }
   ],
-  "aiMessage": "Pesan ramah dari AI, contoh: 'Untuk minuman dingin, saya rekomendasikan Es Teh Manis yang segar!'"
+  "aiMessage": "Pesan ramah, JANGAN membuat menu baru, hanya rekomendasikan dari daftar yang ada"
 }
 
-Jika tidak memesan dan tidak bertanya, kembalikan items dan recommendations kosong dengan aiMessage yang membantu.`
+ATURAN PENTING:
+- JANGAN pernah membuat menu baru yang tidak ada di daftar
+- Jika menu tidak ditemukan, SELALU rekomendasikan menu lain yang ada
+- Gunakan aiMessage untuk menjelaskan bahwa menu tidak tersedia dan menawarkan alternatif`
 
     let parseResult: VoiceParseResponse
 
