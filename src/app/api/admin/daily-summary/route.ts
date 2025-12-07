@@ -8,6 +8,9 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+// Cache duration: 3 hours in milliseconds
+const CACHE_DURATION_MS = 3 * 60 * 60 * 1000
+
 interface TopSellingItem {
   id: string
   name: string
@@ -43,6 +46,11 @@ function getDateString(date: Date): string {
   return date.toISOString().split('T')[0]
 }
 
+// Get today's date
+function getTodayDate(): string {
+  return getDateString(new Date())
+}
+
 // Get yesterday's date
 function getYesterdayDate(): string {
   const yesterday = new Date()
@@ -68,6 +76,28 @@ function formatDateForDisplay(dateString: string): string {
   })
 }
 
+// Check if cache is still valid (within 3 hours)
+function isCacheValid(generatedAt: string): boolean {
+  const generatedTime = new Date(generatedAt).getTime()
+  const now = Date.now()
+  return (now - generatedTime) < CACHE_DURATION_MS
+}
+
+// Count orders for a specific date
+async function countOrdersForDate(storeId: string, dateString: string): Promise<number> {
+  const startOfDay = `${dateString}T00:00:00.000Z`
+  const endOfDay = `${dateString}T23:59:59.999Z`
+
+  const { count } = await supabase
+    .from('orders')
+    .select('*', { count: 'exact', head: true })
+    .eq('store_id', storeId)
+    .gte('created_at', startOfDay)
+    .lte('created_at', endOfDay)
+
+  return count || 0
+}
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getUserFromToken()
@@ -78,8 +108,30 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const dateParam = searchParams.get('date')
 
-    // Default to YESTERDAY instead of today
-    const targetDate = dateParam || getYesterdayDate()
+    // Determine which date to use:
+    // 1. If dateParam provided, use it
+    // 2. Otherwise, check if yesterday has data
+    // 3. If yesterday has no data, use today
+    let targetDate: string
+    let isUsingToday = false
+
+    if (dateParam) {
+      targetDate = dateParam
+    } else {
+      const yesterdayDate = getYesterdayDate()
+      const todayDate = getTodayDate()
+
+      // Check if yesterday has any orders
+      const yesterdayOrderCount = await countOrdersForDate(user.storeId, yesterdayDate)
+
+      if (yesterdayOrderCount > 0) {
+        targetDate = yesterdayDate
+      } else {
+        // No orders yesterday, use today's data
+        targetDate = todayDate
+        isUsingToday = true
+      }
+    }
 
     // Check if summary already exists for this date
     const { data: existingSummary } = await supabase
@@ -89,17 +141,24 @@ export async function GET(request: NextRequest) {
       .eq('summary_date', targetDate)
       .single()
 
-    if (existingSummary) {
+    // Check if cache is still valid (within 3 hours)
+    if (existingSummary && isCacheValid(existingSummary.generated_at)) {
       // Return cached summary
       return NextResponse.json({
         summary: existingSummary,
         cached: true,
+        isToday: isUsingToday,
         isYesterday: targetDate === getYesterdayDate(),
       })
     }
 
-    // No cached summary - generate new one
-    // This will only happen once per day per store
+    // Cache expired or doesn't exist - delete old and generate new
+    if (existingSummary) {
+      await supabase
+        .from('daily_summaries')
+        .delete()
+        .eq('id', existingSummary.id)
+    }
 
     // Get date range for the target date
     const startOfDay = `${targetDate}T00:00:00.000Z`
@@ -203,8 +262,8 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.orders - a.orders)
       .slice(0, 5)
 
-    // Get day before target date for comparison
-    const comparisonDate = getDayBeforeYesterdayDate()
+    // Get comparison date (day before target date)
+    const comparisonDate = isUsingToday ? getYesterdayDate() : getDayBeforeYesterdayDate()
     const { data: previousDaySummary } = await supabase
       .from('daily_summaries')
       .select('total_revenue, total_orders')
@@ -232,13 +291,15 @@ export async function GET(request: NextRequest) {
     }
 
     const displayDate = formatDateForDisplay(targetDate)
+    const periodLabel = isUsingToday ? 'Hari Ini' : 'Kemarin'
+    const periodLower = isUsingToday ? 'hari ini' : 'kemarin'
 
     // Only call AI if there's data to analyze
     if (totalOrders > 0) {
       try {
         const prompt = `Kamu adalah analis bisnis restoran. Berikan ringkasan harian dalam Bahasa Indonesia yang singkat dan actionable.
 
-DATA BISNIS KEMARIN (${displayDate}):
+DATA BISNIS ${periodLabel.toUpperCase()} (${displayDate}):
 - Total Pesanan: ${totalOrders}
 - Pesanan Selesai: ${completedOrders}
 - Pesanan Dibatalkan: ${cancelledOrders}
@@ -254,51 +315,51 @@ ${topSellingItems.map((item, i) => `${i + 1}. ${item.name}: ${item.quantity}x (R
 JAM RAMAI:
 ${peakHours.map(h => `- Jam ${h.hour.toString().padStart(2, '0')}:00: ${h.orders} pesanan`).join('\n') || 'Tidak ada data'}
 
-${previousDaySummary ? `PERBANDINGAN DENGAN HARI SEBELUMNYA:
+${previousDaySummary ? `PERBANDINGAN DENGAN ${isUsingToday ? 'KEMARIN' : 'HARI SEBELUMNYA'}:
 - Revenue: ${revenueChangePercent !== null ? (revenueChangePercent >= 0 ? '+' : '') + revenueChangePercent.toFixed(1) + '%' : 'N/A'}
 - Pesanan: ${ordersChangePercent !== null ? (ordersChangePercent >= 0 ? '+' : '') + ordersChangePercent.toFixed(1) + '%' : 'N/A'}` : 'Data hari sebelumnya tidak tersedia untuk perbandingan.'}
 
 Berikan respons dalam format JSON:
 {
-  "summary": "Ringkasan singkat 2-3 kalimat tentang performa kemarin, gunakan kata 'kemarin' bukan 'hari ini'",
+  "summary": "Ringkasan singkat 2-3 kalimat tentang performa ${periodLower}, gunakan kata '${periodLower}'",
   "insights": [
-    {"type": "positive", "message": "Hal positif yang terjadi kemarin"},
-    {"type": "negative", "message": "Hal yang perlu perhatian dari kemarin"},
-    {"type": "suggestion", "message": "Saran untuk hari ini berdasarkan data kemarin"}
+    {"type": "positive", "message": "Hal positif yang terjadi ${periodLower}"},
+    {"type": "negative", "message": "Hal yang perlu perhatian dari ${periodLower}"},
+    {"type": "suggestion", "message": "${isUsingToday ? 'Saran untuk sisa hari ini' : 'Saran untuk hari ini berdasarkan data kemarin'}"}
   ],
   "recommendations": [
-    {"priority": "high", "action": "Tindakan untuk hari ini", "reason": "Berdasarkan insight dari kemarin"}
+    {"priority": "high", "action": "${isUsingToday ? 'Tindakan untuk sisa hari ini' : 'Tindakan untuk hari ini'}", "reason": "Berdasarkan insight dari ${periodLower}"}
   ]
 }
 
 ATURAN:
 - insights maksimal 3-4 item yang paling relevan
-- recommendations maksimal 2-3 item yang actionable untuk HARI INI
+- recommendations maksimal 2-3 item yang actionable
 - Gunakan bahasa Indonesia yang mudah dipahami
 - Fokus pada insight yang actionable, bukan hanya deskriptif
-- Berikan rekomendasi untuk hari ini berdasarkan data kemarin
-- Jika kemarin ada penurunan, sarankan cara meningkatkan hari ini
-- Jika kemarin ada peningkatan, sarankan cara mempertahankan momentum`
+- ${isUsingToday ? 'Data ini adalah data HARI INI yang masih berjalan, berikan insight real-time' : 'Berikan rekomendasi untuk hari ini berdasarkan data kemarin'}
+- Jika ada penurunan, sarankan cara meningkatkan
+- Jika ada peningkatan, sarankan cara mempertahankan momentum`
 
         aiContent = await generateJSON<AIGeneratedContent>(prompt)
       } catch (aiError) {
         console.error('AI generation error:', aiError)
         // Fallback to basic summary if AI fails
         aiContent = {
-          summary: `Kemarin (${displayDate}) ada ${totalOrders} pesanan dengan total revenue Rp ${totalRevenue.toLocaleString('id-ID')}. Menu terlaris adalah ${topSellingItems[0]?.name || 'tidak ada data'}.`,
+          summary: `${periodLabel} (${displayDate}) ada ${totalOrders} pesanan dengan total revenue Rp ${totalRevenue.toLocaleString('id-ID')}. Menu terlaris adalah ${topSellingItems[0]?.name || 'tidak ada data'}.`,
           insights: [],
           recommendations: [],
         }
       }
     } else {
       aiContent = {
-        summary: `Tidak ada pesanan kemarin (${displayDate}).`,
+        summary: `Tidak ada pesanan ${periodLower} (${displayDate}).`,
         insights: [
-          { type: 'negative', message: 'Tidak ada transaksi sama sekali kemarin.' },
-          { type: 'suggestion', message: 'Pertimbangkan untuk membuat promo menarik atau promosi di media sosial untuk menarik pelanggan hari ini.' }
+          { type: 'negative', message: `Tidak ada transaksi sama sekali ${periodLower}.` },
+          { type: 'suggestion', message: 'Pertimbangkan untuk membuat promo menarik atau promosi di media sosial untuk menarik pelanggan.' }
         ],
         recommendations: [
-          { priority: 'high', action: 'Buat promo atau diskon menarik untuk hari ini', reason: 'Tidak ada penjualan kemarin, perlu strategi untuk menarik pelanggan' }
+          { priority: 'high', action: 'Buat promo atau diskon menarik', reason: `Tidak ada penjualan ${periodLower}, perlu strategi untuk menarik pelanggan` }
         ],
       }
     }
@@ -339,6 +400,7 @@ ATURAN:
         summary: { ...summaryData, id: 'temp' },
         cached: false,
         saveError: true,
+        isToday: isUsingToday,
         isYesterday: targetDate === getYesterdayDate(),
       })
     }
@@ -346,6 +408,7 @@ ATURAN:
     return NextResponse.json({
       summary: newSummary,
       cached: false,
+      isToday: isUsingToday,
       isYesterday: targetDate === getYesterdayDate(),
     })
   } catch (error: any) {

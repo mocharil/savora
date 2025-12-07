@@ -148,6 +148,7 @@ export function DailySummaryCard({ hasData = true }: DailySummaryCardProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const [regenerating, setRegenerating] = useState(false)
   const [cached, setCached] = useState(false)
+  const [isToday, setIsToday] = useState(false)
 
   const fetchSummary = async (forceRegenerate = false) => {
     try {
@@ -176,6 +177,7 @@ export function DailySummaryCard({ hasData = true }: DailySummaryCardProps) {
 
       setSummary(data.summary)
       setCached(data.cached || false)
+      setIsToday(data.isToday || false)
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -271,13 +273,21 @@ export function DailySummaryCard({ hasData = true }: DailySummaryCardProps) {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-gray-900">Ringkasan Kemarin</h3>
-
-                
+                <h3 className="font-semibold text-gray-900">
+                  Ringkasan {isToday ? 'Hari Ini' : 'Kemarin'}
+                </h3>
+                {isToday && (
+                  <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-[10px] font-semibold">
+                    Live
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <Calendar className="w-3 h-3" />
                 {formatDate(summary.summary_date)}
+                {cached && (
+                  <span className="text-gray-400">• Update setiap 3 jam</span>
+                )}
               </div>
             </div>
           </div>
@@ -319,7 +329,7 @@ export function DailySummaryCard({ hasData = true }: DailySummaryCardProps) {
             {/* Key Metrics */}
             <div className="px-4 pb-4">
               <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                Performa Kemarin
+                Performa {isToday ? 'Hari Ini' : 'Kemarin'}
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {/* Revenue */}
@@ -334,7 +344,7 @@ export function DailySummaryCard({ hasData = true }: DailySummaryCardProps) {
                   <div className="flex items-center gap-1">
                     <TrendIndicator value={summary.revenue_change_percent} />
                     {summary.revenue_change_percent !== null && (
-                      <span className="text-[10px] text-gray-400">vs lusa</span>
+                      <span className="text-[10px] text-gray-400">vs {isToday ? 'kemarin' : 'lusa'}</span>
                     )}
                   </div>
                 </div>
@@ -351,7 +361,7 @@ export function DailySummaryCard({ hasData = true }: DailySummaryCardProps) {
                   <div className="flex items-center gap-1">
                     <TrendIndicator value={summary.orders_change_percent} />
                     {summary.orders_change_percent !== null && (
-                      <span className="text-[10px] text-gray-400">vs lusa</span>
+                      <span className="text-[10px] text-gray-400">vs {isToday ? 'kemarin' : 'lusa'}</span>
                     )}
                   </div>
                 </div>
