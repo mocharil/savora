@@ -1,0 +1,65 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import { jwtVerify } from 'jose'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+// Use service role key if available, otherwise fall back to anon key
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY &&
+  process.env.SUPABASE_SERVICE_ROLE_KEY !== 'your_service_role_key'
+    ? process.env.SUPABASE_SERVICE_ROLE_KEY
+    : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// JWT Secret - required environment variable
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+  console.error('CRITICAL: JWT_SECRET environment variable is not set')
+}
+const jwtSecret = new TextEncoder().encode(JWT_SECRET || '')
+
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+export async function GET(request: NextRequest) {
+  try {
+    const token = request.cookies.get('auth_token')?.value
+
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Tidak terautentikasi' },
+        { status: 401 }
+      )
+    }
+
+    // Verify JWT
+    const { payload } = await jwtVerify(token, jwtSecret)
+
+    // Get fresh user data from database
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, email, full_name, role, store_id, is_active')
+      .eq('id', payload.userId)
+      .single()
+
+    if (error || !user || !user.is_active) {
+      return NextResponse.json(
+        { error: 'User tidak ditemukan' },
+        { status: 401 }
+      )
+    }
+
+    return NextResponse.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role,
+        store_id: user.store_id
+      }
+    })
+
+  } catch (error: any) {
+    console.error('Auth me error:', error)
+    return NextResponse.json(
+      { error: 'Token tidak valid' },
+      { status: 401 }
+    )
+  }
+}
