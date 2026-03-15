@@ -3,6 +3,47 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getUserFromToken } from '@/lib/tenant-context'
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ orderId: string }> }
+) {
+  try {
+    const user = await getUserFromToken()
+    if (!user || !user.storeId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { orderId } = await params
+    const supabase = createAdminClient()
+
+    // Verify order belongs to this store and get payment info
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('id, store_id, payment_status')
+      .eq('id', orderId)
+      .eq('store_id', user.storeId)
+      .single()
+
+    if (orderError || !order) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    }
+
+    const { data: payment } = await supabase
+      .from('payments')
+      .select('id, status, payment_method, payment_url, paid_at')
+      .eq('order_id', orderId)
+      .single()
+
+    return NextResponse.json({
+      order: { id: order.id, payment_status: order.payment_status },
+      payment: payment || null
+    })
+  } catch (error: any) {
+    console.error('Payment status check error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ orderId: string }> }

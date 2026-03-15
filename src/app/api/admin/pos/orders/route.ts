@@ -58,9 +58,9 @@ export async function POST(request: NextRequest) {
     const supabase = createAdminClient()
     const orderNumber = generateOrderNumber()
 
-    // For POS orders with payment method, set payment_status to 'paid' immediately
-    // since payment is done at the counter
-    const isPaid = !!paymentMethod
+    // For POS orders: cash/qris/card = paid immediately at counter
+    // For Mayar: payment_status starts as 'pending', confirmed via webhook
+    const isPaid = !!paymentMethod && paymentMethod !== 'mayar'
 
     // Create order (matches actual schema)
     const { data: order, error: orderError } = await supabase
@@ -137,16 +137,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Create payment record if payment method is provided
-    // For POS orders, payment is done immediately so status is 'paid'
+    // For Mayar payments, status starts as 'pending' (will be confirmed via webhook)
+    // For other methods (cash, qris, card), payment is done immediately at counter
+    const isMayarPayment = paymentMethod === 'mayar'
+
     if (paymentMethod) {
       const { error: paymentError } = await supabase
         .from('payments')
         .insert({
           order_id: order.id,
           payment_method: paymentMethod,
+          payment_gateway: isMayarPayment ? 'mayar' : 'manual',
           amount: total,
-          status: 'paid',
-          paid_at: new Date().toISOString()
+          status: isMayarPayment ? 'pending' : 'paid',
+          paid_at: isMayarPayment ? null : new Date().toISOString()
         })
 
       if (paymentError) {

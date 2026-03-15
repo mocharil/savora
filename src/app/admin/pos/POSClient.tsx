@@ -65,7 +65,7 @@ export function POSClient({ categories, menuItems, tables, storeId }: POSClientP
   const [cart, setCart] = useState<CartItem[]>([])
   const [customerName, setCustomerName] = useState('')
   const [selectedTable, setSelectedTable] = useState<string>('')
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'qris' | 'card'>('cash')
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'qris' | 'card' | 'mayar'>('cash')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [showWarning, setShowWarning] = useState(false)
@@ -73,6 +73,10 @@ export function POSClient({ categories, menuItems, tables, storeId }: POSClientP
   const [createdOrderNumber, setCreatedOrderNumber] = useState('')
   const [cashAmount, setCashAmount] = useState<string>('')
   const [changeAmount, setChangeAmount] = useState<number>(0)
+  const [mayarPaymentUrl, setMayarPaymentUrl] = useState<string | null>(null)
+  const [showMayarModal, setShowMayarModal] = useState(false)
+  const [mayarOrderId, setMayarOrderId] = useState<string | null>(null)
+  const [checkingMayarStatus, setCheckingMayarStatus] = useState(false)
 
   // Filter menu items
   const filteredItems = useMemo(() => {
@@ -215,6 +219,10 @@ export function POSClient({ categories, menuItems, tables, storeId }: POSClientP
       showWarningModal('Jumlah uang tunai tidak mencukupi. Silakan masukkan jumlah yang benar.')
       return
     }
+    if (paymentMethod === 'mayar') {
+      setCashAmount('')
+      setChangeAmount(0)
+    }
 
     setIsSubmitting(true)
 
@@ -245,6 +253,37 @@ export function POSClient({ categories, menuItems, tables, storeId }: POSClientP
 
       const data = await response.json()
       setCreatedOrderNumber(data.orderNumber)
+
+      // If Mayar payment, create payment link and show modal
+      if (paymentMethod === 'mayar') {
+        try {
+          const paymentResponse = await fetch('/api/payment/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: data.orderId, gateway: 'mayar' }),
+          })
+
+          if (!paymentResponse.ok) {
+            throw new Error('Gagal membuat link pembayaran Mayar')
+          }
+
+          const { payment_url } = await paymentResponse.json()
+          setMayarPaymentUrl(payment_url)
+          setMayarOrderId(data.orderId)
+          setShowMayarModal(true)
+        } catch (err) {
+          console.error('Mayar payment error:', err)
+          // Order is created but payment link failed - show success with note
+          setShowSuccess(true)
+          setTimeout(() => {
+            setShowSuccess(false)
+            clearCart()
+            router.refresh()
+          }, 3000)
+        }
+        return
+      }
+
       setShowSuccess(true)
 
       // Reset after 3 seconds
@@ -260,6 +299,104 @@ export function POSClient({ categories, menuItems, tables, storeId }: POSClientP
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // Check Mayar payment status
+  const handleCheckMayarStatus = async () => {
+    if (!mayarOrderId) return
+    setCheckingMayarStatus(true)
+    try {
+      const response = await fetch(`/api/admin/orders/${mayarOrderId}/payment`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.payment?.status === 'paid') {
+          setShowMayarModal(false)
+          setCreatedOrderNumber(createdOrderNumber)
+          setShowSuccess(true)
+          setTimeout(() => {
+            setShowSuccess(false)
+            clearCart()
+            setMayarPaymentUrl(null)
+            setMayarOrderId(null)
+            router.refresh()
+          }, 3000)
+        }
+      }
+    } catch (err) {
+      console.error('Error checking payment status:', err)
+    } finally {
+      setCheckingMayarStatus(false)
+    }
+  }
+
+  // Close Mayar modal (order already created, just close)
+  const handleCloseMayarModal = () => {
+    setShowMayarModal(false)
+    setMayarPaymentUrl(null)
+    setMayarOrderId(null)
+    clearCart()
+    router.refresh()
+  }
+
+  // Mayar payment modal
+  const MayarPaymentModal = () => {
+    if (!showMayarModal) return null
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center animate-in zoom-in-95 duration-200">
+          <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-4">
+            <CreditCard className="w-8 h-8 text-orange-600" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Pembayaran Mayar</h2>
+          <p className="text-gray-600 mb-2">
+            Pesanan <span className="font-bold text-orange-600">#{createdOrderNumber}</span> berhasil dibuat
+          </p>
+          <p className="text-2xl font-bold text-gray-900 mb-4">{formatCurrency(total)}</p>
+          <p className="text-sm text-gray-500 mb-6">
+            Arahkan pelanggan untuk menyelesaikan pembayaran melalui Mayar, atau buka link di bawah.
+          </p>
+
+          <div className="space-y-3">
+            {mayarPaymentUrl && (
+              <a
+                href={mayarPaymentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-amber-600 transition-all"
+              >
+                <CreditCard className="w-5 h-5" />
+                Buka Halaman Pembayaran Mayar
+              </a>
+            )}
+
+            <button
+              onClick={handleCheckMayarStatus}
+              disabled={checkingMayarStatus}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-orange-200 text-orange-600 font-semibold rounded-xl hover:bg-orange-50 transition-all disabled:opacity-70"
+            >
+              {checkingMayarStatus ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Mengecek...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-5 h-5" />
+                  Cek Status Pembayaran
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleCloseMayarModal}
+              className="w-full px-6 py-2.5 text-gray-500 text-sm hover:text-gray-700 transition-colors"
+            >
+              Tutup (pesanan tetap tersimpan)
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // Warning modal
@@ -314,6 +451,7 @@ export function POSClient({ categories, menuItems, tables, storeId }: POSClientP
   return (
     <>
       <WarningModal />
+      <MayarPaymentModal />
       <div className="flex h-[calc(100vh-4rem)] -m-4 md:-m-6">
       {/* Left: Menu Grid */}
       <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
@@ -592,11 +730,12 @@ export function POSClient({ categories, menuItems, tables, storeId }: POSClientP
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {[
                   { id: 'cash', label: 'Tunai', icon: Banknote },
                   { id: 'qris', label: 'QRIS', icon: QrCode },
                   { id: 'card', label: 'Kartu', icon: CreditCard },
+                  { id: 'mayar', label: 'Mayar', icon: CreditCard },
                 ].map(method => (
                   <button
                     key={method.id}
